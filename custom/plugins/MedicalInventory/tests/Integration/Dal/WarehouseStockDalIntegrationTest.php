@@ -126,8 +126,22 @@ final class WarehouseStockDalIntegrationTest extends TestCase
 
         /** @var WarehouseStockService $stockService */
         $stockService = $container->get(WarehouseStockService::class);
-        $stockService->reserveStock($warehouseCodes['DE-KOELN'], $productId, 15, $context, 'integration-test', 'dal-order');
-        $stockService->reserveStock($warehouseCodes['DE-BERLIN'], $productId, 5, $context, 'integration-test', 'dal-order');
+        $stockService->reserveStock(
+            $warehouseCodes['DE-KOELN'],
+            $productId,
+            15,
+            $context,
+            'integration-test',
+            'dal-order'
+        );
+        $stockService->reserveStock(
+            $warehouseCodes['DE-BERLIN'],
+            $productId,
+            5,
+            $context,
+            'integration-test',
+            'dal-order'
+        );
 
         $criteria = new Criteria();
         $criteria->addFilter(new EqualsFilter('productId', $productId));
