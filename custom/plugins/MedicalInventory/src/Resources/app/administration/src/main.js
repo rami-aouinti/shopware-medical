@@ -43,7 +43,19 @@ Component.register('medical-inventory-dashboard', {
                             </sw-button>
                         </div>
                     </sw-card>
+                    <sw-card title="Warehouse stock and minimum thresholds" style="margin-top:16px">
+                        <div v-if="dashboard" v-for="stock in dashboard.stock" :key="stock.warehouse_code + stock.product_id"
+                             style="display:flex;align-items:center;gap:12px;padding:10px;border-bottom:1px solid #e0e0e0">
+                            <div style="flex:1">
+                                <strong>{{ stock.product_number }}</strong> — {{ stock.warehouse_code }}
+                                <small>Physical {{ stock.quantity }} · Reserved {{ stock.reserved_quantity }} · Available {{ stock.available_quantity }}</small>
+                            </div>
+                            <sw-number-field v-model:value="stock.minimum_quantity" label="Minimum" :min="0" :max="4294967295" size="small" />
+                            <sw-button size="small" @click="saveMinimum(stock)">Save</sw-button>
+                        </div>
+                    </sw-card>
                     <sw-card title="Open low-stock alerts" style="margin-top:16px">
+                        <sw-button size="small" @click="scanAlerts">Scan now</sw-button>
                         <sw-data-grid
                             v-if="dashboard"
                             :data-source="dashboard.alerts"
@@ -85,6 +97,11 @@ Component.register('medical-inventory-dashboard', {
     created() {
         this.loadDashboard();
     },
+    computed: {
+        canCreateWarehouse() {
+            return this.newWarehouse.code.trim() !== '' && this.newWarehouse.name.trim() !== '' && /^[A-Za-z]{2}$/.test(this.newWarehouse.countryCode);
+        },
+    },
     methods: {
         getHttpClient() {
             return Shopware.Application.getContainer('init').httpClient;
@@ -121,6 +138,27 @@ Component.register('medical-inventory-dashboard', {
                 this.error = error?.response?.data?.errors?.[0]?.detail || error.message || 'Unable to change warehouse status.';
             }
         },
+        async saveMinimum(stock) {
+            try {
+                await this.getHttpClient().patch(
+                    '_action/medical-inventory/warehouses/' + encodeURIComponent(stock.warehouse_code)
+                        + '/products/' + stock.product_id + '/minimum',
+                    { minimumQuantity: Number(stock.minimum_quantity) },
+                    this.getRequestConfig(),
+                );
+                await this.loadDashboard();
+            } catch (error) {
+                this.error = error?.response?.data?.errors?.[0]?.detail || error.message || 'Unable to update minimum stock.';
+            }
+        },
+        async scanAlerts() {
+            try {
+                await this.getHttpClient().post('_action/medical-inventory/alerts/scan', {}, this.getRequestConfig());
+                await this.loadDashboard();
+            } catch (error) {
+                this.error = error?.response?.data?.errors?.[0]?.detail || error.message || 'Unable to scan stock alerts.';
+            }
+        },
         async loadDashboard() {
             this.isLoading = true;
             this.error = null;
@@ -136,9 +174,6 @@ Component.register('medical-inventory-dashboard', {
             } finally {
                 this.isLoading = false;
             }
-        },
-        get canCreateWarehouse() {
-            return this.newWarehouse.code.trim() !== '' && this.newWarehouse.name.trim() !== '' && /^[A-Za-z]{2}$/.test(this.newWarehouse.countryCode);
         },
         formatLabel(value) {
             return value.replace(/([A-Z])/g, ' $1').replace(/^./, (letter) => letter.toUpperCase());
