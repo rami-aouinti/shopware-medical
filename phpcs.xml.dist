@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<ruleset name="MedicalInventory">
+    <description>Code style rules for the MedicalInventory Shopware plugin.</description>
+
+    <file>custom/plugins/MedicalInventory/src</file>
+    <file>custom/plugins/MedicalInventory/tests</file>
+
+    <exclude-pattern>*/vendor/*</exclude-pattern>
+    <exclude-pattern>*/Resources/*</exclude-pattern>
+
+    <arg name="basepath" value="."/>
+    <arg name="colors"/>
+    <arg value="sp"/>
+
+    <rule ref="PSR12"/>
+</ruleset>

@@ -46,6 +46,12 @@
             "App\\": "src/"
         }
     },
+    "autoload-dev": {
+        "psr-4": {
+            "MedicalInventory\\": "custom/plugins/MedicalInventory/src/",
+            "MedicalInventory\\Tests\\": "custom/plugins/MedicalInventory/tests/"
+        }
+    },
     "prefer-stable": true,
     "config": {
         "allow-plugins": {
@@ -65,6 +71,27 @@
         ],
         "post-update-cmd": [
             "@auto-scripts"
+        ],
+        "cs:cbf": "phpcbf --standard=phpcs.xml.dist",
+        "cs:check": "phpcs --standard=phpcs.xml.dist",
+        "cs:fix": "php-cs-fixer fix --config=.php-cs-fixer.dist.php",
+        "cs:fix:check": "php-cs-fixer fix --config=.php-cs-fixer.dist.php --dry-run --diff",
+        "stan": "phpstan analyse --configuration=phpstan.neon.dist --no-progress",
+        "psalm": "psalm --config=psalm.xml",
+        "mess-detector": "phpmd custom/plugins/MedicalInventory/src text phpmd.xml",
+        "insights": "phpinsights analyse custom/plugins/MedicalInventory/src --no-interaction",
+        "rector:check": "rector process custom/plugins/MedicalInventory/src --dry-run",
+        "rector:fix": "rector process custom/plugins/MedicalInventory/src",
+        "test:plugin": "phpunit --configuration=custom/plugins/MedicalInventory/phpunit.xml.dist",
+        "quality": [
+            "@cs:check",
+            "@cs:fix:check",
+            "@stan",
+            "@psalm",
+            "@mess-detector",
+            "@insights",
+            "@rector:check",
+            "@test:plugin"
         ]
     },
     "extra": {
@@ -76,5 +103,16 @@
                 "flex://defaults"
             ]
         }
+    },
+    "require-dev": {
+        "friendsofphp/php-cs-fixer": "^3.80",
+        "nunomaduro/phpinsights": "^2.13",
+        "phpmd/phpmd": "^2.15",
+        "phpstan/phpstan": "^2.1",
+        "phpstan/phpstan-phpunit": "^2.0",
+        "phpunit/phpunit": "^11.5",
+        "rector/rector": "^2.0",
+        "squizlabs/php_codesniffer": "^3.13",
+        "vimeo/psalm": "^6.0"
     }
 }

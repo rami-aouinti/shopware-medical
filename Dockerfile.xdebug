@@ -1,0 +1,9 @@
+FROM ghcr.io/shopware/docker-dev:php8.5-node24-caddy
+
+USER root
+
+RUN install-php-extensions xdebug
+
+COPY docker/php/99-xdebug.ini /usr/local/etc/php/conf.d/99-xdebug.ini
+
+USER 1000:1000
