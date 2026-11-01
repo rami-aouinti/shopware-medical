@@ -1,0 +1,11 @@
+compatibility_date: "2026-11-01"
+docker:
+    php:
+        version: "8.5"
+environments:
+    local:
+        type: docker
+        url: http://127.0.0.1:8000
+        admin_api:
+            username: admin
+            password: shopware
