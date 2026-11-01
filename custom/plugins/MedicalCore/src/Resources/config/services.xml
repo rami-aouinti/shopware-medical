@@ -9,9 +9,6 @@
         <defaults autowire="true" autoconfigure="true" public="false"/>
 
         <service id="MedicalCore\Service\ProjectInfoProvider"/>
-
-        <service id="MedicalCore\Command\MedicalCoreInfoCommand">
-            <tag name="console.command"/>
-        </service>
+        <service id="MedicalCore\Command\MedicalCoreInfoCommand"/>
     </services>
 </container>
