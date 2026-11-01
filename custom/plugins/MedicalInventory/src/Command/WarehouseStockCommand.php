@@ -28,6 +28,7 @@ final class WarehouseStockCommand extends Command
         parent::__construct();
     }
 
+    #[\Override]
     protected function configure(): void
     {
         $this
@@ -41,6 +42,7 @@ final class WarehouseStockCommand extends Command
             ->addOption('quantity', null, InputOption::VALUE_REQUIRED, 'Quantity for the operation');
     }
 
+    #[\Override]
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
