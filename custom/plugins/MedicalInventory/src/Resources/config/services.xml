@@ -48,7 +48,7 @@
             <argument type="service" id="MedicalInventory\Service\WarehouseStockService"/>
         </service>
 
-        <service id="MedicalInventory\Decorator\MedicalInventoryOrderPersister" decorates="Shopware\Core\Checkout\Cart\Order\OrderPersisterInterface">
+        <service id="MedicalInventory\Decorator\MedicalInventoryOrderPersister" decorates="Shopware\Core\Checkout\Cart\Order\OrderPersister">
             <argument type="service" id="MedicalInventory\Decorator\MedicalInventoryOrderPersister.inner"/>
             <argument type="service" id="Doctrine\DBAL\Connection"/>
             <argument type="service" id="MedicalInventory\Service\OrderFulfillmentService"/>
