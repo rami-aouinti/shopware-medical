@@ -1,0 +1,106 @@
+<?php declare(strict_types=1);
+
+namespace MedicalInventory\Controller;
+
+use Doctrine\DBAL\Connection;
+use InvalidArgumentException;
+use MedicalInventory\Service\WarehouseStockService;
+use Shopware\Core\Framework\Context;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Routing\Attribute\Route;
+
+#[Route(defaults: ['_routeScope' => ['api']])]
+final class MedicalInventoryAdminController
+{
+    public function __construct(
+        private readonly Connection $connection,
+        private readonly WarehouseStockService $stockService,
+    ) {
+    }
+
+    #[Route(
+        path: '/api/_action/medical-inventory/dashboard',
+        name: 'api.action.medical_inventory.dashboard',
+        methods: ['GET']
+    )]
+    public function dashboard(): JsonResponse
+    {
+        $warehouses = $this->connection->fetchAllAssociative(
+            <<<'SQL'
+                SELECT
+                    LOWER(HEX(w.id)) AS id,
+                    w.code,
+                    w.name,
+                    w.country_code,
+                    w.priority,
+                    w.is_active AS active,
+                    COUNT(s.id) AS stock_rows,
+                    COALESCE(SUM(s.quantity - s.reserved_quantity), 0) AS available_units
+                FROM medical_warehouse w
+                LEFT JOIN medical_warehouse_stock s ON s.warehouse_id = w.id
+                GROUP BY w.id, w.code, w.name, w.country_code, w.priority, w.is_active
+                ORDER BY w.priority ASC, w.name ASC
+            SQL
+        );
+
+        $summary = [
+            'warehouses' => (int) $this->connection->fetchOne('SELECT COUNT(*) FROM medical_warehouse'),
+            'activeWarehouses' => (int) $this->connection->fetchOne('SELECT COUNT(*) FROM medical_warehouse WHERE is_active = 1'),
+            'openAlerts' => (int) $this->connection->fetchOne("SELECT COUNT(*) FROM medical_stock_alert WHERE status = 'OPEN'"),
+            'activeReservations' => (int) $this->connection->fetchOne("SELECT COUNT(*) FROM medical_stock_reservation WHERE status = 'ACTIVE'"),
+            'openShipments' => (int) $this->connection->fetchOne("SELECT COUNT(*) FROM medical_shipment WHERE status = 'SHIPPED'"),
+        ];
+
+        $alerts = $this->connection->fetchAllAssociative(
+            <<<'SQL'
+                SELECT
+                    LOWER(HEX(a.id)) AS id,
+                    w.code AS warehouse_code,
+                    LOWER(HEX(a.product_id)) AS product_id,
+                    a.threshold_quantity,
+                    a.available_quantity,
+                    a.opened_at
+                FROM medical_stock_alert a
+                INNER JOIN medical_warehouse w ON w.id = a.warehouse_id
+                WHERE a.status = 'OPEN'
+                ORDER BY a.opened_at ASC
+                LIMIT 100
+            SQL
+        );
+
+        return new JsonResponse([
+            'summary' => $summary,
+            'warehouses' => $warehouses,
+            'alerts' => $alerts,
+        ]);
+    }
+
+    #[Route(
+        path: '/api/_action/medical-inventory/warehouses/{warehouseCode}/products/{productId}/minimum',
+        name: 'api.action.medical_inventory.minimum_stock',
+        methods: ['PATCH']
+    )]
+    public function updateMinimumStock(
+        string $warehouseCode,
+        string $productId,
+        Request $request,
+        Context $context,
+    ): JsonResponse {
+        $payload = $request->toArray();
+        $minimumQuantity = $payload['minimumQuantity'] ?? null;
+
+        if (!is_int($minimumQuantity) || $minimumQuantity < 0) {
+            throw new InvalidArgumentException('minimumQuantity must be a non-negative integer.');
+        }
+
+        $this->stockService->setMinimumQuantity(
+            $warehouseCode,
+            $productId,
+            $minimumQuantity,
+            $context
+        );
+
+        return new JsonResponse(['success' => true]);
+    }
+}
