@@ -28,7 +28,8 @@ final class MedicalInventoryAdminController
     #[Route(
         path: '/api/_action/medical-inventory/dashboard',
         name: 'api.action.medical_inventory.dashboard',
-        methods: ['GET']
+        methods: ['GET'],
+        defaults: ['_acl' => ['product:read']]
     )]
     public function dashboard(): JsonResponse
     {
@@ -114,7 +115,8 @@ final class MedicalInventoryAdminController
     #[Route(
         path: '/api/_action/medical-inventory/warehouses',
         name: 'api.action.medical_inventory.warehouse.create',
-        methods: ['POST']
+        methods: ['POST'],
+        defaults: ['_acl' => ['product:create']]
     )]
     public function createWarehouse(Request $request, Context $context): JsonResponse
     {
@@ -141,7 +143,8 @@ final class MedicalInventoryAdminController
     #[Route(
         path: '/api/_action/medical-inventory/warehouses/{warehouseCode}',
         name: 'api.action.medical_inventory.warehouse.update',
-        methods: ['PATCH']
+        methods: ['PATCH'],
+        defaults: ['_acl' => ['product:update']]
     )]
     public function updateWarehouse(string $warehouseCode, Request $request, Context $context): JsonResponse
     {
@@ -175,7 +178,8 @@ final class MedicalInventoryAdminController
     #[Route(
         path: '/api/_action/medical-inventory/alerts/scan',
         name: 'api.action.medical_inventory.alerts.scan',
-        methods: ['POST']
+        methods: ['POST'],
+        defaults: ['_acl' => ['product:create']]
     )]
     public function scanAlerts(): JsonResponse
     {
@@ -188,7 +192,8 @@ final class MedicalInventoryAdminController
     #[Route(
         path: '/api/_action/medical-inventory/orders/{orderId}/shipments',
         name: 'api.action.medical_inventory.shipment.create',
-        methods: ['POST']
+        methods: ['POST'],
+        defaults: ['_acl' => ['product:create']]
     )]
     public function createShipment(string $orderId, Request $request, Context $context): JsonResponse
     {
@@ -235,7 +240,8 @@ final class MedicalInventoryAdminController
     #[Route(
         path: '/api/_action/medical-inventory/shipments/{shipmentId}/delivered',
         name: 'api.action.medical_inventory.shipment.delivered',
-        methods: ['PATCH']
+        methods: ['PATCH'],
+        defaults: ['_acl' => ['product:update']]
     )]
     public function markShipmentDelivered(string $shipmentId, Request $request): JsonResponse
     {
@@ -249,7 +255,8 @@ final class MedicalInventoryAdminController
     #[Route(
         path: '/api/_action/medical-inventory/warehouses/{warehouseCode}/products/{productId}/minimum',
         name: 'api.action.medical_inventory.minimum_stock',
-        methods: ['PATCH']
+        methods: ['PATCH'],
+        defaults: ['_acl' => ['product:update']]
     )]
     public function updateMinimumStock(
         string $warehouseCode,
