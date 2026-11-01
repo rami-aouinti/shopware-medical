@@ -17,6 +17,5 @@ class Migration1793519366CreateWarehouseTable extends MigrationStep
 
     public function update(Connection $connection): void
     {
-
     }
 }
