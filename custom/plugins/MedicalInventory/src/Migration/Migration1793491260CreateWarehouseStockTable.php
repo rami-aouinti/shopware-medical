@@ -8,11 +8,13 @@ use Shopware\Core\Framework\Migration\MigrationStep;
 class Migration1793491260CreateWarehouseStockTable extends MigrationStep
 {
     #[\Override]
+    #[\Override]
     public function getCreationTimestamp(): int
     {
         return 1793491260;
     }
 
+    #[\Override]
     #[\Override]
     public function update(Connection $connection): void
     {
