@@ -26,7 +26,10 @@ final class WarehouseAllocationServiceTest extends TestCase
         ]));
         $repository->expects(self::once())
             ->method('search')
-            ->with(self::isInstanceOf(\Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria::class), self::isInstanceOf(Context::class))
+            ->with(
+                self::isInstanceOf(\Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria::class),
+                self::isInstanceOf(Context::class)
+            )
             ->willReturn($searchResult);
 
         $service = new WarehouseAllocationService($repository, new WarehouseAllocationPlanner());
