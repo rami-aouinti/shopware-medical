@@ -82,7 +82,7 @@
         "insights": "phpinsights analyse custom/plugins/MedicalInventory/src --no-interaction",
         "rector:check": "rector process custom/plugins/MedicalInventory/src --dry-run",
         "rector:fix": "rector process custom/plugins/MedicalInventory/src",
-        "test:plugin": "phpunit --configuration=custom/plugins/MedicalInventory/phpunit.xml.dist",
+        "test:plugin": "phpunit --configuration=phpunit.dist.xml",
         "quality": [
             "@cs:check",
             "@cs:fix:check",
