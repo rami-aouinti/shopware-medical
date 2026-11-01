@@ -1,0 +1,30 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "target": "ES2020",
+    "lib": ["ES2020", "DOM"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "noEmit": true,
+    "strict": false,
+    "paths": {
+      "@administration/*": [
+        "../../../../../../../src/Administration/Resources/app/administration/*"
+      ]
+    }
+  },
+  "include": [
+    "src/**/*.ts",
+  ],
+  "exclude": [
+    "src/**/*.spec.ts",
+    "node_modules"
+  ],
+  "files": [
+    "../../../../../../../src/Administration/Resources/app/administration/src/html-shim.d.ts",
+    "../../../../../../../src/Administration/Resources/app/administration/src/entity-schema-definition.d.ts"
+  ]
+}

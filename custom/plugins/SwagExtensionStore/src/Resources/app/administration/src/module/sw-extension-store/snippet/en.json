@@ -1,0 +1,136 @@
+{
+    "sw-extension-store": {
+        "component": {
+            "sw-extension-permissions-details-modal": {
+                "operationUpdate": "Edit",
+                "operationDelete": "Delete"
+            }
+        },
+        "general": {
+            "title": "Store",
+            "taxNotice": "* All prices are exclusive of VAT"
+        },
+        "in-app-purchases": {
+            "label": "In-App Purchases",
+            "paymentOptions": "Payment Options",
+            "onceOff": "one-time"
+        },
+        "legacyServices": {
+            "description": "This extension is now available as a Shopware Service.",
+            "openServices": "Open Shopware Payments"
+        },
+        "purchase-confirmation": {
+            "backToCheckout": "Back to checkout",
+            "closeWindow": "Close window",
+            "modalTitle": "Checkout",
+            "checkout": {
+                "success": {
+                    "title": "Your order was successful!",
+                    "description": "Order confirmation email has been sent. The extension is now visible in your Shopware Account and in the Admin of your shop."
+                },
+                "failed": {
+                    "title": "Something went wrong",
+                    "description": "Sorry, your purchase could not be completed.",
+                    "documentationLink": "See documentation"
+                },
+                "overview": {
+                    "billingAddress": "Billing address",
+                    "bookingDomain": "Booking domain",
+                    "by": "by",
+                    "change": "Change",
+                    "changeBillingAddressUrl": "https://account.shopware.com/settings/data",
+                    "paymentMethod": "Payment method",
+                    "noPaymentMethod": "No payment method stored",
+                    "addPaymentMethod": "Add payment method",
+                    "paymentMethodBanner": {
+                        "noPaymentMethod": {
+                            "title": "Please provide a payment method to proceed",
+                            "description": "For licensing Extensions in our store a payment method is required. Please add a payment method in your Shopware Account. To add it, click the button below.",
+                            "action": "Add payment method"
+                        },
+                        "change": {
+                            "title": "Change payment method?",
+                            "description": "The standard payment method that has been added to the Shopware Account will be used for this order. To change it, click the button below.<br><br><b>Note:</b> After updating the standard payment method in the Shopware Account it will be updated in the background and automatically be used if you submit this order. No reload required.",
+                            "action": "Change payment method"
+                        }
+                    }
+                },
+                "demo": {
+                    "hint": {
+                        "title": "Test license for demo environment",
+                        "description": "You are booking this extension as a test license for your demo environment. This license is intended for testing purposes only and cannot be used in a production environment. No costs will apply in the demo test phase."
+                    },
+                    "install": {
+                        "label": "Install extension automatically after test license creation"
+                    },
+                    "order": {
+                        "submit": "Create test license",
+                        "submit-and-install": "Create & install test license"
+                    }
+                },
+                "install": {
+                  "title": "Installation",
+                  "label": "Install extension automatically after purchase",
+                  "hint": "Extension version is not marked as compatible with your shop version"
+                },
+                "toc": {
+                    "title": "Terms and Conditions",
+                    "checkboxes": {
+                        "gtc": {
+                            "text": "I have read the {link} and agree with them.",
+                            "link": "General Terms and Conditions"
+                        },
+                        "permissions": {
+                            "text": "I am aware that this extension needs additional permissions.",
+                            "link": "Show permissions"
+                        }
+                    }
+                },
+                "order": {
+                    "firstMonth": "/first month",
+                    "followingPerMonth": "Following {price}** /month",
+                    "followingPerYear": "Following {price}** /year",
+                    "forMonths": "for {months} months",
+                    "forFirstYear": "for the first year",
+                    "perMonth": "/month",
+                    "perYear": "/year",
+                    "submit": "Submit order",
+                    "submit-and-install": "Submit order and install",
+                    "then": "Then"
+                },
+                "notes": {
+                    "tax": "* All prices are quoted net of the statutory value-added tax"
+                },
+                "loading": {
+                    "title": {
+                        "order": "Processing your order...",
+                        "update": "Updating your extension data...",
+                        "install": "Installing your extension...",
+                        "reload": "Reloading your shop..."
+                    },
+                    "description": "Please wait. This can take a few seconds."
+                }
+            },
+            "permissions": {
+                "intro": {
+                    "label": "Permissions",
+                    "descriptionPermissions": "{extensionLabel} will get access to the components below.",
+                    "descriptionDomains": "Some data will also be shared with the domains listed below."
+                },
+                "domains": {
+                    "label": "Domains",
+                    "description": "Some data will be shared with / transferred to the domains listed below."
+                }
+            }
+        },
+        "installation": {
+            "successTitle": "Installation successful",
+            "successMessage": "{name} has been successfully installed and activated.",
+            "errorTitle": "Installation failed",
+            "errorMessage": "{name} could not be installed. Please try again or install it manually.",
+            "reloadRequiredTitle": "Reload required",
+            "reloadRequiredMessage": "{name} has been installed. Reload the administration to start using it.",
+            "reloadRequiredAction": "Reload now"
+        }
+    }
+}

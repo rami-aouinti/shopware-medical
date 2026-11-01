@@ -4,11 +4,12 @@
     "type": "project",
     "require": {
         "composer-runtime-api": "^2.0",
-        "shopware/deployment-helper": "*",
         "shopware/administration": "*",
         "shopware/core": "6.7.15.1",
+        "shopware/deployment-helper": "*",
         "shopware/elasticsearch": "*",
         "shopware/storefront": "*",
+        "swag/paypal": "10.8.5",
         "symfony/amqp-messenger": "*",
         "symfony/flex": "~2",
         "symfony/runtime": "*"
