@@ -118,7 +118,10 @@ final class WarehouseDemoDataCommand extends Command
 
             foreach ($definition['stock'] as $warehouseCode => $quantity) {
                 if (!isset($warehouses[$warehouseCode])) {
-                    throw new RuntimeException(sprintf('Demo warehouse "%s" is not configured.', $warehouseCode));
+                    throw new RuntimeException(sprintf(
+                        'Demo warehouse "%s" is not configured.',
+                        $warehouseCode
+                    ));
                 }
 
                 $existingStock = $this->stockService->getStock($warehouseCode, $product->getId(), $context);
