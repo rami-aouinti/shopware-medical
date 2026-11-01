@@ -33,10 +33,30 @@ final class ShipmentService
             );
         }
 
+        $quantitiesByProduct = [];
+
+        foreach ($items as $item) {
+            if (!Uuid::isValid($item['productId']) || $item['quantity'] <= 0) {
+                throw new InvalidArgumentException(
+                    'Shipment product ID and quantity must be valid and positive.'
+                );
+            }
+
+            $quantitiesByProduct[$item['productId']] = (
+                $quantitiesByProduct[$item['productId']] ?? 0
+            ) + $item['quantity'];
+        }
+
+        $normalizedItems = [];
+
+        foreach ($quantitiesByProduct as $productId => $quantity) {
+            $normalizedItems[] = ['productId' => $productId, 'quantity' => $quantity];
+        }
+
         return $this->connection->transactional(function () use (
             $orderId,
             $warehouseCode,
-            $items,
+            $normalizedItems,
             $context,
             $carrierCode,
             $trackingNumber
@@ -57,7 +77,7 @@ final class ShipmentService
                 'created_at' => $now,
             ]);
 
-            foreach ($items as $item) {
+            foreach ($normalizedItems as $item) {
                 $this->shipAllocation(
                     $orderId,
                     $warehouseId,
