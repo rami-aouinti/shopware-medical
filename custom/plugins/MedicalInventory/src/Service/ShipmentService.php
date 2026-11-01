@@ -186,7 +186,7 @@ final class ShipmentService
         }
 
         $warehouseCode = $this->getWarehouseCode($warehouseId);
-        $this->stockService->shipReservedStock($warehouseCode, $productId, $quantity, $context);
+        $this->stockService->shipReservedStock($warehouseCode, $productId, $quantity, $context, 'shipment', $shipmentId);
 
         $shippedQuantity = (int) $allocation['shipped_quantity'] + $quantity;
         $allocationStatus = $shippedQuantity === (int) $allocation['quantity'] ? 'SHIPPED' : 'PARTIALLY_SHIPPED';
