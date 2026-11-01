@@ -28,7 +28,9 @@ final class ShipmentService
         ?string $trackingNumber = null,
     ): string {
         if (!Uuid::isValid($orderId) || $items === []) {
-            throw new InvalidArgumentException('A valid order ID and at least one shipment item are required.');
+            throw new InvalidArgumentException(
+                'A valid order ID and at least one shipment item are required.'
+            );
         }
 
         return $this->connection->transactional(function () use (
@@ -136,7 +138,9 @@ final class ShipmentService
         string $now,
     ): void {
         if (!Uuid::isValid($productId) || $quantity <= 0) {
-            throw new InvalidArgumentException('Shipment product ID and quantity must be valid and positive.');
+            throw new InvalidArgumentException(
+                'Shipment product ID and quantity must be valid and positive.'
+            );
         }
 
         $allocation = $this->connection->fetchAssociative(
@@ -166,7 +170,9 @@ final class ShipmentService
         $remaining = (int) $allocation['quantity'] - (int) $allocation['shipped_quantity'];
 
         if ($quantity > $remaining) {
-            throw new DomainException(sprintf('Cannot ship %d units; only %d remain allocated.', $quantity, $remaining));
+            throw new DomainException(
+                sprintf('Cannot ship %d units; only %d remain allocated.', $quantity, $remaining)
+            );
         }
 
         $allocationId = (string) $allocation['id'];
