@@ -71,12 +71,16 @@ final class LowStockAlertService
                             'available_quantity' => (int) $row['available_quantity'],
                             'opened_at' => $now,
                         ]);
-                    } else {
-                        $this->connection->update('medical_stock_alert', [
-                            'threshold_quantity' => (int) $row['minimum_quantity'],
-                            'available_quantity' => (int) $row['available_quantity'],
-                        ], ['id' => $existingId]);
+
+                        ++$openedOrUpdated;
+
+                        continue;
                     }
+
+                    $this->connection->update('medical_stock_alert', [
+                        'threshold_quantity' => (int) $row['minimum_quantity'],
+                        'available_quantity' => (int) $row['available_quantity'],
+                    ], ['id' => $existingId]);
 
                     ++$openedOrUpdated;
 

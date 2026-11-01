@@ -25,6 +25,7 @@ jobs:
     name: PHP 8.5 / Shopware 6.7 quality and tests
     runs-on: ubuntu-latest
     timeout-minutes: 45
+
     services:
       mariadb:
         image: mariadb:11.4
@@ -46,10 +47,19 @@ jobs:
       MEDICAL_INVENTORY_TEST_DATABASE_URL: mysql://root:root@127.0.0.1:3306/medical_inventory_test?serverVersion=mariadb-11.4.0
       COMPOSER_MAX_PARALLEL_HTTP: 4
       COMPOSER_PROCESS_TIMEOUT: 900
+      COMPOSER_MEMORY_LIMIT: -1
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Cache Composer packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.composer/cache/files
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -59,14 +69,35 @@ jobs:
           extensions: bcmath, ctype, curl, dom, fileinfo, gd, iconv, intl, json, libxml, mbstring, openssl, pdo_mysql, simplexml, sodium, tokenizer, xml, xmlwriter, zip
           coverage: none
 
-      - name: Validate Composer configuration
-        run: composer validate --no-check-publish --no-check-lock
+      - name: Validate Composer configuration and lock file
+        run: composer validate --no-check-publish
 
-      - name: Install project and quality dependencies from composer.lock
-        run: composer install --no-interaction --prefer-dist --no-progress --no-scripts
+      - name: Install locked dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress --no-scripts --optimize-autoloader
 
-      - name: Build optimized autoloader
-        run: composer dump-autoload --optimize --no-interaction
+      - name: Check PHP coding standard
+        run: composer cs:check
 
-      - name: Run all quality gates and unit tests
-        run: composer quality
+      - name: Check PHP-CS-Fixer formatting
+        run: composer cs:fix:check
+
+      - name: Run PHPStan
+        run: composer stan
+
+      - name: Run Psalm
+        run: composer psalm
+
+      - name: Run PHPMD
+        run: composer mess-detector
+
+      - name: Run PHPInsights
+        run: composer insights
+
+      - name: Run Rector dry-run
+        run: composer rector:check
+
+      - name: Run plugin unit tests
+        run: composer test:plugin
+
+      - name: Run MariaDB and Shopware DAL integration tests
+        run: composer test:integration

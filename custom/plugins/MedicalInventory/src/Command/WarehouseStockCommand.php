@@ -46,100 +46,142 @@ final class WarehouseStockCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
-        $context = Context::createDefaultContext();
-        $action = (string) $input->getArgument('action');
-        $warehouseCode = (string) ($input->getOption('warehouse') ?? '');
-        $productId = (string) ($input->getOption('product') ?? '');
 
         try {
-            $this->requireValue($warehouseCode, '--warehouse');
-
-            if ($action === 'list') {
-                $rows = [];
-
-                foreach ($this->stockService->listByWarehouse($warehouseCode, $context)->getEntities() as $stock) {
-                    if (!$stock instanceof WarehouseStockEntity) {
-                        continue;
-                    }
-
-                    $rows[] = [
-                        $stock->getProductId(),
-                        $stock->getQuantity(),
-                        $stock->getReservedQuantity(),
-                        $stock->getAvailableQuantity(),
-                        $stock->getMinimumQuantity(),
-                    ];
-                }
-
-                $io->table(['Product ID', 'Quantity', 'Reserved', 'Available', 'Minimum'], $rows);
-
-                return Command::SUCCESS;
-            }
-
-            $this->requireValue($productId, '--product');
-
-            if ($action === 'minimum') {
-                $quantityOption = $input->getOption('quantity');
-                $minimumQuantity = is_string($quantityOption)
-                    ? filter_var($quantityOption, FILTER_VALIDATE_INT)
-                    : false;
-
-                if ($minimumQuantity === false) {
-                    throw new InvalidArgumentException('The minimum action requires an integer --quantity option.');
-                }
-
-                $this->stockService->setMinimumQuantity($warehouseCode, $productId, $minimumQuantity, $context);
-                $io->success('Minimum stock threshold updated.');
-
-                return Command::SUCCESS;
-            }
-
-            if ($action === 'show') {
-                $stock = $this->stockService->getStock($warehouseCode, $productId, $context);
-
-                if (!$stock instanceof WarehouseStockEntity) {
-                    $io->warning('No stock row exists for this warehouse and product.');
-
-                    return Command::FAILURE;
-                }
-
-                $this->renderStock($io, $stock);
-
-                return Command::SUCCESS;
-            }
-
-            $quantityOption = $input->getOption('quantity');
-            $validatedQuantity = is_string($quantityOption)
-                ? filter_var($quantityOption, FILTER_VALIDATE_INT)
-                : false;
-
-            if ($validatedQuantity === false) {
-                throw new InvalidArgumentException('This action requires an integer --quantity option.');
-            }
-
-            $quantity = $validatedQuantity;
-
-            $stock = match ($action) {
-                'set' => $this->stockService->setStock($warehouseCode, $productId, $quantity, $context),
-                'add' => $this->stockService->addStock($warehouseCode, $productId, $quantity, $context),
-                'remove' => $this->stockService->removeStock($warehouseCode, $productId, $quantity, $context),
-                'reserve' => $this->stockService->reserveStock($warehouseCode, $productId, $quantity, $context),
-                'release' => $this->stockService->releaseReservation($warehouseCode, $productId, $quantity, $context),
-                'ship' => $this->stockService->shipReservedStock($warehouseCode, $productId, $quantity, $context),
-                default => throw new InvalidArgumentException(
-                    'Unknown action. Use set, add, remove, reserve, release, ship, minimum, show or list.'
-                ),
-            };
-
-            $io->success(sprintf('Stock operation "%s" completed.', $action));
-            $this->renderStock($io, $stock);
-
-            return Command::SUCCESS;
+            return $this->executeAction(
+                (string) $input->getArgument('action'),
+                (string) ($input->getOption('warehouse') ?? ''),
+                (string) ($input->getOption('product') ?? ''),
+                $input,
+                $io
+            );
         } catch (InvalidArgumentException | DomainException | RuntimeException $exception) {
             $io->error($exception->getMessage());
 
             return Command::FAILURE;
         }
+    }
+
+    private function executeAction(
+        string $action,
+        string $warehouseCode,
+        string $productId,
+        InputInterface $input,
+        SymfonyStyle $io,
+    ): int {
+        $this->requireValue($warehouseCode, '--warehouse');
+
+        return match ($action) {
+            'list' => $this->listStock($warehouseCode, $io),
+            'minimum' => $this->updateMinimum($warehouseCode, $productId, $input, $io),
+            'show' => $this->showStock($warehouseCode, $productId, $io),
+            'set', 'add', 'remove', 'reserve', 'release', 'ship' => $this->performMutation(
+                $action,
+                $warehouseCode,
+                $productId,
+                $input,
+                $io
+            ),
+            default => throw new InvalidArgumentException(
+                'Unknown action. Use set, add, remove, reserve, release, ship, minimum, show or list.'
+            ),
+        };
+    }
+
+    private function listStock(string $warehouseCode, SymfonyStyle $io): int
+    {
+        $rows = [];
+
+        foreach ($this->stockService->listByWarehouse($warehouseCode, Context::createDefaultContext())->getEntities() as $stock) {
+            if (!$stock instanceof WarehouseStockEntity) {
+                continue;
+            }
+
+            $rows[] = [
+                $stock->getProductId(),
+                $stock->getQuantity(),
+                $stock->getReservedQuantity(),
+                $stock->getAvailableQuantity(),
+                $stock->getMinimumQuantity(),
+            ];
+        }
+
+        $io->table(['Product ID', 'Quantity', 'Reserved', 'Available', 'Minimum'], $rows);
+
+        return Command::SUCCESS;
+    }
+
+    private function updateMinimum(
+        string $warehouseCode,
+        string $productId,
+        InputInterface $input,
+        SymfonyStyle $io,
+    ): int {
+        $this->requireValue($productId, '--product');
+        $quantity = $this->readQuantity($input, 'The minimum action requires an integer --quantity option.');
+        $this->stockService->setMinimumQuantity(
+            $warehouseCode,
+            $productId,
+            $quantity,
+            Context::createDefaultContext()
+        );
+        $io->success('Minimum stock threshold updated.');
+
+        return Command::SUCCESS;
+    }
+
+    private function showStock(string $warehouseCode, string $productId, SymfonyStyle $io): int
+    {
+        $this->requireValue($productId, '--product');
+        $stock = $this->stockService->getStock($warehouseCode, $productId, Context::createDefaultContext());
+
+        if (!$stock instanceof WarehouseStockEntity) {
+            $io->warning('No stock row exists for this warehouse and product.');
+
+            return Command::FAILURE;
+        }
+
+        $this->renderStock($io, $stock);
+
+        return Command::SUCCESS;
+    }
+
+    private function performMutation(
+        string $action,
+        string $warehouseCode,
+        string $productId,
+        InputInterface $input,
+        SymfonyStyle $io,
+    ): int {
+        $this->requireValue($productId, '--product');
+        $quantity = $this->readQuantity($input, 'This action requires an integer --quantity option.');
+        $context = Context::createDefaultContext();
+
+        $stock = match ($action) {
+            'set' => $this->stockService->setStock($warehouseCode, $productId, $quantity, $context),
+            'add' => $this->stockService->addStock($warehouseCode, $productId, $quantity, $context),
+            'remove' => $this->stockService->removeStock($warehouseCode, $productId, $quantity, $context),
+            'reserve' => $this->stockService->reserveStock($warehouseCode, $productId, $quantity, $context),
+            'release' => $this->stockService->releaseReservation($warehouseCode, $productId, $quantity, $context),
+            'ship' => $this->stockService->shipReservedStock($warehouseCode, $productId, $quantity, $context),
+        };
+
+        $io->success(sprintf('Stock operation "%s" completed.', $action));
+        $this->renderStock($io, $stock);
+
+        return Command::SUCCESS;
+    }
+
+    private function readQuantity(InputInterface $input, string $errorMessage): int
+    {
+        $option = $input->getOption('quantity');
+        $quantity = is_string($option) ? filter_var($option, FILTER_VALIDATE_INT) : false;
+
+        if ($quantity === false) {
+            throw new InvalidArgumentException($errorMessage);
+        }
+
+        return $quantity;
     }
 
     private function renderStock(SymfonyStyle $io, WarehouseStockEntity $stock): void

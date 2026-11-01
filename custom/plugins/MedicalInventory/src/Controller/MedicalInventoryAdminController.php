@@ -198,11 +198,55 @@ final class MedicalInventoryAdminController
     public function createShipment(string $orderId, Request $request, Context $context): JsonResponse
     {
         $payload = $request->toArray();
-        $warehouseCode = $payload['warehouseCode'] ?? null;
-        $items = $payload['items'] ?? null;
+        $warehouseCode = $this->requireStringPayloadValue($payload, 'warehouseCode');
+        $validatedItems = $this->validateShipmentItems($payload['items'] ?? null);
 
-        if (!is_string($warehouseCode) || !is_array($items) || $items === []) {
-            throw new InvalidArgumentException('warehouseCode and a non-empty items array are required.');
+        $shipmentId = $context->scope(
+            Context::SYSTEM_SCOPE,
+            fn (Context $systemContext): string => $this->shipmentService->createShipment(
+                $orderId,
+                $warehouseCode,
+                $validatedItems,
+                $systemContext,
+                $this->optionalStringPayloadValue($payload, 'carrierCode'),
+                $this->optionalStringPayloadValue($payload, 'trackingNumber')
+            )
+        );
+
+        return new JsonResponse(['success' => true, 'shipmentId' => $shipmentId], 201);
+    }
+
+    /**
+     * @param array<string, mixed> $payload
+     */
+    private function requireStringPayloadValue(array $payload, string $key): string
+    {
+        $value = $payload[$key] ?? null;
+
+        if (!is_string($value) || trim($value) === '') {
+            throw new InvalidArgumentException(sprintf('%s must be a non-empty string.', $key));
+        }
+
+        return trim($value);
+    }
+
+    /**
+     * @param array<string, mixed> $payload
+     */
+    private function optionalStringPayloadValue(array $payload, string $key): ?string
+    {
+        $value = $payload[$key] ?? null;
+
+        return is_string($value) ? $value : null;
+    }
+
+    /**
+     * @return list<array{productId: string, quantity: int}>
+     */
+    private function validateShipmentItems(mixed $items): array
+    {
+        if (!is_array($items) || $items === []) {
+            throw new InvalidArgumentException('A non-empty items array is required.');
         }
 
         $validatedItems = [];
@@ -222,19 +266,7 @@ final class MedicalInventoryAdminController
             ];
         }
 
-        $shipmentId = $context->scope(
-            Context::SYSTEM_SCOPE,
-            fn (Context $systemContext): string => $this->shipmentService->createShipment(
-                $orderId,
-                $warehouseCode,
-                $validatedItems,
-                $systemContext,
-                is_string($payload['carrierCode'] ?? null) ? $payload['carrierCode'] : null,
-                is_string($payload['trackingNumber'] ?? null) ? $payload['trackingNumber'] : null
-            )
-        );
-
-        return new JsonResponse(['success' => true, 'shipmentId' => $shipmentId], 201);
+        return $validatedItems;
     }
 
     #[Route(

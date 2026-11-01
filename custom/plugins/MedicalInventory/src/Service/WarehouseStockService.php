@@ -42,7 +42,7 @@ final class WarehouseStockService
         int $quantity,
         Context $context,
     ): WarehouseStockEntity {
-        return $this->mutate(
+        return $this->mutateActiveWarehouse(
             $warehouseCode,
             $productId,
             $context,
@@ -58,7 +58,7 @@ final class WarehouseStockService
         int $amount,
         Context $context,
     ): WarehouseStockEntity {
-        return $this->mutate(
+        return $this->mutateActiveWarehouse(
             $warehouseCode,
             $productId,
             $context,
@@ -74,7 +74,7 @@ final class WarehouseStockService
         int $amount,
         Context $context,
     ): WarehouseStockEntity {
-        return $this->mutate(
+        return $this->mutateActiveWarehouse(
             $warehouseCode,
             $productId,
             $context,
@@ -92,14 +92,13 @@ final class WarehouseStockService
         ?string $referenceType = null,
         ?string $referenceId = null,
     ): WarehouseStockEntity {
-        return $this->mutate(
+        return $this->mutateActiveWarehouse(
             $warehouseCode,
             $productId,
             $context,
             fn (int $current, int $reserved): array => $this->calculator->reserve($current, $reserved, $amount),
             'RESERVATION',
             'Order stock reservation',
-            true,
             $referenceType,
             $referenceId,
         );
@@ -114,13 +113,12 @@ final class WarehouseStockService
         ?string $referenceId = null,
     ): WarehouseStockEntity {
         return $this->mutate(
-            $warehouseCode,
+            $this->getWarehouse($warehouseCode, $context),
             $productId,
             $context,
             fn (int $current, int $reserved): array => $this->calculator->release($current, $reserved, $amount),
             'RELEASE',
             'Stock reservation released',
-            false,
             $referenceType,
             $referenceId,
         );
@@ -135,13 +133,12 @@ final class WarehouseStockService
         ?string $referenceId = null,
     ): WarehouseStockEntity {
         return $this->mutate(
-            $warehouseCode,
+            $this->getWarehouse($warehouseCode, $context),
             $productId,
             $context,
             fn (int $current, int $reserved): array => $this->calculator->ship($current, $reserved, $amount),
             'SHIPMENT',
             'Reserved stock shipped',
-            false,
             $referenceType,
             $referenceId,
         );
@@ -302,106 +299,155 @@ final class WarehouseStockService
     /**
      * @param callable(int, int): array{quantity: int, reservedQuantity: int} $change
      */
-    private function mutate(
+    private function mutateActiveWarehouse(
         string $warehouseCode,
         string $productId,
         Context $context,
         callable $change,
         string $movementType,
         string $reason,
-        bool $requireActive = true,
         ?string $referenceType = null,
         ?string $referenceId = null,
     ): WarehouseStockEntity {
         $warehouse = $this->getWarehouse($warehouseCode, $context);
 
-        if ($requireActive && !$warehouse->isActive()) {
+        if (!$warehouse->isActive()) {
             throw new DomainException(sprintf('Warehouse "%s" is inactive.', $warehouseCode));
         }
 
-        $this->assertProductExists($productId, $context);
-
-        $warehouseId = $warehouse->getUniqueIdentifier();
-        $versionId = $context->getVersionId();
-
-        return $this->connection->transactional(function () use (
-            $warehouseId,
+        return $this->mutate(
+            $warehouse,
             $productId,
-            $versionId,
             $context,
             $change,
             $movementType,
             $reason,
             $referenceType,
-            $referenceId,
-        ): WarehouseStockEntity {
-            // Lock the current row before calculating the new values.
-            $row = $this->connection->fetchAssociative(
-                <<<'SQL'
-                    SELECT LOWER(HEX(id)) AS id, quantity, reserved_quantity
-                    FROM medical_warehouse_stock
-                    WHERE warehouse_id = :warehouseId
-                      AND product_id = :productId
-                      AND product_version_id = :versionId
-                    FOR UPDATE
-                SQL,
-                [
-                    'warehouseId' => Uuid::fromHexToBytes($warehouseId),
-                    'productId' => Uuid::fromHexToBytes($productId),
-                    'versionId' => Uuid::fromHexToBytes($versionId),
-                ],
-            );
+            $referenceId
+        );
+    }
 
-            $currentQuantity = $row === false ? 0 : (int) $row['quantity'];
-            $reservedQuantity = $row === false ? 0 : (int) $row['reserved_quantity'];
-            $newState = $change($currentQuantity, $reservedQuantity);
+    /**
+     * @param callable(int, int): array{quantity: int, reservedQuantity: int} $change
+     */
+    private function mutate(
+        WarehouseEntity $warehouse,
+        string $productId,
+        Context $context,
+        callable $change,
+        string $movementType,
+        string $reason,
+        ?string $referenceType = null,
+        ?string $referenceId = null,
+    ): WarehouseStockEntity {
+        $this->assertProductExists($productId, $context);
+        $warehouseId = $warehouse->getUniqueIdentifier();
+        $versionId = $context->getVersionId();
 
-            if ($row === false) {
-                $this->warehouseStockRepository->create([
-                    [
-                        'id' => Uuid::randomHex(),
-                        'warehouseId' => $warehouseId,
-                        'productId' => $productId,
-                        'productVersionId' => $versionId,
-                        'quantity' => $newState['quantity'],
-                        'reservedQuantity' => $newState['reservedQuantity'],
-                        'minimumQuantity' => 0,
-                    ],
-                ], $context);
-            }
-
-            if ($row !== false) {
-                $this->warehouseStockRepository->update([
-                    [
-                        'id' => (string) $row['id'],
-                        'quantity' => $newState['quantity'],
-                        'reservedQuantity' => $newState['reservedQuantity'],
-                    ],
-                ], $context);
-            }
-
-            $this->movementRecorder->record(
+        return $this->connection->transactional(
+            fn (): WarehouseStockEntity => $this->mutateStockWithinTransaction(
                 $warehouseId,
                 $productId,
                 $versionId,
+                $context,
+                $change,
                 $movementType,
-                $newState['quantity'] - $currentQuantity,
-                $newState['reservedQuantity'] - $reservedQuantity,
                 $reason,
                 $referenceType,
                 $referenceId
-            );
+            )
+        );
+    }
 
-            $this->syncAggregateProductStock($productId, $versionId, $context);
+    /**
+     * @param callable(int, int): array{quantity: int, reservedQuantity: int} $change
+     */
+    private function mutateStockWithinTransaction(
+        string $warehouseId,
+        string $productId,
+        string $versionId,
+        Context $context,
+        callable $change,
+        string $movementType,
+        string $reason,
+        ?string $referenceType,
+        ?string $referenceId,
+    ): WarehouseStockEntity {
+        $row = $this->connection->fetchAssociative(
+            <<<'SQL'
+                SELECT LOWER(HEX(id)) AS id, quantity, reserved_quantity
+                FROM medical_warehouse_stock
+                WHERE warehouse_id = :warehouseId
+                  AND product_id = :productId
+                  AND product_version_id = :versionId
+                FOR UPDATE
+            SQL,
+            [
+                'warehouseId' => Uuid::fromHexToBytes($warehouseId),
+                'productId' => Uuid::fromHexToBytes($productId),
+                'versionId' => Uuid::fromHexToBytes($versionId),
+            ],
+        );
 
-            $stock = $this->findStockByIds($warehouseId, $productId, $versionId, $context);
+        $currentQuantity = $row === false ? 0 : (int) $row['quantity'];
+        $reservedQuantity = $row === false ? 0 : (int) $row['reserved_quantity'];
+        $newState = $change($currentQuantity, $reservedQuantity);
 
-            if (!$stock instanceof WarehouseStockEntity) {
-                throw new RuntimeException('The stock row could not be reloaded after the operation.');
-            }
+        $this->persistStockState($row, $warehouseId, $productId, $versionId, $newState, $context);
+        $this->movementRecorder->record(
+            $warehouseId,
+            $productId,
+            $versionId,
+            $movementType,
+            $newState['quantity'] - $currentQuantity,
+            $newState['reservedQuantity'] - $reservedQuantity,
+            $reason,
+            $referenceType,
+            $referenceId
+        );
 
-            return $stock;
-        });
+        $this->syncAggregateProductStock($productId, $versionId, $context);
+
+        $stock = $this->findStockByIds($warehouseId, $productId, $versionId, $context);
+
+        if (!$stock instanceof WarehouseStockEntity) {
+            throw new RuntimeException('The stock row could not be reloaded after the operation.');
+        }
+
+        return $stock;
+    }
+
+    /**
+     * @param array<string, mixed>|false $row
+     * @param array{quantity: int, reservedQuantity: int} $newState
+     */
+    private function persistStockState(
+        array|false $row,
+        string $warehouseId,
+        string $productId,
+        string $versionId,
+        array $newState,
+        Context $context,
+    ): void {
+        if ($row === false) {
+            $this->warehouseStockRepository->create([[
+                'id' => Uuid::randomHex(),
+                'warehouseId' => $warehouseId,
+                'productId' => $productId,
+                'productVersionId' => $versionId,
+                'quantity' => $newState['quantity'],
+                'reservedQuantity' => $newState['reservedQuantity'],
+                'minimumQuantity' => 0,
+            ]], $context);
+
+            return;
+        }
+
+        $this->warehouseStockRepository->update([[
+            'id' => (string) $row['id'],
+            'quantity' => $newState['quantity'],
+            'reservedQuantity' => $newState['reservedQuantity'],
+        ]], $context);
     }
 
     private function syncAggregateProductStock(

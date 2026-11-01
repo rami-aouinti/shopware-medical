@@ -16,23 +16,38 @@ class Migration1793496000AddFulfillmentLifecycle extends MigrationStep
     #[\Override]
     public function update(Connection $connection): void
     {
-        $schemaManager = $connection->createSchemaManager();
-
-        if (!$schemaManager->tablesExist(['medical_warehouse_stock'])) {
+        if (!$connection->createSchemaManager()->tablesExist(['medical_warehouse_stock'])) {
             return;
         }
 
+        $this->ensureMinimumQuantityColumn($connection);
+        $this->createStockMovementTable($connection);
+        $this->createOrderAllocationTable($connection);
+        $this->createStockReservationTable($connection);
+        $this->createShipmentTable($connection);
+        $this->createShipmentItemTable($connection);
+        $this->createShipmentEventTable($connection);
+        $this->createStockAlertTable($connection);
+    }
+
+    private function ensureMinimumQuantityColumn(Connection $connection): void
+    {
         $columns = array_change_key_case(
-            $schemaManager->listTableColumns('medical_warehouse_stock'),
+            $connection->createSchemaManager()->listTableColumns('medical_warehouse_stock'),
             CASE_LOWER
         );
 
-        if (!isset($columns['minimum_quantity'])) {
-            $connection->executeStatement(
-                'ALTER TABLE medical_warehouse_stock ADD minimum_quantity INT UNSIGNED NOT NULL DEFAULT 0'
-            );
+        if (isset($columns['minimum_quantity'])) {
+            return;
         }
 
+        $connection->executeStatement(
+            'ALTER TABLE medical_warehouse_stock ADD minimum_quantity INT UNSIGNED NOT NULL DEFAULT 0'
+        );
+    }
+
+    private function createStockMovementTable(Connection $connection): void
+    {
         $connection->executeStatement(<<<'SQL'
             CREATE TABLE IF NOT EXISTS medical_stock_movement (
                 id BINARY(16) NOT NULL,
@@ -51,7 +66,10 @@ class Migration1793496000AddFulfillmentLifecycle extends MigrationStep
                 INDEX idx_medical_movement_reference (reference_type, reference_id)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
         SQL);
+    }
 
+    private function createOrderAllocationTable(Connection $connection): void
+    {
         $connection->executeStatement(<<<'SQL'
             CREATE TABLE IF NOT EXISTS medical_order_warehouse_allocation (
                 id BINARY(16) NOT NULL,
@@ -73,7 +91,10 @@ class Migration1793496000AddFulfillmentLifecycle extends MigrationStep
                 INDEX idx_medical_allocation_warehouse (warehouse_id, status)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
         SQL);
+    }
 
+    private function createStockReservationTable(Connection $connection): void
+    {
         $connection->executeStatement(<<<'SQL'
             CREATE TABLE IF NOT EXISTS medical_stock_reservation (
                 id BINARY(16) NOT NULL,
@@ -96,7 +117,10 @@ class Migration1793496000AddFulfillmentLifecycle extends MigrationStep
                 INDEX idx_medical_reservation_expiry (status, expires_at)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
         SQL);
+    }
 
+    private function createShipmentTable(Connection $connection): void
+    {
         $connection->executeStatement(<<<'SQL'
             CREATE TABLE IF NOT EXISTS medical_shipment (
                 id BINARY(16) NOT NULL,
@@ -115,7 +139,10 @@ class Migration1793496000AddFulfillmentLifecycle extends MigrationStep
                 INDEX idx_medical_shipment_warehouse (warehouse_id, status)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
         SQL);
+    }
 
+    private function createShipmentItemTable(Connection $connection): void
+    {
         $connection->executeStatement(<<<'SQL'
             CREATE TABLE IF NOT EXISTS medical_shipment_item (
                 id BINARY(16) NOT NULL,
@@ -129,7 +156,10 @@ class Migration1793496000AddFulfillmentLifecycle extends MigrationStep
                 INDEX idx_medical_shipment_item_allocation (allocation_id)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
         SQL);
+    }
 
+    private function createShipmentEventTable(Connection $connection): void
+    {
         $connection->executeStatement(<<<'SQL'
             CREATE TABLE IF NOT EXISTS medical_shipment_event (
                 id BINARY(16) NOT NULL,
@@ -143,7 +173,10 @@ class Migration1793496000AddFulfillmentLifecycle extends MigrationStep
                 INDEX idx_medical_shipment_event (shipment_id, event_at)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
         SQL);
+    }
 
+    private function createStockAlertTable(Connection $connection): void
+    {
         $connection->executeStatement(<<<'SQL'
             CREATE TABLE IF NOT EXISTS medical_stock_alert (
                 id BINARY(16) NOT NULL,
