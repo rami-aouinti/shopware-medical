@@ -41,9 +41,9 @@ class Migration1793575028MedicalWarehouse extends MigrationStep
 
         $connection->executeStatement(
             'ALTER TABLE medical_warehouse'
-            . ' CHANGE \`code\` code VARCHAR(255) NOT NULL,'
-            . ' CHANGE \`country_code\` country_code VARCHAR(255) NOT NULL,'
-            . ' CHANGE \`is_active\` is_active TINYINT DEFAULT 0 NOT NULL'
+            . ' CHANGE code code VARCHAR(255) NOT NULL,'
+            . ' CHANGE country_code country_code VARCHAR(255) NOT NULL,'
+            . ' CHANGE is_active is_active TINYINT DEFAULT 0 NOT NULL'
         );
     }
 
