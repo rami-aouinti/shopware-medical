@@ -13,7 +13,6 @@ use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\EntitySearchResult;
 use Shopware\Core\Framework\Uuid\Uuid;
-use Shopware\Core\Framework\Uuid\Uuid;
 
 final class WarehouseAllocationServiceTest extends TestCase
 {
