@@ -18,7 +18,7 @@ final class OrderCancellationSubscriber
 
     public static function getSubscribedEvents(): array
     {
-        return [StateMachineTransitionEvent::class => 'onStateMachineTransition'];
+        return [StateMachineTransitionEvent::class => ['onStateMachineTransition', -100]];
     }
 
     public function onStateMachineTransition(StateMachineTransitionEvent $event): void
