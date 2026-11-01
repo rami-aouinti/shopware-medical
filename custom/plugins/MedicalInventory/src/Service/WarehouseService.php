@@ -81,7 +81,7 @@ final class WarehouseService
     {
         $warehouse = $this->findByCode($code, $context);
 
-        if ($warehouse === null) {
+        if (!$warehouse instanceof WarehouseEntity) {
             throw new RuntimeException(sprintf('Warehouse "%s" was not found.', $code));
         }
 
