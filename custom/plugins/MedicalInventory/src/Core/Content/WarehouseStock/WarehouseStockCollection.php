@@ -10,6 +10,7 @@ use Shopware\Core\Framework\DataAbstractionLayer\EntityCollection;
 class WarehouseStockCollection extends EntityCollection
 {
     #[\Override]
+    #[\Override]
     protected function getExpectedClass(): string
     {
         return WarehouseStockEntity::class;
