@@ -12,5 +12,9 @@
     <arg name="colors"/>
     <arg value="sp"/>
 
-    <rule ref="PSR12"/>
+    <!-- Shopware's standard file header is "<?php declare(strict_types=1);". -->
+    <rule ref="PSR12">
+        <exclude name="PSR12.Files.OpenTag.NotAlone"/>
+        <exclude name="PSR12.Files.FileHeader.SpacingAfterBlock"/>
+    </rule>
 </ruleset>
