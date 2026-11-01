@@ -89,6 +89,8 @@ final class WarehouseStockService
         string $productId,
         int $amount,
         Context $context,
+        ?string $referenceType = null,
+        ?string $referenceId = null,
     ): WarehouseStockEntity {
         return $this->mutate(
             $warehouseCode,
@@ -97,6 +99,9 @@ final class WarehouseStockService
             fn (int $current, int $reserved): array => $this->calculator->reserve($current, $reserved, $amount),
             'RESERVATION',
             'Order stock reservation',
+            true,
+            $referenceType,
+            $referenceId,
         );
     }
 
@@ -105,6 +110,8 @@ final class WarehouseStockService
         string $productId,
         int $amount,
         Context $context,
+        ?string $referenceType = null,
+        ?string $referenceId = null,
     ): WarehouseStockEntity {
         return $this->mutate(
             $warehouseCode,
@@ -113,6 +120,9 @@ final class WarehouseStockService
             fn (int $current, int $reserved): array => $this->calculator->release($current, $reserved, $amount),
             'RELEASE',
             'Stock reservation released',
+            false,
+            $referenceType,
+            $referenceId,
         );
     }
 
@@ -121,6 +131,8 @@ final class WarehouseStockService
         string $productId,
         int $amount,
         Context $context,
+        ?string $referenceType = null,
+        ?string $referenceId = null,
     ): WarehouseStockEntity {
         return $this->mutate(
             $warehouseCode,
@@ -129,6 +141,9 @@ final class WarehouseStockService
             fn (int $current, int $reserved): array => $this->calculator->ship($current, $reserved, $amount),
             'SHIPMENT',
             'Reserved stock shipped',
+            false,
+            $referenceType,
+            $referenceId,
         );
     }
 
@@ -237,6 +252,9 @@ final class WarehouseStockService
         callable $change,
         string $movementType,
         string $reason,
+        bool $requireActive = true,
+        ?string $referenceType = null,
+        ?string $referenceId = null,
     ): WarehouseStockEntity {
         $warehouse = $this->getWarehouse($warehouseCode, $context);
 
@@ -257,6 +275,9 @@ final class WarehouseStockService
             $change,
             $movementType,
             $reason,
+            $requireActive,
+            $referenceType,
+            $referenceId,
         ): WarehouseStockEntity {
             // Lock the current row before calculating the new values.
             $row = $this->connection->fetchAssociative(
@@ -310,7 +331,9 @@ final class WarehouseStockService
                 $newState['quantity'] - $currentQuantity,
                 $newState['reservedQuantity'] - $reservedQuantity,
                 $reason,
-                $context
+                $context,
+                $referenceType,
+                $referenceId
             );
 
             $stock = $this->findStockByIds($warehouseId, $productId, $versionId, $context);
