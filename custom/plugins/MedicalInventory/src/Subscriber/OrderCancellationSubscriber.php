@@ -31,8 +31,13 @@ final class OrderCancellationSubscriber
             return;
         }
 
-        $this->connection->transactional(function () use ($event): void {
-            $this->fulfillmentService->releaseOrder($event->getEntityId(), $event->getContext());
-        });
+        $event->getContext()->scope(
+            Context::SYSTEM_SCOPE,
+            function (Context $systemContext) use ($event): void {
+                $this->connection->transactional(function () use ($event, $systemContext): void {
+                    $this->fulfillmentService->releaseOrder($event->getEntityId(), $systemContext);
+                });
+            }
+        );
     }
 }
