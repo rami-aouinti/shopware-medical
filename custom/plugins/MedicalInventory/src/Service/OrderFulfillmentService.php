@@ -126,8 +126,6 @@ final class OrderFulfillmentService
                     'order',
                     $orderId
                 );
-
-
             }
 
             $this->connection->update('medical_stock_reservation', [
