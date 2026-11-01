@@ -8,6 +8,9 @@
 5. [Stratégie de tests](05-testing-strategy.md)
 6. [Roadmap](06-roadmap.md)
 
+## Ateliers techniques Shopware
+1. [Atelier 01 — Entité Warehouse avec le DAL](technical/01-warehouse-dal.md)
+
 ## Spécifications
 7. [Exigences fonctionnelles](07-functional-requirements.md)
 8. [Règles métier](08-business-rules.md)
