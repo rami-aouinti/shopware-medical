@@ -10,6 +10,10 @@
             <tag name="shopware.entity.definition" entity="medical_warehouse"/>
         </service>
 
+        <service id="MedicalInventory\Core\Content\WarehouseStock\WarehouseStockDefinition">
+            <tag name="shopware.entity.definition" entity="medical_warehouse_stock"/>
+        </service>
+
         <service id="MedicalInventory\Service\WarehouseValidator"/>
 
         <service id="MedicalInventory\Service\WarehouseService">
