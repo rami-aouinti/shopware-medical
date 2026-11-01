@@ -84,7 +84,7 @@ final class WarehouseStockDalIntegrationTest extends TestCase
         $productBuilder = (new ProductBuilder(
             new IdsCollection(),
             'MED-DAL-' . strtoupper(substr(Uuid::randomHex(), 0, 8))
-        ))->price(25)->visibility();
+        ))->price(25);
         $productBuilder->write($container);
         $productId = $productBuilder->id;
 
