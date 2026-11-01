@@ -45,22 +45,10 @@ class WarehouseCrudCommand extends Command
             switch ($action) {
                 case 'create':
                     $name = (string) ($input->getOption('name') ?? '');
-                    $country = strtoupper((string) ($input->getOption('country') ?? ''));
-
-                    if ($code === '' || $name === '' || !preg_match('/^[A-Z]{2}$/', $country)) {
-                        $io->error('For create, provide --code, --name and a valid two-letter --country (for example DE).');
-
-                        return Command::INVALID;
-                    }
-
-                    if ($this->warehouseService->findByCode($code, $context) !== null) {
-                        $io->error(sprintf('A warehouse with code "%s" already exists.', $code));
-
-                        return Command::FAILURE;
-                    }
+                    $country = (string) ($input->getOption('country') ?? '');
 
                     $this->warehouseService->create($code, $name, $country, $context);
-                    $io->success(sprintf('Warehouse "%s" created.', $code));
+                    $io->success(sprintf('Warehouse "%s" created.', strtoupper(trim($code))));
 
                     return Command::SUCCESS;
 
@@ -125,7 +113,7 @@ class WarehouseCrudCommand extends Command
 
                     return Command::INVALID;
             }
-        } catch (\RuntimeException $exception) {
+        } catch (\InvalidArgumentException | \RuntimeException $exception) {
             $io->error($exception->getMessage());
 
             return Command::FAILURE;
@@ -134,7 +122,7 @@ class WarehouseCrudCommand extends Command
 
     private function requireCode(string $code): void
     {
-        if ($code === '') {
+        if (trim($code) === '') {
             throw new \RuntimeException('This action requires the --code option.');
         }
     }
