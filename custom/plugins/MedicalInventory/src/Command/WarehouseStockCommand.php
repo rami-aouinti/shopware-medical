@@ -35,7 +35,7 @@ final class WarehouseStockCommand extends Command
             ->addArgument(
                 'action',
                 InputArgument::REQUIRED,
-                'Action: set, add, remove, reserve, release, ship, show or list'
+                'Action: set, add, remove, reserve, release, ship, minimum, show or list'
             )
             ->addOption('warehouse', null, InputOption::VALUE_REQUIRED, 'Warehouse code')
             ->addOption('product', null, InputOption::VALUE_REQUIRED, 'Shopware product UUID')
@@ -67,15 +67,32 @@ final class WarehouseStockCommand extends Command
                         $stock->getQuantity(),
                         $stock->getReservedQuantity(),
                         $stock->getAvailableQuantity(),
+                        $stock->getMinimumQuantity(),
                     ];
                 }
 
-                $io->table(['Product ID', 'Quantity', 'Reserved', 'Available'], $rows);
+                $io->table(['Product ID', 'Quantity', 'Reserved', 'Available', 'Minimum'], $rows);
 
                 return Command::SUCCESS;
             }
 
             $this->requireValue($productId, '--product');
+
+            if ($action === 'minimum') {
+                $quantityOption = $input->getOption('quantity');
+                $minimumQuantity = is_string($quantityOption)
+                    ? filter_var($quantityOption, FILTER_VALIDATE_INT)
+                    : false;
+
+                if ($minimumQuantity === false) {
+                    throw new InvalidArgumentException('The minimum action requires an integer --quantity option.');
+                }
+
+                $this->stockService->setMinimumQuantity($warehouseCode, $productId, $minimumQuantity, $context);
+                $io->success('Minimum stock threshold updated.');
+
+                return Command::SUCCESS;
+            }
 
             if ($action === 'show') {
                 $stock = $this->stockService->getStock($warehouseCode, $productId, $context);
@@ -110,7 +127,7 @@ final class WarehouseStockCommand extends Command
                 'release' => $this->stockService->releaseReservation($warehouseCode, $productId, $quantity, $context),
                 'ship' => $this->stockService->shipReservedStock($warehouseCode, $productId, $quantity, $context),
                 default => throw new InvalidArgumentException(
-                    'Unknown action. Use set, add, remove, reserve, release, ship, show or list.'
+                    'Unknown action. Use set, add, remove, reserve, release, ship, minimum, show or list.'
                 ),
             };
 
@@ -132,6 +149,7 @@ final class WarehouseStockCommand extends Command
             ['Quantity' => $stock->getQuantity()],
             ['Reserved' => $stock->getReservedQuantity()],
             ['Available' => $stock->getAvailableQuantity()],
+            ['Minimum threshold' => $stock->getMinimumQuantity()],
         );
     }
 
