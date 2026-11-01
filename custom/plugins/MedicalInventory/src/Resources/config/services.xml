@@ -42,6 +42,11 @@
             <argument type="service" id="MedicalInventory\Service\WarehouseAllocationPlanner"/>
         </service>
 
+        <service id="MedicalInventory\Decorator\MedicalInventoryStockStorageDecorator" decorates="Shopware\Core\Content\Product\Stock\StockStorage">
+            <argument type="service" id="MedicalInventory\Decorator\MedicalInventoryStockStorageDecorator.inner"/>
+            <argument type="service" id="Doctrine\DBAL\Connection"/>
+        </service>
+
         <service id="MedicalInventory\Service\OrderFulfillmentService">
             <argument type="service" id="Doctrine\DBAL\Connection"/>
             <argument type="service" id="MedicalInventory\Service\WarehouseAllocationService"/>
