@@ -25,6 +25,7 @@ class WarehouseCrudCommand extends Command
         parent::__construct();
     }
 
+    #[\Override]
     protected function configure(): void
     {
         $this
@@ -38,6 +39,7 @@ class WarehouseCrudCommand extends Command
             ->addOption('country', null, InputOption::VALUE_REQUIRED, 'Two-letter country code');
     }
 
+    #[\Override]
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
