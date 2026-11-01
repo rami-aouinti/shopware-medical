@@ -309,6 +309,7 @@ final class WarehouseStockService
                         'productVersionId' => $versionId,
                         'quantity' => $newState['quantity'],
                         'reservedQuantity' => $newState['reservedQuantity'],
+                        'minimumQuantity' => 0,
                     ],
                 ], $context);
             }
