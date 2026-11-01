@@ -4,6 +4,7 @@ namespace MedicalInventory\Command;
 
 use MedicalInventory\Core\Content\Warehouse\WarehouseEntity;
 use MedicalInventory\Service\WarehouseService;
+use MedicalInventory\Service\WarehouseStockService;
 use Shopware\Core\Framework\Context;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -21,6 +22,7 @@ class WarehouseCrudCommand extends Command
 {
     public function __construct(
         private readonly WarehouseService $warehouseService,
+        private readonly WarehouseStockService $stockService,
     ) {
         parent::__construct();
     }
@@ -153,6 +155,7 @@ class WarehouseCrudCommand extends Command
     ): int {
         $this->requireCode($code);
         $this->warehouseService->setActiveByCode($code, $active, $context);
+        $this->stockService->syncWarehouseAvailability($code, $context);
         $io->success(sprintf(
             'Warehouse "%s" is now %s.',
             $code,
