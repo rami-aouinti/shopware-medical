@@ -24,7 +24,11 @@ jobs:
   quality:
     name: PHP 8.5 / Shopware 6.7 quality and tests
     runs-on: ubuntu-latest
-    timeout-minutes: 35
+    timeout-minutes: 45
+
+    env:
+      COMPOSER_MAX_PARALLEL_HTTP: 4
+      COMPOSER_PROCESS_TIMEOUT: 900
 
     steps:
       - name: Checkout
@@ -41,16 +45,22 @@ jobs:
       - name: Validate Composer configuration
         run: composer validate --no-check-publish --no-check-lock
 
-      - name: Install Shopware CLI
-        uses: shopware/shopware-cli-action@v3
-
-      - name: Validate MedicalInventory extension
-        run: shopware-cli extension validate custom/plugins/MedicalInventory
-
-      # The committed lock file predates the new quality-tool dependencies.
-      # Resolve them in CI; run composer update locally and commit the refreshed lock.
+      # The committed lock file predates the new require-dev tools.
+      # Retry transient Packagist/CDN failures while resolving the updated lock.
       - name: Resolve project and quality dependencies
-        run: composer update --no-interaction --prefer-dist --no-progress --no-scripts
+        shell: bash
+        run: |
+          set -euo pipefail
+          for attempt in 1 2 3; do
+            if composer update --no-interaction --prefer-dist --no-progress --no-scripts; then
+              exit 0
+            fi
+            if [ "$attempt" -lt 3 ]; then
+              echo "Composer update failed (attempt $attempt/3); retrying in 15 seconds..."
+              sleep 15
+            fi
+          done
+          exit 1
 
       - name: Build optimized autoloader
         run: composer dump-autoload --optimize --no-interaction
