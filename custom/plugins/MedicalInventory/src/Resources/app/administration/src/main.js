@@ -20,15 +20,28 @@ Component.register('medical-inventory-dashboard', {
                             <h2>{{ value }}</h2>
                         </sw-card>
                     </div>
+                    <sw-card title="Create warehouse" style="margin-top:16px">
+                        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px">
+                            <sw-text-field v-model:value="newWarehouse.code" label="Warehouse code" />
+                            <sw-text-field v-model:value="newWarehouse.name" label="Name" />
+                            <sw-text-field v-model:value="newWarehouse.countryCode" label="Country code" />
+                            <sw-number-field v-model:value="newWarehouse.priority" label="Allocation priority" :min="0" :max="65535" />
+                        </div>
+                        <sw-button variant="primary" :disabled="!canCreateWarehouse" @click="createWarehouse">Create warehouse</sw-button>
+                    </sw-card>
                     <sw-card title="Warehouses">
-                        <sw-data-grid
-                            v-if="dashboard"
-                            :data-source="dashboard.warehouses"
-                            :columns="warehouseColumns"
-                            :show-selection="false"
-                            :show-actions="false"
-                            :is-loading="isLoading"
-                        />
+                        <div v-if="dashboard" v-for="warehouse in dashboard.warehouses" :key="warehouse.id"
+                             style="display:flex;align-items:center;gap:12px;padding:12px;border-bottom:1px solid #e0e0e0">
+                            <div style="flex:1">
+                                <strong>{{ warehouse.code }}</strong> — {{ warehouse.name }}
+                                <small>({{ warehouse.country_code }}) · {{ warehouse.available_units }} available</small>
+                            </div>
+                            <sw-number-field v-model:value="warehouse.priority" label="Priority" :min="0" :max="65535" size="small" />
+                            <sw-button size="small" @click="saveWarehouse(warehouse)">Save</sw-button>
+                            <sw-button size="small" :variant="warehouse.active ? 'danger' : 'success'" @click="toggleWarehouse(warehouse)">
+                                {{ warehouse.active ? 'Deactivate' : 'Activate' }}
+                            </sw-button>
+                        </div>
                     </sw-card>
                     <sw-card title="Open low-stock alerts" style="margin-top:16px">
                         <sw-data-grid
@@ -50,6 +63,7 @@ Component.register('medical-inventory-dashboard', {
             isLoading: false,
             error: null,
             dashboard: null,
+            newWarehouse: { code: '', name: '', countryCode: 'DE', priority: 100 },
             warehouseColumns: [
                 { property: 'code', label: 'Code' },
                 { property: 'name', label: 'Name' },
@@ -72,6 +86,41 @@ Component.register('medical-inventory-dashboard', {
         this.loadDashboard();
     },
     methods: {
+        getHttpClient() {
+            return Shopware.Application.getContainer('init').httpClient;
+        },
+        getRequestConfig() {
+            return { headers: this.loginService.getBearerAuthentication() };
+        },
+        async createWarehouse() {
+            try {
+                await this.getHttpClient().post('_action/medical-inventory/warehouses', this.newWarehouse, this.getRequestConfig());
+                this.newWarehouse = { code: '', name: '', countryCode: 'DE', priority: 100 };
+                await this.loadDashboard();
+            } catch (error) {
+                this.error = error?.response?.data?.errors?.[0]?.detail || error.message || 'Unable to create warehouse.';
+            }
+        },
+        async saveWarehouse(warehouse) {
+            try {
+                await this.getHttpClient().patch('_action/medical-inventory/warehouses/' + encodeURIComponent(warehouse.code), {
+                    priority: Number(warehouse.priority),
+                }, this.getRequestConfig());
+                await this.loadDashboard();
+            } catch (error) {
+                this.error = error?.response?.data?.errors?.[0]?.detail || error.message || 'Unable to update warehouse.';
+            }
+        },
+        async toggleWarehouse(warehouse) {
+            try {
+                await this.getHttpClient().patch('_action/medical-inventory/warehouses/' + encodeURIComponent(warehouse.code), {
+                    active: !warehouse.active,
+                }, this.getRequestConfig());
+                await this.loadDashboard();
+            } catch (error) {
+                this.error = error?.response?.data?.errors?.[0]?.detail || error.message || 'Unable to change warehouse status.';
+            }
+        },
         async loadDashboard() {
             this.isLoading = true;
             this.error = null;
@@ -87,6 +136,9 @@ Component.register('medical-inventory-dashboard', {
             } finally {
                 this.isLoading = false;
             }
+        },
+        get canCreateWarehouse() {
+            return this.newWarehouse.code.trim() !== '' && this.newWarehouse.name.trim() !== '' && /^[A-Za-z]{2}$/.test(this.newWarehouse.countryCode);
         },
         formatLabel(value) {
             return value.replace(/([A-Z])/g, ' $1').replace(/^./, (letter) => letter.toUpperCase());
