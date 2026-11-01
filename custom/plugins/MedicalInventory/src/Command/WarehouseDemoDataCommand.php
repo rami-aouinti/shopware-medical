@@ -99,9 +99,8 @@ final class WarehouseDemoDataCommand extends Command
         $currency = $this->getEuroCurrency($context);
         $tax = $this->getPreferredTax($context);
 
-        $warehouses = [];
         foreach (self::WAREHOUSES as $definition) {
-            $warehouses[$definition['code']] = $this->ensureWarehouse($definition, $context);
+            $this->ensureWarehouse($definition, $context);
         }
 
         $rows = [];
@@ -117,13 +116,6 @@ final class WarehouseDemoDataCommand extends Command
             );
 
             foreach ($definition['stock'] as $warehouseCode => $quantity) {
-                if (!isset($warehouses[$warehouseCode])) {
-                    throw new RuntimeException(sprintf(
-                        'Demo warehouse "%s" is not configured.',
-                        $warehouseCode
-                    ));
-                }
-
                 $existingStock = $this->stockService->getStock($warehouseCode, $product->getId(), $context);
 
                 if ($existingStock !== null) {
@@ -168,7 +160,7 @@ final class WarehouseDemoDataCommand extends Command
             'Demo catalogue ready: %d products, %d warehouses. Existing records were preserved. '
             . 'Currency: %s; tax: %s%%.',
             count(self::PRODUCTS),
-            count($warehouses),
+            count(self::WAREHOUSES),
             $currency->getIsoCode(),
             $tax->getTaxRate()
         ));
