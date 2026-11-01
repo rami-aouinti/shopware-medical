@@ -74,10 +74,18 @@ final class MedicalInventoryAdminController
 
         $summary = [
             'warehouses' => (int) $this->connection->fetchOne('SELECT COUNT(*) FROM medical_warehouse'),
-            'activeWarehouses' => (int) $this->connection->fetchOne('SELECT COUNT(*) FROM medical_warehouse WHERE is_active = 1'),
-            'openAlerts' => (int) $this->connection->fetchOne("SELECT COUNT(*) FROM medical_stock_alert WHERE status = 'OPEN'"),
-            'activeReservations' => (int) $this->connection->fetchOne("SELECT COUNT(*) FROM medical_stock_reservation WHERE status = 'ACTIVE'"),
-            'openShipments' => (int) $this->connection->fetchOne("SELECT COUNT(*) FROM medical_shipment WHERE status = 'SHIPPED'"),
+            'activeWarehouses' => (int) $this->connection->fetchOne(
+                'SELECT COUNT(*) FROM medical_warehouse WHERE is_active = 1'
+            ),
+            'openAlerts' => (int) $this->connection->fetchOne(
+                "SELECT COUNT(*) FROM medical_stock_alert WHERE status = 'OPEN'"
+            ),
+            'activeReservations' => (int) $this->connection->fetchOne(
+                "SELECT COUNT(*) FROM medical_stock_reservation WHERE status = 'ACTIVE'"
+            ),
+            'openShipments' => (int) $this->connection->fetchOne(
+                "SELECT COUNT(*) FROM medical_shipment WHERE status = 'SHIPPED'"
+            ),
         ];
 
         $alerts = $this->connection->fetchAllAssociative(
