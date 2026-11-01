@@ -21,7 +21,12 @@ final class MedicalInventoryOrderPersister implements OrderPersisterInterface
     {
         return $this->connection->transactional(function () use ($cart, $context): string {
             $orderId = $this->decorated->persist($cart, $context);
-            $this->fulfillmentService->reserveOrder($orderId, $cart, $context->getContext());
+            $context->getContext()->scope(
+                Context::SYSTEM_SCOPE,
+                function (Context $systemContext) use ($orderId, $cart): void {
+                    $this->fulfillmentService->reserveOrder($orderId, $cart, $systemContext);
+                }
+            );
 
             return $orderId;
         });
