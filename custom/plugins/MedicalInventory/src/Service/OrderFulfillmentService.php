@@ -148,6 +148,21 @@ final class OrderFulfillmentService
                 'orderId' => Uuid::fromHexToBytes($orderId),
             ]
         );
+
+        $productIds = $this->connection->fetchFirstColumn(
+            <<<'SQL'
+                SELECT DISTINCT LOWER(HEX(product_id))
+                FROM medical_order_warehouse_allocation
+                WHERE order_id = :orderId
+            SQL,
+            ['orderId' => Uuid::fromHexToBytes($orderId)]
+        );
+
+        foreach ($productIds as $productId) {
+            if (is_string($productId)) {
+                $this->stockService->syncProductAvailability($productId, $context);
+            }
+        }
     }
 
     /**
