@@ -110,6 +110,7 @@
 
         <service id="MedicalInventory\Command\WarehouseCrudCommand">
             <argument type="service" id="MedicalInventory\Service\WarehouseService"/>
+            <argument type="service" id="MedicalInventory\Service\WarehouseStockService"/>
             <tag name="console.command"/>
         </service>
 
