@@ -13,13 +13,13 @@ Les règles ci-dessous constituent la version 1. Elles seront référencées par
 
 - BR-010 : chaque inventaire est unique pour le couple entrepôt-produit.
 - BR-011 : quantité disponible = quantité physique - quantité réservée - éventuelles quantités indisponibles explicitement modélisées.
-- BR-012 : une opération de stock crée un mouvement historique et met à jour l'inventaire dans une même transaction.
+- BR-012 : chaque modification de quantité physique ou réservée crée un mouvement historique append-only et met à jour l'inventaire dans une même transaction.
 - BR-013 : les mouvements validés ne sont pas modifiés ni supprimés ; une correction crée un mouvement compensatoire.
 - BR-014 : un transfert crée une sortie et une entrée liées à une même opération.
-- BR-015 : une réservation ne peut pas rendre le stock disponible négatif, sauf politique exceptionnelle qui devra être explicitement approuvée.
-- BR-016 : la réservation est atomique et protégée contre les mises à jour concurrentes.
+- BR-015 : une réservation ne peut pas rendre le stock disponible négatif ; une annulation libère uniquement la quantité non expédiée.
+- BR-016 : la réservation est atomique, protégée contre les mises à jour concurrentes et incluse dans la transaction de persistance de la commande.
 - BR-017 : l'allocation ignore les entrepôts inactifs ; elle privilégie un entrepôt pouvant satisfaire toute la ligne de commande, choisi par priorité croissante, puis par stock disponible décroissant ; si aucun entrepôt ne suffit seul, la quantité est répartie selon le même ordre ; si le stock cumulé est insuffisant, aucune réservation n'est créée.
-- BR-018 : le stock natif Shopware et le stock multi-entrepôts ne doivent pas devenir deux sources de vérité concurrentes.
+- BR-018 : le stock multi-entrepôts est la source de vérité pour les produits gérés par MedicalInventory ; les produits sans ligne de stock MedicalInventory restent gérés par le stock natif Shopware. Le stock natif agrégé reste cohérent avec les réservations de commande pour les produits en mode closeout.
 
 ## Comptes B2B et accès
 
@@ -58,9 +58,9 @@ Les règles ci-dessous constituent la version 1. Elles seront référencées par
 
 ## Livraison, notification et tâches
 
-- BR-060 : une commande peut être livrée en plusieurs expéditions.
-- BR-061 : la somme des quantités expédiées ne peut pas dépasser la quantité commandée, hors règle de remplacement explicitement définie.
-- BR-062 : les événements de tracking sont historisés.
+- BR-060 : une commande peut être répartie entre plusieurs entrepôts et livrée en plusieurs expéditions.
+- BR-061 : la somme des quantités expédiées par allocation ne peut pas dépasser la quantité réservée ; chaque expédition consomme une réservation et diminue le stock physique dans la même transaction.
+- BR-062 : les événements de tracking sont historisés en append-only ; une expédition peut passer de SHIPPED à DELIVERED et les quantités partielles restent traçables.
 - BR-063 : une notification peut être rejouée sans dupliquer l'effet métier.
 - BR-064 : chaque tâche planifiée conserve son statut et ses informations d'exécution.
 
