@@ -163,6 +163,32 @@ final class ShipmentService
             );
         }
 
+        $allocation = $this->findShippableAllocation($orderId, $warehouseId, $productId);
+        $this->assertAllocationCanShip($allocation, $quantity);
+
+        $allocationId = (string) $allocation['id'];
+        $reservation = $this->findActiveReservation($allocationId);
+        $this->assertReservationCanShip($reservation, $quantity);
+
+        $this->stockService->shipReservedStock(
+            $this->getWarehouseCode($warehouseId),
+            $productId,
+            $quantity,
+            $context,
+            'shipment',
+            $shipmentId
+        );
+
+        $this->updateAllocationAfterShipment($allocation, $quantity, $now);
+        $this->updateReservationAfterShipment($reservation, $quantity, $now);
+        $this->createShipmentItem($shipmentId, $allocationId, $productId, $quantity, $now);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function findShippableAllocation(string $orderId, string $warehouseId, string $productId): array
+    {
         $allocation = $this->connection->fetchAssociative(
             <<<'SQL'
                 SELECT
@@ -187,6 +213,14 @@ final class ShipmentService
             throw new DomainException('No shippable allocation exists for this product in the selected warehouse.');
         }
 
+        return $allocation;
+    }
+
+    /**
+     * @param array<string, mixed> $allocation
+     */
+    private function assertAllocationCanShip(array $allocation, int $quantity): void
+    {
         $remaining = (int) $allocation['quantity'] - (int) $allocation['shipped_quantity'];
 
         if ($quantity > $remaining) {
@@ -194,8 +228,13 @@ final class ShipmentService
                 sprintf('Cannot ship %d units; only %d remain allocated.', $quantity, $remaining)
             );
         }
+    }
 
-        $allocationId = (string) $allocation['id'];
+    /**
+     * @return array<string, mixed>
+     */
+    private function findActiveReservation(string $allocationId): array
+    {
         $reservation = $this->connection->fetchAssociative(
             <<<'SQL'
                 SELECT LOWER(HEX(id)) AS id, quantity, consumed_quantity
@@ -207,41 +246,62 @@ final class ShipmentService
             ['allocationId' => Uuid::fromHexToBytes($allocationId)]
         );
 
-        if (
-            $reservation === false
-            || (int) $reservation['quantity'] - (int) $reservation['consumed_quantity'] < $quantity
-        ) {
+        if ($reservation === false) {
             throw new DomainException('The stock reservation is missing or smaller than the requested shipment.');
         }
 
-        $warehouseCode = $this->getWarehouseCode($warehouseId);
-        $this->stockService->shipReservedStock(
-            $warehouseCode,
-            $productId,
-            $quantity,
-            $context,
-            'shipment',
-            $shipmentId
-        );
+        return $reservation;
+    }
 
+    /**
+     * @param array<string, mixed> $reservation
+     */
+    private function assertReservationCanShip(array $reservation, int $quantity): void
+    {
+        $remaining = (int) $reservation['quantity'] - (int) $reservation['consumed_quantity'];
+
+        if ($remaining < $quantity) {
+            throw new DomainException('The stock reservation is missing or smaller than the requested shipment.');
+        }
+    }
+
+    /**
+     * @param array<string, mixed> $allocation
+     */
+    private function updateAllocationAfterShipment(array $allocation, int $quantity, string $now): void
+    {
         $shippedQuantity = (int) $allocation['shipped_quantity'] + $quantity;
-        $allocationStatus = $shippedQuantity === (int) $allocation['quantity'] ? 'SHIPPED' : 'PARTIALLY_SHIPPED';
+        $status = $shippedQuantity === (int) $allocation['quantity'] ? 'SHIPPED' : 'PARTIALLY_SHIPPED';
 
         $this->connection->update('medical_order_warehouse_allocation', [
             'shipped_quantity' => $shippedQuantity,
-            'status' => $allocationStatus,
+            'status' => $status,
             'updated_at' => $now,
-        ], ['id' => Uuid::fromHexToBytes($allocationId)]);
+        ], ['id' => Uuid::fromHexToBytes((string) $allocation['id'])]);
+    }
 
+    /**
+     * @param array<string, mixed> $reservation
+     */
+    private function updateReservationAfterShipment(array $reservation, int $quantity, string $now): void
+    {
         $consumedQuantity = (int) $reservation['consumed_quantity'] + $quantity;
-        $reservationStatus = $consumedQuantity === (int) $reservation['quantity'] ? 'CONSUMED' : 'ACTIVE';
+        $status = $consumedQuantity === (int) $reservation['quantity'] ? 'CONSUMED' : 'ACTIVE';
 
         $this->connection->update('medical_stock_reservation', [
             'consumed_quantity' => $consumedQuantity,
-            'status' => $reservationStatus,
+            'status' => $status,
             'updated_at' => $now,
         ], ['id' => Uuid::fromHexToBytes((string) $reservation['id'])]);
+    }
 
+    private function createShipmentItem(
+        string $shipmentId,
+        string $allocationId,
+        string $productId,
+        int $quantity,
+        string $now,
+    ): void {
         $this->connection->insert('medical_shipment_item', [
             'id' => Uuid::fromHexToBytes(Uuid::randomHex()),
             'shipment_id' => Uuid::fromHexToBytes($shipmentId),
