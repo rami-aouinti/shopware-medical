@@ -207,12 +207,22 @@ final class ShipmentService
             ['allocationId' => Uuid::fromHexToBytes($allocationId)]
         );
 
-        if ($reservation === false || (int) $reservation['quantity'] - (int) $reservation['consumed_quantity'] < $quantity) {
+        if (
+            $reservation === false
+            || (int) $reservation['quantity'] - (int) $reservation['consumed_quantity'] < $quantity
+        ) {
             throw new DomainException('The stock reservation is missing or smaller than the requested shipment.');
         }
 
         $warehouseCode = $this->getWarehouseCode($warehouseId);
-        $this->stockService->shipReservedStock($warehouseCode, $productId, $quantity, $context, 'shipment', $shipmentId);
+        $this->stockService->shipReservedStock(
+            $warehouseCode,
+            $productId,
+            $quantity,
+            $context,
+            'shipment',
+            $shipmentId
+        );
 
         $shippedQuantity = (int) $allocation['shipped_quantity'] + $quantity;
         $allocationStatus = $shippedQuantity === (int) $allocation['quantity'] ? 'SHIPPED' : 'PARTIALLY_SHIPPED';
