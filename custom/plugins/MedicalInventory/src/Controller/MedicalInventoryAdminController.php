@@ -47,6 +47,26 @@ final class MedicalInventoryAdminController
             SQL
         );
 
+        $stock = $this->connection->fetchAllAssociative(
+            <<<'SQL'
+                SELECT
+                    w.code AS warehouse_code,
+                    LOWER(HEX(s.product_id)) AS product_id,
+                    p.product_number,
+                    s.quantity,
+                    s.reserved_quantity,
+                    s.quantity - s.reserved_quantity AS available_quantity,
+                    s.minimum_quantity
+                FROM medical_warehouse_stock s
+                INNER JOIN medical_warehouse w ON w.id = s.warehouse_id
+                INNER JOIN product p
+                    ON p.id = s.product_id
+                   AND p.version_id = s.product_version_id
+                ORDER BY w.priority ASC, p.product_number ASC
+                LIMIT 500
+            SQL
+        );
+
         $summary = [
             'warehouses' => (int) $this->connection->fetchOne('SELECT COUNT(*) FROM medical_warehouse'),
             'activeWarehouses' => (int) $this->connection->fetchOne('SELECT COUNT(*) FROM medical_warehouse WHERE is_active = 1'),
@@ -75,6 +95,7 @@ final class MedicalInventoryAdminController
         return new JsonResponse([
             'summary' => $summary,
             'warehouses' => $warehouses,
+            'stock' => $stock,
             'alerts' => $alerts,
         ]);
     }
