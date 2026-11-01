@@ -32,6 +32,7 @@ final class WarehouseStockService
         private readonly EntityRepository $productRepository,
         private readonly Connection $connection,
         private readonly WarehouseStockCalculator $calculator,
+        private readonly StockMovementRecorder $movementRecorder,
     ) {
     }
 
@@ -46,6 +47,8 @@ final class WarehouseStockService
             $productId,
             $context,
             fn (int $current, int $reserved): array => $this->calculator->setQuantity($current, $reserved, $quantity),
+            'ADJUSTMENT',
+            'Physical stock quantity set',
         );
     }
 
@@ -60,6 +63,8 @@ final class WarehouseStockService
             $productId,
             $context,
             fn (int $current, int $reserved): array => $this->calculator->add($current, $reserved, $amount),
+            'INBOUND',
+            'Stock replenishment',
         );
     }
 
@@ -74,6 +79,8 @@ final class WarehouseStockService
             $productId,
             $context,
             fn (int $current, int $reserved): array => $this->calculator->remove($current, $reserved, $amount),
+            'OUTBOUND',
+            'Manual stock removal',
         );
     }
 
@@ -88,6 +95,8 @@ final class WarehouseStockService
             $productId,
             $context,
             fn (int $current, int $reserved): array => $this->calculator->reserve($current, $reserved, $amount),
+            'RESERVATION',
+            'Order stock reservation',
         );
     }
 
@@ -102,6 +111,8 @@ final class WarehouseStockService
             $productId,
             $context,
             fn (int $current, int $reserved): array => $this->calculator->release($current, $reserved, $amount),
+            'RELEASE',
+            'Stock reservation released',
         );
     }
 
@@ -116,6 +127,8 @@ final class WarehouseStockService
             $productId,
             $context,
             fn (int $current, int $reserved): array => $this->calculator->ship($current, $reserved, $amount),
+            'SHIPMENT',
+            'Reserved stock shipped',
         );
     }
 
@@ -163,6 +176,8 @@ final class WarehouseStockService
         string $productId,
         Context $context,
         callable $change,
+        string $movementType,
+        string $reason,
     ): WarehouseStockEntity {
         $warehouse = $this->getWarehouse($warehouseCode, $context);
 
@@ -180,7 +195,9 @@ final class WarehouseStockService
             $productId,
             $versionId,
             $context,
-            $change
+            $change,
+            $movementType,
+            $reason,
         ): WarehouseStockEntity {
             // Lock the current row before calculating the new values.
             $row = $this->connection->fetchAssociative(
@@ -225,6 +242,17 @@ final class WarehouseStockService
                     ],
                 ], $context);
             }
+
+            $this->movementRecorder->record(
+                $warehouseId,
+                $productId,
+                $versionId,
+                $movementType,
+                $newState['quantity'] - $currentQuantity,
+                $newState['reservedQuantity'] - $reservedQuantity,
+                $reason,
+                $context
+            );
 
             $stock = $this->findStockByIds($warehouseId, $productId, $versionId, $context);
 
