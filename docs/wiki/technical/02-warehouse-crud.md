@@ -58,7 +58,7 @@ $warehouse = $repository->search($criteria, $context)->first();
 ```php
 $repository->update([
     [
-        'id' => $warehouse->getId(),
+        'id' => $warehouse->getUniqueIdentifier(),
         'isActive' => false,
     ],
 ], $context);
@@ -70,7 +70,7 @@ Pour modifier une entité, Shopware a besoin de son identifiant. Le service retr
 
 ```php
 $repository->delete([
-    ['id' => $warehouse->getId()],
+    ['id' => $warehouse->getUniqueIdentifier()],
 ], $context);
 ```
 
