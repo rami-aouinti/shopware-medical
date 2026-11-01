@@ -163,7 +163,12 @@ final class MedicalInventoryAdminController
             }
 
             $this->warehouseService->setActiveByCode($warehouseCode, $payload['active'], $context);
-            $this->stockService->syncWarehouseAvailability($warehouseCode, $context);
+            $context->scope(
+                Context::SYSTEM_SCOPE,
+                function (Context $systemContext) use ($warehouseCode): void {
+                    $this->stockService->syncWarehouseAvailability($warehouseCode, $systemContext);
+                }
+            );
         }
 
         return new JsonResponse(['success' => true]);
@@ -214,13 +219,16 @@ final class MedicalInventoryAdminController
             ];
         }
 
-        $shipmentId = $this->shipmentService->createShipment(
-            $orderId,
-            $warehouseCode,
-            $validatedItems,
-            $context,
-            is_string($payload['carrierCode'] ?? null) ? $payload['carrierCode'] : null,
-            is_string($payload['trackingNumber'] ?? null) ? $payload['trackingNumber'] : null
+        $shipmentId = $context->scope(
+            Context::SYSTEM_SCOPE,
+            fn (Context $systemContext): string => $this->shipmentService->createShipment(
+                $orderId,
+                $warehouseCode,
+                $validatedItems,
+                $systemContext,
+                is_string($payload['carrierCode'] ?? null) ? $payload['carrierCode'] : null,
+                is_string($payload['trackingNumber'] ?? null) ? $payload['trackingNumber'] : null
+            )
         );
 
         return new JsonResponse(['success' => true, 'shipmentId' => $shipmentId], 201);
@@ -258,11 +266,16 @@ final class MedicalInventoryAdminController
             throw new InvalidArgumentException('minimumQuantity must be a non-negative integer.');
         }
 
-        $this->stockService->setMinimumQuantity(
-            $warehouseCode,
-            $productId,
-            $minimumQuantity,
-            $context
+        $context->scope(
+            Context::SYSTEM_SCOPE,
+            function (Context $systemContext) use ($warehouseCode, $productId, $minimumQuantity): void {
+                $this->stockService->setMinimumQuantity(
+                    $warehouseCode,
+                    $productId,
+                    $minimumQuantity,
+                    $systemContext
+                );
+            }
         );
 
         return new JsonResponse(['success' => true]);
