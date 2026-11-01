@@ -179,7 +179,7 @@ final class MedicalInventoryAdminController
         path: '/api/_action/medical-inventory/alerts/scan',
         name: 'api.action.medical_inventory.alerts.scan',
         methods: ['POST'],
-        defaults: ['_acl' => ['product:create']]
+        defaults: ['_acl' => ['product:update']]
     )]
     public function scanAlerts(): JsonResponse
     {
@@ -193,7 +193,7 @@ final class MedicalInventoryAdminController
         path: '/api/_action/medical-inventory/orders/{orderId}/shipments',
         name: 'api.action.medical_inventory.shipment.create',
         methods: ['POST'],
-        defaults: ['_acl' => ['product:create']]
+        defaults: ['_acl' => ['product:update']]
     )]
     public function createShipment(string $orderId, Request $request, Context $context): JsonResponse
     {
