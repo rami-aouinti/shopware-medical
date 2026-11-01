@@ -9,11 +9,11 @@
   },
   "autoload": {
     "psr-4": {
-      "MedicalInventory\\\\": "src/"
+      "MedicalInventory\\": "src/"
     }
   },
   "extra": {
-    "shopware-plugin-class": "MedicalInventory\\\\MedicalInventory",
+    "shopware-plugin-class": "MedicalInventory\\MedicalInventory",
     "label": {
       "en-GB": "Medical Inventory",
       "de-DE": "Medical Inventory"
