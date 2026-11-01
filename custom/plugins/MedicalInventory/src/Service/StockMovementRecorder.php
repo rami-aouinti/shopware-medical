@@ -20,7 +20,6 @@ final class StockMovementRecorder
         int $quantityDelta,
         int $reservedQuantityDelta,
         string $reason,
-        Context $context,
         ?string $referenceType = null,
         ?string $referenceId = null,
     ): void {
