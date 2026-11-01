@@ -28,7 +28,11 @@ class WarehouseCrudCommand extends Command
     protected function configure(): void
     {
         $this
-            ->addArgument('action', InputArgument::REQUIRED, 'Action: create, list, find, activate, deactivate or delete')
+            ->addArgument(
+                'action',
+                InputArgument::REQUIRED,
+                'Action: create, list, find, activate, deactivate or delete'
+            )
             ->addOption('code', null, InputOption::VALUE_REQUIRED, 'Warehouse code')
             ->addOption('name', null, InputOption::VALUE_REQUIRED, 'Warehouse name')
             ->addOption('country', null, InputOption::VALUE_REQUIRED, 'Two-letter country code');
@@ -97,7 +101,11 @@ class WarehouseCrudCommand extends Command
                 case 'deactivate':
                     $this->requireCode($code);
                     $this->warehouseService->setActiveByCode($code, $action === 'activate', $context);
-                    $io->success(sprintf('Warehouse "%s" is now %s.', $code, $action === 'activate' ? 'active' : 'inactive'));
+                    $io->success(sprintf(
+                        'Warehouse "%s" is now %s.',
+                        $code,
+                        $action === 'activate' ? 'active' : 'inactive'
+                    ));
 
                     return Command::SUCCESS;
 
