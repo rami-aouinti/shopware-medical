@@ -17,7 +17,7 @@
             <directory>custom/plugins/MedicalInventory/tests/Unit</directory>
         </testsuite>
         <testsuite name="MedicalInventory Database Integration">
-            <directory>custom/plugins/MedicalInventory/tests/Integration</directory>
+            <directory>custom/plugins/MedicalInventory/tests/Integration/Database</directory>
         </testsuite>
     </testsuites>
 </phpunit>
