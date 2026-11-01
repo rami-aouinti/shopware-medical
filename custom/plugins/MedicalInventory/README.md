@@ -165,7 +165,8 @@ stock rises above the threshold.
 
 The Medical Inventory module provides a warehouse dashboard, warehouse
 creation, priority and active-status management, stock threshold editing,
-low-stock alert visibility, and a manual alert scan. Shipment creation and
+low-stock alert visibility, and a manual alert scan. Warehouses with stock or
+audit/order/shipment history cannot be deleted; deactivate them instead. Shipment creation and
 delivery updates are also exposed through protected Admin API actions.
 
 ## Database integration tests
