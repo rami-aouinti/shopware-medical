@@ -14,4 +14,14 @@
             <directory name="vendor"/>
         </ignoreFiles>
     </projectFiles>
+
+    <issueHandlers>
+        <UndefinedDocblockClass>
+            <errorLevel type="suppress">
+                <!-- Shopware uses PHPStan-style generic template names in DAL docblocks. -->
+                <referencedClass name="Shopware\Core\Framework\DataAbstractionLayer\Search\template-type"/>
+                <referencedClass name="Shopware\Core\Framework\DataAbstractionLayer\Search\TEntityCollection"/>
+            </errorLevel>
+        </UndefinedDocblockClass>
+    </issueHandlers>
 </psalm>
