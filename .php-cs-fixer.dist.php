@@ -17,10 +17,10 @@ $finder = Finder::create()
 return (new Config())
     ->setRiskyAllowed(true)
     ->setRules([
-        '@PSR12' => true,
-        // Keep the Shopware file-header convention used throughout this project.
-        'linebreak_after_opening_tag' => false,
+        // Preserve Shopware's "<?php declare(strict_types=1);" header convention.
         'declare_strict_types' => true,
-        'single_line_empty_body' => true,
+        'no_trailing_whitespace' => true,
+        'no_whitespace_in_blank_line' => true,
+        'single_blank_line_at_eof' => true,
     ])
     ->setFinder($finder);
