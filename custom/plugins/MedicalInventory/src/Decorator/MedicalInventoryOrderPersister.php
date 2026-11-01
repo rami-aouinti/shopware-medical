@@ -21,6 +21,7 @@ final class MedicalInventoryOrderPersister implements OrderPersisterInterface
     ) {
     }
 
+    #[\Override]
     public function persist(Cart $cart, SalesChannelContext $context): string
     {
         return $this->connection->transactional(function () use ($cart, $context): string {
