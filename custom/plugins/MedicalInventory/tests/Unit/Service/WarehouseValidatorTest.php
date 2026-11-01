@@ -10,6 +10,7 @@ final class WarehouseValidatorTest extends TestCase
 {
     private WarehouseValidator $validator;
 
+    #[\Override]
     protected function setUp(): void
     {
         $this->validator = new WarehouseValidator();
