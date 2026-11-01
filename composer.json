@@ -96,7 +96,7 @@
             "@test:plugin",
             "@test:integration"
         ],
-        "test:integration": "phpunit --configuration=phpunit.dist.xml --testsuite='MedicalInventory Integration'"
+        "test:integration": "phpunit --configuration=phpunit.dist.xml --testsuite='MedicalInventory Database Integration' && phpunit --configuration=phpunit.dal.xml.dist"
     },
     "extra": {
         "symfony": {
