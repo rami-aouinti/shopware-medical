@@ -99,7 +99,6 @@ final class WarehouseStockService
             fn (int $current, int $reserved): array => $this->calculator->reserve($current, $reserved, $amount),
             'RESERVATION',
             'Order stock reservation',
-            true,
             $referenceType,
             $referenceId,
         );
