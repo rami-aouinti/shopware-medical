@@ -37,7 +37,13 @@ class WarehouseCrudCommand extends Command
             ->addOption('code', null, InputOption::VALUE_REQUIRED, 'Warehouse code')
             ->addOption('name', null, InputOption::VALUE_REQUIRED, 'Warehouse name')
             ->addOption('country', null, InputOption::VALUE_REQUIRED, 'Two-letter country code')
-            ->addOption('priority', null, InputOption::VALUE_REQUIRED, 'Warehouse allocation priority (0-65535)', '100');
+            ->addOption(
+                'priority',
+                null,
+                InputOption::VALUE_REQUIRED,
+                'Warehouse allocation priority (0-65535)',
+                '100'
+            );
     }
 
     #[\Override]
