@@ -163,6 +163,7 @@ final class MedicalInventoryAdminController
             }
 
             $this->warehouseService->setActiveByCode($warehouseCode, $payload['active'], $context);
+            $this->stockService->syncWarehouseAvailability($warehouseCode, $context);
         }
 
         return new JsonResponse(['success' => true]);
