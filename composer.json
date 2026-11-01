@@ -93,8 +93,10 @@
             "@mess-detector",
             "@insights",
             "@rector:check",
-            "@test:plugin"
-        ]
+            "@test:plugin",
+            "@test:integration"
+        ],
+        "test:integration": "phpunit --configuration=phpunit.dist.xml --testsuite='MedicalInventory Integration'"
     },
     "extra": {
         "symfony": {
