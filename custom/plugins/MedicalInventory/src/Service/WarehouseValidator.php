@@ -7,9 +7,9 @@ use InvalidArgumentException;
 final class WarehouseValidator
 {
     /**
-     * @return array{code: string, name: string, countryCode: string}
+     * @return array{code: string, name: string, countryCode: string, priority: int}
      */
-    public function validate(string $code, string $name, string $countryCode): array
+    public function validate(string $code, string $name, string $countryCode, int $priority = 100): array
     {
         $code = strtoupper(trim($code));
         $name = trim($name);
@@ -29,10 +29,22 @@ final class WarehouseValidator
             throw new InvalidArgumentException('Country code must contain exactly two letters (for example DE).');
         }
 
+        $this->validatePriority($priority);
+
         return [
             'code' => $code,
             'name' => $name,
             'countryCode' => $countryCode,
+            'priority' => $priority,
         ];
+    }
+
+    public function validatePriority(int $priority): int
+    {
+        if ($priority < 0 || $priority > 65_535) {
+            throw new InvalidArgumentException('Warehouse priority must be between 0 and 65535.');
+        }
+
+        return $priority;
     }
 }
