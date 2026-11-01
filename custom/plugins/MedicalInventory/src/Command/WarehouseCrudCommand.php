@@ -194,7 +194,7 @@ class WarehouseCrudCommand extends Command
     private function deleteWarehouse(string $code, SymfonyStyle $io, Context $context): int
     {
         $this->requireCode($code);
-        $stockRows = $this->stockService->listByWarehouse($code, $context)->getEntities();
+        $this->stockService->assertWarehouseCanBeDeleted($code, $context);
         $this->warehouseService->deleteByCode($code, $context);
 
         foreach ($stockRows as $stock) {
