@@ -6,6 +6,7 @@ use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use MedicalInventory\Migration\Migration1793496000AddFulfillmentLifecycle;
+use MedicalInventory\Service\LowStockAlertService;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 use Shopware\Core\Defaults;
@@ -40,7 +41,7 @@ final class FulfillmentMigrationTest extends TestCase
                 'medical_order_warehouse_allocation',
                 'medical_stock_movement',
                 'medical_warehouse_stock',
-            'medical_warehouse',
+                'medical_warehouse',
             ] as $table
         ) {
             $this->connection->executeStatement('DROP TABLE IF EXISTS ' . $table);
