@@ -186,10 +186,27 @@ final class MedicalInventoryAdminController
             throw new InvalidArgumentException('warehouseCode and a non-empty items array are required.');
         }
 
+        $validatedItems = [];
+
+        foreach ($items as $item) {
+            if (
+                !is_array($item)
+                || !is_string($item['productId'] ?? null)
+                || !is_int($item['quantity'] ?? null)
+            ) {
+                throw new InvalidArgumentException('Every shipment item requires a productId and integer quantity.');
+            }
+
+            $validatedItems[] = [
+                'productId' => $item['productId'],
+                'quantity' => $item['quantity'],
+            ];
+        }
+
         $shipmentId = $this->shipmentService->createShipment(
             $orderId,
             $warehouseCode,
-            $items,
+            $validatedItems,
             $context,
             is_string($payload['carrierCode'] ?? null) ? $payload['carrierCode'] : null,
             is_string($payload['trackingNumber'] ?? null) ? $payload['trackingNumber'] : null
