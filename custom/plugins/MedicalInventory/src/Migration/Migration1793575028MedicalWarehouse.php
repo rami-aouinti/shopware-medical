@@ -19,11 +19,32 @@ class Migration1793575028MedicalWarehouse extends MigrationStep
 
     public function update(Connection $connection): void
     {
-        $query = <<<'SQL'
-            ALTER TABLE medical_warehouse ADD priority INT NOT NULL, CHANGE `code` code VARCHAR(255) NOT NULL, CHANGE `country_code` country_code VARCHAR(255) NOT NULL, CHANGE `is_active` is_active TINYINT DEFAULT 0 NOT NULL;
-SQL;
+        $schemaManager = $connection->createSchemaManager();
 
-        $connection->executeStatement($query);
+        if (!$schemaManager->tablesExist(['medical_warehouse'])) {
+            return;
+        }
+
+        $columns = $schemaManager->listTableColumns('medical_warehouse');
+        $normalizedColumns = [];
+
+        foreach ($columns as $column) {
+            $normalizedColumns[strtolower($column->getName())] = $column;
+        }
+
+        // The priority column may already exist after the earlier priority migration.
+        if (!isset($normalizedColumns['priority'])) {
+            $connection->executeStatement(
+                'ALTER TABLE medical_warehouse ADD priority INT NOT NULL DEFAULT 100'
+            );
+        }
+
+        $connection->executeStatement(
+            'ALTER TABLE medical_warehouse'
+            . ' CHANGE code code VARCHAR(255) NOT NULL,'
+            . ' CHANGE country_code country_code VARCHAR(255) NOT NULL,'
+            . ' CHANGE is_active is_active TINYINT DEFAULT 0 NOT NULL'
+        );
     }
 
     public function updateDestructive(Connection $connection): void
