@@ -258,7 +258,7 @@ final class WarehouseStockService
     ): WarehouseStockEntity {
         $warehouse = $this->getWarehouse($warehouseCode, $context);
 
-        if (!$warehouse->isActive()) {
+        if ($requireActive && !$warehouse->isActive()) {
             throw new DomainException(sprintf('Warehouse "%s" is inactive.', $warehouseCode));
         }
 
