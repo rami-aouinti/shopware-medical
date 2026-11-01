@@ -80,7 +80,7 @@ final class WarehouseStockCommand extends Command
             if ($action === 'show') {
                 $stock = $this->stockService->getStock($warehouseCode, $productId, $context);
 
-                if ($stock === null) {
+                if (!$stock instanceof WarehouseStockEntity) {
                     $io->warning('No stock row exists for this warehouse and product.');
 
                     return Command::FAILURE;

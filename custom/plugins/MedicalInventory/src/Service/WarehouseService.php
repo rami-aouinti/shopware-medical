@@ -3,15 +3,15 @@
 namespace MedicalInventory\Service;
 
 use MedicalInventory\Core\Content\Warehouse\WarehouseEntity;
+use RuntimeException;
+use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\EntitySearchResult;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\EqualsFilter;
-use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\Uuid\Uuid;
-use RuntimeException;
 
-class WarehouseService
+final class WarehouseService
 {
     public function __construct(
         private readonly EntityRepository $warehouseRepository,
@@ -27,7 +27,7 @@ class WarehouseService
     ): void {
         $data = $this->warehouseValidator->validate($code, $name, $countryCode);
 
-        if ($this->findByCode($data['code'], $context) !== null) {
+        if ($this->findByCode($data['code'], $context) instanceof WarehouseEntity) {
             throw new RuntimeException(sprintf('A warehouse with code "%s" already exists.', $data['code']));
         }
 
@@ -65,7 +65,7 @@ class WarehouseService
     {
         $warehouse = $this->findByCode($code, $context);
 
-        if ($warehouse === null) {
+        if (!$warehouse instanceof WarehouseEntity) {
             throw new RuntimeException(sprintf('Warehouse "%s" was not found.', $code));
         }
 
@@ -81,7 +81,7 @@ class WarehouseService
     {
         $warehouse = $this->findByCode($code, $context);
 
-        if ($warehouse === null) {
+        if (!$warehouse instanceof WarehouseEntity) {
             throw new RuntimeException(sprintf('Warehouse "%s" was not found.', $code));
         }
 
