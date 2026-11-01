@@ -1,34 +1,41 @@
 # 3. Domaines métier
 
-## Fournisseur
+Ce document donne une vue synthétique. Le [modèle de données détaillé](09-data-model.md) contient les champs et contraintes. Les [spécifications de modules](modules/README.md) détaillent les comportements.
 
-Un fournisseur possède une identité, des coordonnées, un statut et des références liées aux produits. Un produit peut être proposé par plusieurs fournisseurs.
+## Fournisseurs
+Supplier possède des contacts et propose des produits via SupplierProduct. L'association porte la référence fournisseur, le prix d'achat, la devise, le minimum et le délai.
 
-## Produit médical
+## Produits
+Le produit Shopware reste le catalogue de référence. MedicalProductManagement ajoute les données spécifiques : référence fabricant, unité de vente, conditionnement, stockage et documents techniques. Les custom fields sont préférés pour les attributs simples ; une entité DAL est utilisée si le cycle de vie ou les associations le justifient.
 
-Le catalogue Shopware reste la source des données e-commerce standard. Le plugin métier peut ajouter des attributs comme la référence fabricant, la référence fournisseur, l'unité de vente, les informations de conditionnement et les documents techniques. Les champs exacts seront décidés avant la migration.
+## Stocks multi-entrepôts
+Warehouse contient des Inventory par produit. Chaque Inventory suit quantités physiques, réservées et seuils. StockMovement conserve l'historique immuable ; StockReservation représente les quantités affectées aux commandes. Les transferts sont atomiques et historisés.
 
-## Stock
+## Organisations B2B
+BusinessAccount représente l'organisation ; BusinessAccountUser relie des customers Shopware avec des rôles. BusinessAddress référence les customer_address natives. La politique multi-organisation doit être décidée avant la migration.
 
-Le stock métier peut nécessiter des seuils, des mouvements, des réservations et une source externe. Il faudra distinguer le stock Shopware affiché au client de la quantité réellement disponible dans l'ERP.
+## Tarification
+PricingContract appartient à une organisation. ContractPrice définit le prix d'un produit pour une période. QuantityPriceTier définit les paliers. La priorité entre prix contractuel, quantité et prix standard doit être déterministe.
 
-## Client B2B et tarification
+## Commandes et approbation conditionnelle
+La commande Shopware reste la référence transactionnelle. OrderMetadata porte le contexte B2B ; ApprovalRule détermine si une validation est nécessaire ; OrderApproval historise les décisions. L'état d'approbation est distinct de l'état natif de commande.
 
-Un compte professionnel peut être associé à un groupe, des conditions de paiement et des règles tarifaires. Les prix doivent être calculés côté serveur et ne jamais dépendre d'une valeur fournie par le navigateur.
+## Livraisons
+Shipment représente un colis ou une expédition et peut être lié à order_delivery. ShipmentItem associe les quantités expédiées aux lignes de commande. TrackingEvent conserve les changements de suivi.
 
-## Commande et livraison
+## Commandes externes
+ExternalOrder conserve source et numéro externe, les lignes importées et les logs. L'unicité source_system + external_order_number protège contre les doublons.
 
-La commande Shopware est la référence transactionnelle e-commerce. Les données de livraison étendues, colis, numéros de suivi, synchronisations et tâches logistiques seront ajoutées sans dupliquer inutilement les entités natives.
+## ERP simulé
+ErpSync et ErpSyncLog suivent les échanges. OutboxMessage sera ajouté si nécessaire pour fiabiliser la publication atomique. L'API ERP est une application indépendante avec son propre stockage.
 
-## Commande externe
+## Notifications, tâches et reporting
+Notification trace les messages métier. BusinessTask et TaskExecution suivent les tâches opérationnelles, sans remplacer Scheduled Tasks Shopware. Reporting commence par des services de lecture, sans tables d'agrégats prématurées.
 
-Une commande provenant d'un marketplace ou d'un partenaire doit conserver son identifiant externe, son canal d'origine, son statut de synchronisation et son historique. Les imports doivent être idempotents.
-
-## Questions métier à trancher
-
-- Un produit peut-il avoir plusieurs fournisseurs actifs ?
-- Comment arbitrer plusieurs sources de stock ?
-- Quels clients doivent faire valider leurs commandes ?
-- Les prix sont-ils nets HT, TTC, ou dépendants du groupe de clients ?
-- Quelles transitions de commande sont autorisées ?
-- Quelle application est maître pour chaque donnée ?
+## Questions à trancher avant implémentation
+- Politique de stock natif et allocation multi-entrepôts.
+- Moment de réservation et durée d'expiration.
+- Appartenance d'un customer à plusieurs organisations.
+- Priorité des prix et cumul des remises.
+- Politique de paiement, TVA et crédit.
+- Transitions exactes des commandes et approbations.
