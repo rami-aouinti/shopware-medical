@@ -275,7 +275,6 @@ final class WarehouseStockService
             $change,
             $movementType,
             $reason,
-            $requireActive,
             $referenceType,
             $referenceId,
         ): WarehouseStockEntity {
