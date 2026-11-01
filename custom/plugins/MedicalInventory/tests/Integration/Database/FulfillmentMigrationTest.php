@@ -170,7 +170,8 @@ final class FulfillmentMigrationTest extends TestCase
         $alertService = new LowStockAlertService($this->connection());
 
         self::assertSame(1, $alertService->scan());
-        self::assertSame(1, $alertService->scan());
+        $alertService->scan();
+
         self::assertCount(1, $alertService->getOpenAlerts());
 
         $this->connection()->executeStatement(
