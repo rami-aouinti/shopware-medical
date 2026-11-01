@@ -11,6 +11,7 @@
 ## Ateliers techniques Shopware
 1. [Atelier 01 — Entité Warehouse avec le DAL](technical/01-warehouse-dal.md)
 2. [Atelier 02 — CRUD Warehouse avec EntityRepository](technical/02-warehouse-crud.md)
+3. [Atelier 03 — Validation métier des entrepôts](technical/03-warehouse-validation.md)
 
 ## Spécifications
 7. [Exigences fonctionnelles](07-functional-requirements.md)
