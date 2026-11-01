@@ -53,6 +53,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Cache Composer packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.composer/cache/files
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
+
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
@@ -60,7 +68,6 @@ jobs:
           tools: composer:v2
           extensions: bcmath, ctype, curl, dom, fileinfo, gd, iconv, intl, json, libxml, mbstring, openssl, pdo_mysql, simplexml, sodium, tokenizer, xml, xmlwriter, zip
           coverage: none
-          cache: composer
 
       - name: Validate Composer configuration and lock file
         run: composer validate --no-check-publish
