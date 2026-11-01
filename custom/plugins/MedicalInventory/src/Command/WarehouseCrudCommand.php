@@ -73,7 +73,7 @@ class WarehouseCrudCommand extends Command
                         }
 
                         $rows[] = [
-                            $warehouse->getId(),
+                            $warehouse->getUniqueIdentifier(),
                             $warehouse->getCode(),
                             $warehouse->getName(),
                             $warehouse->getCountryCode(),
@@ -96,7 +96,7 @@ class WarehouseCrudCommand extends Command
                     }
 
                     $io->definitionList(
-                        ['ID' => $warehouse->getId()],
+                        ['ID' => $warehouse->getUniqueIdentifier()],
                         ['Code' => $warehouse->getCode()],
                         ['Name' => $warehouse->getName()],
                         ['Country' => $warehouse->getCountryCode()],
