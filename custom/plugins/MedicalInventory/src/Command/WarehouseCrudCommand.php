@@ -32,11 +32,12 @@ class WarehouseCrudCommand extends Command
             ->addArgument(
                 'action',
                 InputArgument::REQUIRED,
-                'Action: create, list, find, activate, deactivate or delete'
+                'Action: create, list, find, activate, deactivate, set-priority or delete'
             )
             ->addOption('code', null, InputOption::VALUE_REQUIRED, 'Warehouse code')
             ->addOption('name', null, InputOption::VALUE_REQUIRED, 'Warehouse name')
-            ->addOption('country', null, InputOption::VALUE_REQUIRED, 'Two-letter country code');
+            ->addOption('country', null, InputOption::VALUE_REQUIRED, 'Two-letter country code')
+            ->addOption('priority', null, InputOption::VALUE_REQUIRED, 'Warehouse allocation priority (0-65535)', '100');
     }
 
     #[\Override]
@@ -69,6 +70,7 @@ class WarehouseCrudCommand extends Command
             'find' => $this->findWarehouse($code, $io, $context),
             'activate' => $this->setWarehouseActive($code, true, $io, $context),
             'deactivate' => $this->setWarehouseActive($code, false, $io, $context),
+            'set-priority' => $this->setWarehousePriority($code, $input, $io, $context),
             'delete' => $this->deleteWarehouse($code, $io, $context),
             default => $this->unknownAction($io),
         };
@@ -82,8 +84,9 @@ class WarehouseCrudCommand extends Command
     ): int {
         $name = (string) ($input->getOption('name') ?? '');
         $country = (string) ($input->getOption('country') ?? '');
+        $priority = $this->readPriority($input);
 
-        $this->warehouseService->create($code, $name, $country, $context);
+        $this->warehouseService->create($code, $name, $country, $context, $priority);
         $io->success(sprintf('Warehouse "%s" created.', strtoupper(trim($code))));
 
         return Command::SUCCESS;
@@ -103,11 +106,12 @@ class WarehouseCrudCommand extends Command
                 $warehouse->getCode(),
                 $warehouse->getName(),
                 $warehouse->getCountryCode(),
+                $warehouse->getPriority(),
                 $warehouse->isActive() ? 'Yes' : 'No',
             ];
         }
 
-        $io->table(['ID', 'Code', 'Name', 'Country', 'Active'], $rows);
+        $io->table(['ID', 'Code', 'Name', 'Country', 'Priority', 'Active'], $rows);
 
         return Command::SUCCESS;
     }
@@ -128,6 +132,7 @@ class WarehouseCrudCommand extends Command
             ['Code' => $warehouse->getCode()],
             ['Name' => $warehouse->getName()],
             ['Country' => $warehouse->getCountryCode()],
+            ['Priority' => $warehouse->getPriority()],
             ['Active' => $warehouse->isActive() ? 'Yes' : 'No'],
         );
 
@@ -151,6 +156,32 @@ class WarehouseCrudCommand extends Command
         return Command::SUCCESS;
     }
 
+    private function setWarehousePriority(
+        string $code,
+        InputInterface $input,
+        SymfonyStyle $io,
+        Context $context,
+    ): int {
+        $this->requireCode($code);
+        $priority = $this->readPriority($input);
+        $this->warehouseService->setPriorityByCode($code, $priority, $context);
+        $io->success(sprintf('Warehouse "%s" priority set to %d.', $code, $priority));
+
+        return Command::SUCCESS;
+    }
+
+    private function readPriority(InputInterface $input): int
+    {
+        $value = $input->getOption('priority');
+        $priority = is_string($value) ? filter_var($value, FILTER_VALIDATE_INT) : false;
+
+        if ($priority === false) {
+            throw new \InvalidArgumentException('Priority must be an integer between 0 and 65535.');
+        }
+
+        return $priority;
+    }
+
     private function deleteWarehouse(string $code, SymfonyStyle $io, Context $context): int
     {
         $this->requireCode($code);
@@ -162,7 +193,7 @@ class WarehouseCrudCommand extends Command
 
     private function unknownAction(SymfonyStyle $io): int
     {
-        $io->error('Unknown action. Use: create, list, find, activate, deactivate or delete.');
+        $io->error('Unknown action. Use: create, list, find, activate, deactivate, set-priority or delete.');
 
         return Command::INVALID;
     }
