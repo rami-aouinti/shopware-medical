@@ -16,7 +16,7 @@
         <testsuite name="MedicalInventory Unit">
             <directory>custom/plugins/MedicalInventory/tests/Unit</directory>
         </testsuite>
-        <testsuite name="MedicalInventory Integration">
+        <testsuite name="MedicalInventory Database Integration">
             <directory>custom/plugins/MedicalInventory/tests/Integration</directory>
         </testsuite>
     </testsuites>
