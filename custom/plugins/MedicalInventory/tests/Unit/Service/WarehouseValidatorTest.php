@@ -23,6 +23,7 @@ final class WarehouseValidatorTest extends TestCase
                 'code' => 'DE-KOELN',
                 'name' => 'Köln Central Warehouse',
                 'countryCode' => 'DE',
+                'priority' => 100,
             ],
             $this->validator->validate(' de-koeln ', ' Köln Central Warehouse ', ' de ')
         );
@@ -62,6 +63,28 @@ final class WarehouseValidatorTest extends TestCase
         $this->expectException(InvalidArgumentException::class);
 
         $this->validator->validate('DE-KOELN', 'Warehouse', 'DEU');
+    }
+
+    public function testItAcceptsAnExplicitWarehousePriority(): void
+    {
+        self::assertSame(
+            5,
+            $this->validator->validate('DE-KOELN', 'Köln', 'DE', 5)['priority']
+        );
+    }
+
+    public function testItRejectsNegativeWarehousePriority(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        $this->validator->validate('DE-KOELN', 'Köln', 'DE', -1);
+    }
+
+    public function testItRejectsWarehousePriorityAboveTheDatabaseColumnLimit(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        $this->validator->validate('DE-KOELN', 'Köln', 'DE', 65_536);
     }
 
     public function testItRejectsNamesLongerThanTheDatabaseColumn(): void
