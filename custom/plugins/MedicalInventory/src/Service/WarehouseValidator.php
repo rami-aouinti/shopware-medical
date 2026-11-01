@@ -4,7 +4,7 @@ namespace MedicalInventory\Service;
 
 use InvalidArgumentException;
 
-class WarehouseValidator
+final class WarehouseValidator
 {
     /**
      * @return array{code: string, name: string, countryCode: string}
