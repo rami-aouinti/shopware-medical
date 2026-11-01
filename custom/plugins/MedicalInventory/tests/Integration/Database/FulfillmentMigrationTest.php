@@ -26,16 +26,18 @@ final class FulfillmentMigrationTest extends TestCase
 
         $this->connection = DriverManager::getConnection(['url' => $databaseUrl]);
 
-        foreach ([
-            'medical_stock_alert',
-            'medical_shipment_event',
-            'medical_shipment_item',
-            'medical_shipment',
-            'medical_stock_reservation',
-            'medical_order_warehouse_allocation',
-            'medical_stock_movement',
-            'medical_warehouse_stock',
-        ] as $table) {
+        foreach (
+            [
+                'medical_stock_alert',
+                'medical_shipment_event',
+                'medical_shipment_item',
+                'medical_shipment',
+                'medical_stock_reservation',
+                'medical_order_warehouse_allocation',
+                'medical_stock_movement',
+                'medical_warehouse_stock',
+            ] as $table
+        ) {
             $this->connection->executeStatement('DROP TABLE IF EXISTS ' . $table);
         }
 
@@ -80,15 +82,17 @@ final class FulfillmentMigrationTest extends TestCase
         self::assertSame(4, (int) $stock['reserved_quantity']);
         self::assertSame(0, (int) $stock['minimum_quantity']);
 
-        foreach ([
-            'medical_stock_movement',
-            'medical_order_warehouse_allocation',
-            'medical_stock_reservation',
-            'medical_shipment',
-            'medical_shipment_item',
-            'medical_shipment_event',
-            'medical_stock_alert',
-        ] as $table) {
+        foreach (
+            [
+                'medical_stock_movement',
+                'medical_order_warehouse_allocation',
+                'medical_stock_reservation',
+                'medical_shipment',
+                'medical_shipment_item',
+                'medical_shipment_event',
+                'medical_stock_alert',
+            ] as $table
+        ) {
             self::assertTrue($this->connection()->createSchemaManager()->tablesExist([$table]), $table);
         }
     }
