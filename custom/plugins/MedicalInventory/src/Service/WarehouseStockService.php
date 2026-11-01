@@ -217,6 +217,7 @@ final class WarehouseStockService
             'medical_order_warehouse_allocation',
             'medical_stock_reservation',
             'medical_shipment',
+            'medical_stock_alert',
         ];
 
         foreach ($tables as $table) {
@@ -227,7 +228,10 @@ final class WarehouseStockService
 
             if ($count > 0) {
                 throw new DomainException(
-                    sprintf('Warehouse "%s" has inventory or history and cannot be deleted. Deactivate it instead.', $warehouseCode)
+                    sprintf(
+                        'Warehouse "%s" has inventory or history and cannot be deleted. Deactivate it instead.',
+                        $warehouseCode
+                    )
                 );
             }
         }
