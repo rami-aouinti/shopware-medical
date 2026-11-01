@@ -132,6 +132,65 @@ final class WarehouseStockService
         );
     }
 
+    public function setMinimumQuantity(
+        string $warehouseCode,
+        string $productId,
+        int $minimumQuantity,
+        Context $context,
+    ): void {
+        if ($minimumQuantity < 0 || $minimumQuantity > WarehouseStockCalculator::MAX_QUANTITY) {
+            throw new InvalidArgumentException('Minimum quantity is outside the supported range.');
+        }
+
+        $warehouse = $this->getWarehouse($warehouseCode, $context);
+        $this->assertProductExists($productId, $context);
+        $warehouseId = $warehouse->getUniqueIdentifier();
+        $versionId = $context->getVersionId();
+
+        $this->connection->transactional(function () use (
+            $warehouseId,
+            $productId,
+            $versionId,
+            $minimumQuantity,
+            $context
+        ): void {
+            $row = $this->connection->fetchAssociative(
+                <<<'SQL'
+                    SELECT LOWER(HEX(id)) AS id
+                    FROM medical_warehouse_stock
+                    WHERE warehouse_id = :warehouseId
+                      AND product_id = :productId
+                      AND product_version_id = :versionId
+                    FOR UPDATE
+                SQL,
+                [
+                    'warehouseId' => Uuid::fromHexToBytes($warehouseId),
+                    'productId' => Uuid::fromHexToBytes($productId),
+                    'versionId' => Uuid::fromHexToBytes($versionId),
+                ],
+            );
+
+            if ($row === false) {
+                $this->warehouseStockRepository->create([[
+                    'id' => Uuid::randomHex(),
+                    'warehouseId' => $warehouseId,
+                    'productId' => $productId,
+                    'productVersionId' => $versionId,
+                    'quantity' => 0,
+                    'reservedQuantity' => 0,
+                    'minimumQuantity' => $minimumQuantity,
+                ]], $context);
+
+                return;
+            }
+
+            $this->warehouseStockRepository->update([[
+                'id' => (string) $row['id'],
+                'minimumQuantity' => $minimumQuantity,
+            ]], $context);
+        });
+    }
+
     public function getStock(
         string $warehouseCode,
         string $productId,
