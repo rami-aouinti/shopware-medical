@@ -29,7 +29,21 @@ final class FulfillmentMigrationTest extends TestCase
             self::markTestSkipped('Set MEDICAL_INVENTORY_TEST_DATABASE_URL to run MariaDB integration tests.');
         }
 
-        $this->connection = DriverManager::getConnection(['url' => $databaseUrl]);
+        $parts = parse_url($databaseUrl);
+
+        if (!is_array($parts)) {
+            throw new RuntimeException('MEDICAL_INVENTORY_TEST_DATABASE_URL is invalid.');
+        }
+
+        $this->connection = DriverManager::getConnection([
+            'driver' => 'pdo_mysql',
+            'host' => is_string($parts['host'] ?? null) ? $parts['host'] : '127.0.0.1',
+            'port' => is_int($parts['port'] ?? null) ? $parts['port'] : 3306,
+            'user' => is_string($parts['user'] ?? null) ? $parts['user'] : 'root',
+            'password' => is_string($parts['pass'] ?? null) ? $parts['pass'] : '',
+            'dbname' => ltrim(is_string($parts['path'] ?? null) ? $parts['path'] : '', '/'),
+            'serverVersion' => 'mariadb-11.4.0',
+        ]);
 
         foreach (
             [
