@@ -2,6 +2,7 @@
 
 namespace MedicalInventory\Core\Content\Warehouse;
 
+use MedicalInventory\Core\Content\WarehouseStock\WarehouseStockCollection;
 use Shopware\Core\Framework\DataAbstractionLayer\Entity;
 
 class WarehouseEntity extends Entity
@@ -13,6 +14,8 @@ class WarehouseEntity extends Entity
     protected string $countryCode;
 
     protected bool $isActive;
+
+    protected ?WarehouseStockCollection $stocks = null;
 
     public function getCode(): string
     {
@@ -52,5 +55,15 @@ class WarehouseEntity extends Entity
     public function setIsActive(bool $isActive): void
     {
         $this->isActive = $isActive;
+    }
+
+    public function getStocks(): ?WarehouseStockCollection
+    {
+        return $this->stocks;
+    }
+
+    public function setStocks(?WarehouseStockCollection $stocks): void
+    {
+        $this->stocks = $stocks;
     }
 }
