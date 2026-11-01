@@ -76,15 +76,6 @@ Component.register('medical-inventory-dashboard', {
             error: null,
             dashboard: null,
             newWarehouse: { code: '', name: '', countryCode: 'DE', priority: 100 },
-            warehouseColumns: [
-                { property: 'code', label: 'Code' },
-                { property: 'name', label: 'Name' },
-                { property: 'country_code', label: 'Country' },
-                { property: 'priority', label: 'Priority' },
-                { property: 'active', label: 'Active' },
-                { property: 'stock_rows', label: 'Stock rows' },
-                { property: 'available_units', label: 'Available units' },
-            ],
             alertColumns: [
                 { property: 'warehouse_code', label: 'Warehouse' },
                 { property: 'product_id', label: 'Product ID' },
@@ -186,6 +177,7 @@ Module.register('medical-inventory', {
     name: 'MedicalInventory',
     title: 'Medical Inventory',
     description: 'Multi-warehouse stock, reservations and shipments',
+    routePrefix: 'medical.inventory',
     color: '#3b82f6',
     icon: 'regular-box',
     routes: {
