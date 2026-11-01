@@ -206,6 +206,25 @@ final class WarehouseStockService
         });
     }
 
+    public function syncWarehouseAvailability(string $warehouseCode, Context $context): void
+    {
+        $warehouse = $this->getWarehouse($warehouseCode, $context);
+        $criteria = new Criteria();
+        $criteria->addFilter(new EqualsFilter('warehouseId', $warehouse->getUniqueIdentifier()));
+
+        foreach ($this->warehouseStockRepository->search($criteria, $context)->getEntities() as $stock) {
+            if (!$stock instanceof WarehouseStockEntity) {
+                continue;
+            }
+
+            $this->syncAggregateProductStock(
+                $stock->getProductId(),
+                $stock->getProductVersionId(),
+                $context
+            );
+        }
+    }
+
     public function getStock(
         string $warehouseCode,
         string $productId,
@@ -335,6 +354,8 @@ final class WarehouseStockService
                 $referenceId
             );
 
+            $this->syncAggregateProductStock($productId, $versionId, $context);
+
             $stock = $this->findStockByIds($warehouseId, $productId, $versionId, $context);
 
             if (!$stock instanceof WarehouseStockEntity) {
@@ -343,6 +364,36 @@ final class WarehouseStockService
 
             return $stock;
         });
+    }
+
+    private function syncAggregateProductStock(
+        string $productId,
+        string $productVersionId,
+        Context $context,
+    ): void {
+        if ($productVersionId !== $context->getVersionId()) {
+            return;
+        }
+
+        $availableQuantity = (int) $this->connection->fetchOne(
+            <<<'SQL'
+                SELECT COALESCE(SUM(s.quantity - s.reserved_quantity), 0)
+                FROM medical_warehouse_stock s
+                INNER JOIN medical_warehouse w ON w.id = s.warehouse_id
+                WHERE s.product_id = :productId
+                  AND s.product_version_id = :productVersionId
+                  AND w.is_active = 1
+            SQL,
+            [
+                'productId' => Uuid::fromHexToBytes($productId),
+                'productVersionId' => Uuid::fromHexToBytes($productVersionId),
+            ]
+        );
+
+        $this->productRepository->update([[
+            'id' => $productId,
+            'stock' => $availableQuantity,
+        ]], $context);
     }
 
     private function getWarehouse(string $code, Context $context): WarehouseEntity
