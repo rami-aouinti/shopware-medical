@@ -206,6 +206,12 @@ final class WarehouseStockService
         });
     }
 
+    public function syncProductAvailability(string $productId, Context $context): void
+    {
+        $this->assertProductId($productId);
+        $this->syncAggregateProductStock($productId, $context->getVersionId(), $context);
+    }
+
     public function syncWarehouseAvailability(string $warehouseCode, Context $context): void
     {
         $warehouse = $this->getWarehouse($warehouseCode, $context);
