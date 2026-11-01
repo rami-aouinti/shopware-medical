@@ -4,7 +4,10 @@ namespace MedicalInventory\Controller;
 
 use Doctrine\DBAL\Connection;
 use InvalidArgumentException;
+use MedicalInventory\Service\WarehouseService;
 use MedicalInventory\Service\WarehouseStockService;
+use MedicalInventory\Service\ShipmentService;
+use MedicalInventory\Service\LowStockAlertService;
 use Shopware\Core\Framework\Context;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
