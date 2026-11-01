@@ -165,7 +165,8 @@ final class WarehouseDemoDataCommand extends Command
         );
 
         $io->success(sprintf(
-            'Demo catalogue ready: %d products, %d warehouses. Existing records were preserved. Currency: %s; tax: %s%%.',
+            'Demo catalogue ready: %d products, %d warehouses. Existing records were preserved. '
+            . 'Currency: %s; tax: %s%%.',
             count(self::PRODUCTS),
             count($warehouses),
             $currency->getIsoCode(),
