@@ -9,6 +9,7 @@ use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\EntitySearchResult;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\EqualsFilter;
+use Shopware\Core\Framework\DataAbstractionLayer\Search\Sorting\FieldSorting;
 use Shopware\Core\Framework\Uuid\Uuid;
 
 final class WarehouseService
@@ -58,8 +59,8 @@ final class WarehouseService
     public function list(Context $context): EntitySearchResult
     {
         $criteria = new Criteria();
-        $criteria->addSorting(new \Shopware\Core\Framework\DataAbstractionLayer\Search\Sorting\FieldSorting('priority'));
-        $criteria->addSorting(new \Shopware\Core\Framework\DataAbstractionLayer\Search\Sorting\FieldSorting('name'));
+        $criteria->addSorting(new FieldSorting('priority'));
+        $criteria->addSorting(new FieldSorting('name'));
 
         return $this->warehouseRepository->search($criteria, $context);
     }
