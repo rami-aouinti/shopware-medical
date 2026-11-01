@@ -66,7 +66,9 @@ class Migration1793496000AddFulfillmentLifecycle extends MigrationStep
                 created_at DATETIME(3) NOT NULL,
                 updated_at DATETIME(3) DEFAULT NULL,
                 PRIMARY KEY (id),
-                UNIQUE KEY uniq_medical_order_allocation (order_id, order_version_id, product_id, product_version_id, warehouse_id),
+                UNIQUE KEY uniq_medical_order_allocation (
+                    order_id, order_version_id, product_id, product_version_id, warehouse_id
+                ),
                 INDEX idx_medical_allocation_order (order_id, order_version_id),
                 INDEX idx_medical_allocation_warehouse (warehouse_id, status)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
