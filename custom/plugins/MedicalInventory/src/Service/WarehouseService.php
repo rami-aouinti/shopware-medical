@@ -9,6 +9,7 @@ use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\EntitySearchResult;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\EqualsFilter;
+use Shopware\Core\Framework\DataAbstractionLayer\Search\Sorting\FieldSorting;
 use Shopware\Core\Framework\Uuid\Uuid;
 
 final class WarehouseService
@@ -24,8 +25,9 @@ final class WarehouseService
         string $name,
         string $countryCode,
         Context $context,
+        int $priority = 100,
     ): void {
-        $data = $this->warehouseValidator->validate($code, $name, $countryCode);
+        $data = $this->warehouseValidator->validate($code, $name, $countryCode, $priority);
 
         if ($this->findByCode($data['code'], $context) instanceof WarehouseEntity) {
             throw new RuntimeException(sprintf('A warehouse with code "%s" already exists.', $data['code']));
@@ -36,6 +38,7 @@ final class WarehouseService
                 'id' => Uuid::randomHex(),
                 'code' => $data['code'],
                 'name' => $data['name'],
+                'priority' => $data['priority'],
                 'countryCode' => $data['countryCode'],
                 'isActive' => true,
             ],
@@ -56,7 +59,8 @@ final class WarehouseService
     public function list(Context $context): EntitySearchResult
     {
         $criteria = new Criteria();
-        $criteria->addSorting(new \Shopware\Core\Framework\DataAbstractionLayer\Search\Sorting\FieldSorting('name'));
+        $criteria->addSorting(new FieldSorting('priority'));
+        $criteria->addSorting(new FieldSorting('name'));
 
         return $this->warehouseRepository->search($criteria, $context);
     }
@@ -73,6 +77,23 @@ final class WarehouseService
             [
                 'id' => $warehouse->getUniqueIdentifier(),
                 'isActive' => $active,
+            ],
+        ], $context);
+    }
+
+    public function setPriorityByCode(string $code, int $priority, Context $context): void
+    {
+        $priority = $this->warehouseValidator->validatePriority($priority);
+        $warehouse = $this->findByCode($code, $context);
+
+        if (!$warehouse instanceof WarehouseEntity) {
+            throw new RuntimeException(sprintf('Warehouse "%s" was not found.', $code));
+        }
+
+        $this->warehouseRepository->update([
+            [
+                'id' => $warehouse->getUniqueIdentifier(),
+                'priority' => $priority,
             ],
         ], $context);
     }

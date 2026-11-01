@@ -11,6 +11,8 @@ class WarehouseEntity extends Entity
 
     protected string $name;
 
+    protected int $priority = 100;
+
     protected string $countryCode;
 
     protected bool $isActive;
@@ -35,6 +37,16 @@ class WarehouseEntity extends Entity
     public function setName(string $name): void
     {
         $this->name = $name;
+    }
+
+    public function getPriority(): int
+    {
+        return $this->priority;
+    }
+
+    public function setPriority(int $priority): void
+    {
+        $this->priority = $priority;
     }
 
     public function getCountryCode(): string

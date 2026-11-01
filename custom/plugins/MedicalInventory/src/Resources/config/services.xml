@@ -31,6 +31,13 @@
 
         <service id="MedicalInventory\Service\WarehouseStockCalculator"/>
 
+        <service id="MedicalInventory\Service\WarehouseAllocationPlanner"/>
+
+        <service id="MedicalInventory\Service\WarehouseAllocationService">
+            <argument type="service" id="medical_warehouse_stock.repository"/>
+            <argument type="service" id="MedicalInventory\Service\WarehouseAllocationPlanner"/>
+        </service>
+
         <service id="MedicalInventory\Service\WarehouseStockService">
             <argument type="service" id="medical_warehouse.repository"/>
             <argument type="service" id="medical_warehouse_stock.repository"/>

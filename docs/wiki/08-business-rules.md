@@ -18,7 +18,7 @@ Les règles ci-dessous constituent la version 1. Elles seront référencées par
 - BR-014 : un transfert crée une sortie et une entrée liées à une même opération.
 - BR-015 : une réservation ne peut pas rendre le stock disponible négatif, sauf politique exceptionnelle qui devra être explicitement approuvée.
 - BR-016 : la réservation est atomique et protégée contre les mises à jour concurrentes.
-- BR-017 : la stratégie d'allocation entre entrepôts (entrepôt préféré, proximité, disponibilité, fractionnement) doit être configurable ou explicitement choisie avant le checkout.
+- BR-017 : l'allocation ignore les entrepôts inactifs ; elle privilégie un entrepôt pouvant satisfaire toute la ligne de commande, choisi par priorité croissante, puis par stock disponible décroissant ; si aucun entrepôt ne suffit seul, la quantité est répartie selon le même ordre ; si le stock cumulé est insuffisant, aucune réservation n'est créée.
 - BR-018 : le stock natif Shopware et le stock multi-entrepôts ne doivent pas devenir deux sources de vérité concurrentes.
 
 ## Comptes B2B et accès
