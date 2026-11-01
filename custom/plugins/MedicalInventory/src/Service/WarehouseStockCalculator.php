@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace MedicalInventory\Service;
+namespace MedicalInventory\\Service;
 
 use DomainException;
 use InvalidArgumentException;
@@ -22,6 +22,7 @@ final class WarehouseStockCalculator
      */
     public function setQuantity(int $currentQuantity, int $reservedQuantity, int $newQuantity): array
     {
+        $this->assertState($currentQuantity, $reservedQuantity);
         $this->assertQuantity($newQuantity);
 
         if ($newQuantity < $reservedQuantity) {
@@ -39,6 +40,7 @@ final class WarehouseStockCalculator
      */
     public function add(int $quantity, int $reservedQuantity, int $amount): array
     {
+        $this->assertState($quantity, $reservedQuantity);
         $this->assertPositiveAmount($amount);
 
         if ($quantity > self::MAX_QUANTITY - $amount) {
@@ -53,6 +55,7 @@ final class WarehouseStockCalculator
      */
     public function remove(int $quantity, int $reservedQuantity, int $amount): array
     {
+        $this->assertState($quantity, $reservedQuantity);
         $this->assertPositiveAmount($amount);
         $available = $quantity - $reservedQuantity;
 
@@ -72,6 +75,7 @@ final class WarehouseStockCalculator
      */
     public function reserve(int $quantity, int $reservedQuantity, int $amount): array
     {
+        $this->assertState($quantity, $reservedQuantity);
         $this->assertPositiveAmount($amount);
         $available = $quantity - $reservedQuantity;
 
@@ -91,6 +95,7 @@ final class WarehouseStockCalculator
      */
     public function release(int $quantity, int $reservedQuantity, int $amount): array
     {
+        $this->assertState($quantity, $reservedQuantity);
         $this->assertPositiveAmount($amount);
 
         if ($amount > $reservedQuantity) {
@@ -111,6 +116,7 @@ final class WarehouseStockCalculator
      */
     public function ship(int $quantity, int $reservedQuantity, int $amount): array
     {
+        $this->assertState($quantity, $reservedQuantity);
         $this->assertPositiveAmount($amount);
 
         if ($amount > $reservedQuantity) {
@@ -125,6 +131,18 @@ final class WarehouseStockCalculator
             'quantity' => $quantity - $amount,
             'reservedQuantity' => $reservedQuantity - $amount,
         ];
+    }
+
+    private function assertState(int $quantity, int $reservedQuantity): void
+    {
+        if (
+            $quantity < 0
+            || $quantity > self::MAX_QUANTITY
+            || $reservedQuantity < 0
+            || $reservedQuantity > $quantity
+        ) {
+            throw new DomainException('The current stock state violates inventory quantity invariants.');
+        }
     }
 
     private function assertPositiveAmount(int $amount): void

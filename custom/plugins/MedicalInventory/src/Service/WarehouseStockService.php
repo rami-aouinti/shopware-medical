@@ -1,20 +1,20 @@
 <?php declare(strict_types=1);
 
-namespace MedicalInventory\Service;
+namespace MedicalInventory\\Service;
 
-use Doctrine\DBAL\Connection;
+use Doctrine\\DBAL\\Connection;
 use DomainException;
 use InvalidArgumentException;
-use MedicalInventory\Core\Content\Warehouse\WarehouseEntity;
-use MedicalInventory\Core\Content\WarehouseStock\WarehouseStockEntity;
-use Shopware\Core\Content\Product\ProductEntity;
-use Shopware\Core\Framework\Context;
-use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
-use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
-use Shopware\Core\Framework\DataAbstractionLayer\Search\EntitySearchResult;
-use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\EqualsFilter;
-use Shopware\Core\Framework\Uuid\Uuid;
+use MedicalInventory\\Core\\Content\\Warehouse\\WarehouseEntity;
+use MedicalInventory\\Core\\Content\\WarehouseStock\\WarehouseStockEntity;
 use RuntimeException;
+use Shopware\\Core\\Content\\Product\\ProductEntity;
+use Shopware\\Core\\Framework\\Context;
+use Shopware\\Core\\Framework\\DataAbstractionLayer\\EntityRepository;
+use Shopware\\Core\\Framework\\DataAbstractionLayer\\Search\\Criteria;
+use Shopware\\Core\\Framework\\DataAbstractionLayer\\Search\\EntitySearchResult;
+use Shopware\\Core\\Framework\\DataAbstractionLayer\\Search\\Filter\\EqualsFilter;
+use Shopware\\Core\\Framework\\Uuid\\Uuid;
 
 /**
  * Application service for stock operations.
@@ -214,7 +214,9 @@ final class WarehouseStockService
                         'reservedQuantity' => $newState['reservedQuantity'],
                     ],
                 ], $context);
-            } else {
+            }
+
+            if ($row !== false) {
                 $this->warehouseStockRepository->update([
                     [
                         'id' => (string) $row['id'],
