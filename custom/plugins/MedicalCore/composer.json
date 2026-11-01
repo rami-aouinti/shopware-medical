@@ -9,11 +9,11 @@
   },
   "autoload": {
     "psr-4": {
-      "MedicalCore\\\\": "src/"
+      "MedicalCore\\": "src/"
     }
   },
   "extra": {
-    "shopware-plugin-class": "MedicalCore\\\\MedicalCore",
+    "shopware-plugin-class": "MedicalCore\\MedicalCore",
     "label": {
       "en-GB": "Medical Core",
       "de-DE": "Medical Core"
