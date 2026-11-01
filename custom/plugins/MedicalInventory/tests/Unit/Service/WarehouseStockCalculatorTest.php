@@ -1,17 +1,17 @@
 <?php declare(strict_types=1);
 
-namespace MedicalInventory\\Tests\\Unit\\Service;
+namespace MedicalInventory\Tests\Unit\Service;
 
 use DomainException;
 use InvalidArgumentException;
-use MedicalInventory\\Service\\WarehouseStockCalculator;
-use PHPUnit\\Framework\\TestCase;
+use MedicalInventory\Service\WarehouseStockCalculator;
+use PHPUnit\Framework\TestCase;
 
 final class WarehouseStockCalculatorTest extends TestCase
 {
     private WarehouseStockCalculator $calculator;
 
-    #[\\Override]
+    #[\Override]
     protected function setUp(): void
     {
         $this->calculator = new WarehouseStockCalculator();
