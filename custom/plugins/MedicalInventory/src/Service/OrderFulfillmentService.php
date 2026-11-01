@@ -127,21 +127,7 @@ final class OrderFulfillmentService
                     $orderId
                 );
 
-                // Restore Shopware's aggregate stock after the native order stock updater deducted it.
-                $this->connection->executeStatement(
-                    <<<'SQL'
-                        UPDATE product
-                        SET stock = stock + :quantity
-                        WHERE id = :productId
-                          AND version_id = :versionId
-                          AND is_closeout = 1
-                    SQL,
-                    [
-                        'quantity' => $remaining,
-                        'productId' => Uuid::fromHexToBytes((string) $reservation['product_id']),
-                        'versionId' => Uuid::fromHexToBytes($context->getVersionId()),
-                    ]
-                );
+
             }
 
             $this->connection->update('medical_stock_reservation', [
