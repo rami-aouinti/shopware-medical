@@ -14,6 +14,7 @@ use Shopware\Core\Content\Product\ProductEntity;
 use Shopware\Core\Content\Test\Product\ProductBuilder;
 use Shopware\Core\Defaults;
 use Shopware\Core\Framework\Context;
+use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\EqualsFilter;
 use Shopware\Core\Framework\Test\TestCaseBase\IntegrationTestBehaviour;
@@ -27,6 +28,7 @@ final class WarehouseStockDalIntegrationTest extends TestCase
     public function testWarehouseEntityCanBeCreatedAndReadThroughTheDal(): void
     {
         $container = static::getContainer();
+        /** @var EntityRepository $repository */
         $repository = $container->get('medical_warehouse.repository');
         $context = Context::createDefaultContext();
         $warehouseId = Uuid::randomHex();
@@ -53,8 +55,11 @@ final class WarehouseStockDalIntegrationTest extends TestCase
     {
         $container = static::getContainer();
         $context = Context::createDefaultContext();
+        /** @var EntityRepository $warehouseRepository */
         $warehouseRepository = $container->get('medical_warehouse.repository');
+        /** @var EntityRepository $stockRepository */
         $stockRepository = $container->get('medical_warehouse_stock.repository');
+        /** @var EntityRepository $productRepository */
         $productRepository = $container->get('product.repository');
 
         $warehouseIds = [
@@ -112,12 +117,14 @@ final class WarehouseStockDalIntegrationTest extends TestCase
             ],
         ], $context);
 
+        /** @var WarehouseAllocationService $allocationService */
         $allocationService = $container->get(WarehouseAllocationService::class);
         self::assertSame([
             ['warehouseCode' => $warehouseCodes['DE-KOELN'], 'priority' => 1, 'quantity' => 15],
             ['warehouseCode' => $warehouseCodes['DE-BERLIN'], 'priority' => 2, 'quantity' => 5],
         ], $allocationService->planForProduct($productId, 20, $context));
 
+        /** @var WarehouseStockService $stockService */
         $stockService = $container->get(WarehouseStockService::class);
         $stockService->reserveStock($warehouseCodes['DE-KOELN'], $productId, 15, $context, 'integration-test', 'dal-order');
         $stockService->reserveStock($warehouseCodes['DE-BERLIN'], $productId, 5, $context, 'integration-test', 'dal-order');
@@ -137,6 +144,8 @@ final class WarehouseStockDalIntegrationTest extends TestCase
             $availableQuantities[$stock->getWarehouse()->getCode()] = $stock->getAvailableQuantity();
         }
 
+        self::assertArrayHasKey($warehouseCodes['DE-KOELN'], $availableQuantities);
+        self::assertArrayHasKey($warehouseCodes['DE-BERLIN'], $availableQuantities);
         self::assertSame(0, $availableQuantities[$warehouseCodes['DE-KOELN']]);
         self::assertSame(7, $availableQuantities[$warehouseCodes['DE-BERLIN']]);
 
