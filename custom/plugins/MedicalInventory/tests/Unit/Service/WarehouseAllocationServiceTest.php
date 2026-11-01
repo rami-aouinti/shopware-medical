@@ -13,6 +13,7 @@ use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\EntitySearchResult;
 use Shopware\Core\Framework\Uuid\Uuid;
+use Shopware\Core\Framework\Uuid\Uuid;
 
 final class WarehouseAllocationServiceTest extends TestCase
 {
@@ -92,6 +93,7 @@ final class WarehouseAllocationServiceTest extends TestCase
         bool $active = true,
     ): WarehouseStockEntity {
         $warehouse = new WarehouseEntity();
+        $warehouse->setUniqueIdentifier(Uuid::randomHex());
         $warehouse->setCode($warehouseCode);
         $warehouse->setName($warehouseCode);
         $warehouse->setCountryCode('DE');
@@ -99,6 +101,7 @@ final class WarehouseAllocationServiceTest extends TestCase
         $warehouse->setIsActive($active);
 
         $stock = new WarehouseStockEntity();
+        $stock->setUniqueIdentifier(Uuid::randomHex());
         $stock->setWarehouse($warehouse);
         $stock->setQuantity($quantity);
         $stock->setReservedQuantity($reservedQuantity);
