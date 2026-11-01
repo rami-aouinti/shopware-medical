@@ -228,7 +228,7 @@ final class WarehouseStockService
 
             $stock = $this->findStockByIds($warehouseId, $productId, $versionId, $context);
 
-            if ($stock === null) {
+            if (!$stock instanceof WarehouseStockEntity) {
                 throw new RuntimeException('The stock row could not be reloaded after the operation.');
             }
 
