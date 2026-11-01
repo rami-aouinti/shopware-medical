@@ -18,8 +18,9 @@ return (new Config())
     ->setRiskyAllowed(true)
     ->setRules([
         '@PSR12' => true,
+        // Keep the Shopware file-header convention used throughout this project.
+        'linebreak_after_opening_tag' => false,
         'declare_strict_types' => true,
-        'ordered_imports' => true,
         'single_line_empty_body' => true,
     ])
     ->setFinder($finder);
