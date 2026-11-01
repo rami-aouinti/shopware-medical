@@ -45,22 +45,8 @@ jobs:
       - name: Validate Composer configuration
         run: composer validate --no-check-publish --no-check-lock
 
-      # The committed lock file predates the new require-dev tools.
-      # Retry transient Packagist/CDN failures while resolving the updated lock.
-      - name: Resolve project and quality dependencies
-        shell: bash
-        run: |
-          set -euo pipefail
-          for attempt in 1 2 3; do
-            if composer update --no-interaction --prefer-dist --no-progress --no-scripts; then
-              exit 0
-            fi
-            if [ "$attempt" -lt 3 ]; then
-              echo "Composer update failed (attempt $attempt/3); retrying in 15 seconds..."
-              sleep 15
-            fi
-          done
-          exit 1
+      - name: Install project and quality dependencies from composer.lock
+        run: composer install --no-interaction --prefer-dist --no-progress --no-scripts
 
       - name: Build optimized autoloader
         run: composer dump-autoload --optimize --no-interaction
