@@ -23,6 +23,7 @@ final class LowStockScanTaskHandler extends ScheduledTaskHandler
         return [LowStockScanTask::class];
     }
 
+    #[\Override]
     public function run(): void
     {
         $this->alertService->scan();
