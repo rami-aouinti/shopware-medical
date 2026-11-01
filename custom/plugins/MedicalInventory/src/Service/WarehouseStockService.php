@@ -195,6 +195,7 @@ final class WarehouseStockService
                     'reservedQuantity' => 0,
                     'minimumQuantity' => $minimumQuantity,
                 ]], $context);
+                $this->syncAggregateProductStock($productId, $versionId, $context);
 
                 return;
             }
