@@ -3,6 +3,7 @@
 namespace MedicalInventory\Command;
 
 use MedicalInventory\Core\Content\Warehouse\WarehouseEntity;
+use MedicalInventory\Core\Content\WarehouseStock\WarehouseStockEntity;
 use MedicalInventory\Service\WarehouseService;
 use MedicalInventory\Service\WarehouseStockService;
 use RuntimeException;
