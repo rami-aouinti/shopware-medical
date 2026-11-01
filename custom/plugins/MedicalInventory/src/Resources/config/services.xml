@@ -80,6 +80,11 @@
             <tag name="messenger.message_handler"/>
         </service>
 
+        <service id="MedicalInventory\Command\ShipmentManagementCommand">
+            <argument type="service" id="MedicalInventory\Service\ShipmentService"/>
+            <tag name="console.command"/>
+        </service>
+
         <service id="MedicalInventory\Command\LowStockAlertScanCommand">
             <argument type="service" id="MedicalInventory\Service\LowStockAlertService"/>
             <tag name="console.command"/>
