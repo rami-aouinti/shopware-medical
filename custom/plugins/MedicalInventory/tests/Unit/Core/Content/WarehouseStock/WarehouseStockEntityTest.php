@@ -16,6 +16,14 @@ final class WarehouseStockEntityTest extends TestCase
         self::assertSame(25, $warehouse->getPriority());
     }
 
+    public function testItStoresTheMinimumStockThreshold(): void
+    {
+        $stock = new WarehouseStockEntity();
+        $stock->setMinimumQuantity(12);
+
+        self::assertSame(12, $stock->getMinimumQuantity());
+    }
+
     public function testItCalculatesAvailableQuantityFromPhysicalAndReservedStock(): void
     {
         $stock = new WarehouseStockEntity();

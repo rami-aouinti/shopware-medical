@@ -60,6 +60,9 @@ class WarehouseStockDefinition extends EntityDefinition
             (new IntField('reserved_quantity', 'reservedQuantity'))
                 ->addFlags(new Required()),
 
+            (new IntField('minimum_quantity', 'minimumQuantity'))
+                ->addFlags(new Required()),
+
             new CreatedAtField(),
             new UpdatedAtField(),
 

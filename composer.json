@@ -84,7 +84,7 @@
         "insights": "phpinsights analyse custom/plugins/MedicalInventory/src --no-interaction",
         "rector:check": "rector process custom/plugins/MedicalInventory/src --dry-run",
         "rector:fix": "rector process custom/plugins/MedicalInventory/src",
-        "test:plugin": "phpunit --configuration=phpunit.dist.xml",
+        "test:plugin": "phpunit --configuration=phpunit.dist.xml --testsuite='MedicalInventory Unit'",
         "quality": [
             "@cs:check",
             "@cs:fix:check",
@@ -93,8 +93,10 @@
             "@mess-detector",
             "@insights",
             "@rector:check",
-            "@test:plugin"
-        ]
+            "@test:plugin",
+            "@test:integration"
+        ],
+        "test:integration": "phpunit --configuration=phpunit.dist.xml --testsuite='MedicalInventory Database Integration' && phpunit --configuration=phpunit.dal.xml.dist"
     },
     "extra": {
         "symfony": {

@@ -27,22 +27,24 @@ docker compose exec web bin/console medical:inventory:stock list --warehouse=DE-
 docker compose exec web bin/console medical:inventory:stock list --warehouse=FR-PARIS_01
 ~~~
 
-The plugin stock is tracked per warehouse. Shopware's native product stock is
-initialized to the sum of the demo warehouse quantities only when a demo
-product is first created; existing products are not changed.
+The plugin stock is tracked per warehouse. For managed products, Shopware's
+aggregate product stock is synchronized to the sum of available quantities in
+active warehouses after stock mutations. Products without MedicalInventory
+stock rows remain under native Shopware stock management.
 
 ## Tests and quality tools
 
 Install the project dependencies, including the new development tools:
 
 ~~~bash
-docker compose exec web composer update --with-all-dependencies --no-interaction
+docker compose exec web composer install --no-interaction
 ~~~
 
-Run the plugin unit tests:
+Run the plugin unit tests and MariaDB integration tests:
 
 ~~~bash
 docker compose exec web composer test:plugin
+docker compose exec web composer test:integration
 ~~~
 
 Run every quality gate:
@@ -104,7 +106,77 @@ The allocation planner follows these rules:
 7. If combined stock is insufficient, return an insufficient-stock exception;
    no stock is reserved or changed by the planner.
 
-WarehouseAllocationService::planForProduct() loads stock rows through the DAL
-and returns the plan. It is deliberately a planning operation only. Persisting
-allocations against Shopware orders, reserving stock atomically, shipment
-tracking, and release/shipping lifecycle belong to the upcoming order workflow.
+## Order allocation and reservation
+
+The order persister is decorated so order persistence and warehouse reservation
+run inside one DBAL transaction. If any managed product cannot be allocated or
+reserved, the order write and all reservations roll back together.
+
+- Product line items with MedicalInventory stock rows are allocated by the priority planner.
+- Products without MedicalInventory stock rows remain under native Shopware stock management.
+- Each warehouse allocation creates an order allocation and an active stock reservation.
+- Reservation and stock movements are written in the same database transaction.
+- Cancelling an order releases only the unshipped reservation remainder.
+- Shipping consumes reserved and physical stock; partial shipments are supported.
+- Stock movements are append-only audit records with signed physical/reserved deltas.
+
+## Shipment commands
+
+Create a shipment for one product from the allocated warehouse:
+
+~~~bash
+docker compose exec web bin/console medical:inventory:shipment ship \
+  --order=<ORDER_UUID> --warehouse=DE-KOELN \
+  --product=<PRODUCT_UUID> --quantity=5 \
+  --carrier=DHL --tracking=TRACK123
+~~~
+
+List shipments for an order:
+
+~~~bash
+docker compose exec web bin/console medical:inventory:shipment list --order=<ORDER_UUID>
+~~~
+
+Mark a shipment delivered:
+
+~~~bash
+docker compose exec web bin/console medical:inventory:shipment delivered --shipment=<SHIPMENT_UUID>
+~~~
+
+## Low-stock alerts
+
+Set a minimum quantity for one warehouse/product pair:
+
+~~~bash
+docker compose exec web bin/console medical:inventory:stock minimum \
+  --warehouse=DE-KOELN --product=<PRODUCT_UUID> --quantity=10
+~~~
+
+Run an alert scan manually:
+
+~~~bash
+docker compose exec web bin/console medical:inventory:alerts:scan
+~~~
+
+A scheduled task also scans hourly. It opens or updates one active alert when
+available stock is at or below the configured threshold and resolves it when
+stock rises above the threshold.
+
+## Administration
+
+The Medical Inventory module provides a warehouse dashboard, warehouse
+creation, priority and active-status management, stock threshold editing,
+low-stock alert visibility, and a manual alert scan. Warehouses with stock or
+audit/order/shipment history cannot be deleted; deactivate them instead. Shipment creation and
+delivery updates are also exposed through protected Admin API actions.
+
+## Database integration tests
+
+The CI job starts MariaDB 11.4 and runs the plugin migration integration suite.
+It verifies that the new tables are created, the migration is idempotent,
+existing physical/reserved quantities are preserved, movement audit writes
+participate in transactions, and order allocations have a database-level
+idempotency constraint.
+
+The integration suite tests the migration and database constraints directly.
+The DAL allocation service is covered separately by the plugin unit tests.

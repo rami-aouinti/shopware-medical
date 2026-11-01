@@ -32,6 +32,7 @@ final class WarehouseStockService
         private readonly EntityRepository $productRepository,
         private readonly Connection $connection,
         private readonly WarehouseStockCalculator $calculator,
+        private readonly StockMovementRecorder $movementRecorder,
     ) {
     }
 
@@ -46,6 +47,8 @@ final class WarehouseStockService
             $productId,
             $context,
             fn (int $current, int $reserved): array => $this->calculator->setQuantity($current, $reserved, $quantity),
+            'ADJUSTMENT',
+            'Physical stock quantity set',
         );
     }
 
@@ -60,6 +63,8 @@ final class WarehouseStockService
             $productId,
             $context,
             fn (int $current, int $reserved): array => $this->calculator->add($current, $reserved, $amount),
+            'INBOUND',
+            'Stock replenishment',
         );
     }
 
@@ -74,6 +79,8 @@ final class WarehouseStockService
             $productId,
             $context,
             fn (int $current, int $reserved): array => $this->calculator->remove($current, $reserved, $amount),
+            'OUTBOUND',
+            'Manual stock removal',
         );
     }
 
@@ -82,12 +89,19 @@ final class WarehouseStockService
         string $productId,
         int $amount,
         Context $context,
+        ?string $referenceType = null,
+        ?string $referenceId = null,
     ): WarehouseStockEntity {
         return $this->mutate(
             $warehouseCode,
             $productId,
             $context,
             fn (int $current, int $reserved): array => $this->calculator->reserve($current, $reserved, $amount),
+            'RESERVATION',
+            'Order stock reservation',
+            true,
+            $referenceType,
+            $referenceId,
         );
     }
 
@@ -96,12 +110,19 @@ final class WarehouseStockService
         string $productId,
         int $amount,
         Context $context,
+        ?string $referenceType = null,
+        ?string $referenceId = null,
     ): WarehouseStockEntity {
         return $this->mutate(
             $warehouseCode,
             $productId,
             $context,
             fn (int $current, int $reserved): array => $this->calculator->release($current, $reserved, $amount),
+            'RELEASE',
+            'Stock reservation released',
+            false,
+            $referenceType,
+            $referenceId,
         );
     }
 
@@ -110,13 +131,136 @@ final class WarehouseStockService
         string $productId,
         int $amount,
         Context $context,
+        ?string $referenceType = null,
+        ?string $referenceId = null,
     ): WarehouseStockEntity {
         return $this->mutate(
             $warehouseCode,
             $productId,
             $context,
             fn (int $current, int $reserved): array => $this->calculator->ship($current, $reserved, $amount),
+            'SHIPMENT',
+            'Reserved stock shipped',
+            false,
+            $referenceType,
+            $referenceId,
         );
+    }
+
+    public function setMinimumQuantity(
+        string $warehouseCode,
+        string $productId,
+        int $minimumQuantity,
+        Context $context,
+    ): void {
+        if ($minimumQuantity < 0 || $minimumQuantity > WarehouseStockCalculator::MAX_QUANTITY) {
+            throw new InvalidArgumentException('Minimum quantity is outside the supported range.');
+        }
+
+        $warehouse = $this->getWarehouse($warehouseCode, $context);
+        $this->assertProductExists($productId, $context);
+        $warehouseId = $warehouse->getUniqueIdentifier();
+        $versionId = $context->getVersionId();
+
+        $this->connection->transactional(function () use (
+            $warehouseId,
+            $productId,
+            $versionId,
+            $minimumQuantity,
+            $context
+        ): void {
+            $row = $this->connection->fetchAssociative(
+                <<<'SQL'
+                    SELECT LOWER(HEX(id)) AS id
+                    FROM medical_warehouse_stock
+                    WHERE warehouse_id = :warehouseId
+                      AND product_id = :productId
+                      AND product_version_id = :versionId
+                    FOR UPDATE
+                SQL,
+                [
+                    'warehouseId' => Uuid::fromHexToBytes($warehouseId),
+                    'productId' => Uuid::fromHexToBytes($productId),
+                    'versionId' => Uuid::fromHexToBytes($versionId),
+                ],
+            );
+
+            if ($row === false) {
+                $this->warehouseStockRepository->create([[
+                    'id' => Uuid::randomHex(),
+                    'warehouseId' => $warehouseId,
+                    'productId' => $productId,
+                    'productVersionId' => $versionId,
+                    'quantity' => 0,
+                    'reservedQuantity' => 0,
+                    'minimumQuantity' => $minimumQuantity,
+                ]], $context);
+                $this->syncAggregateProductStock($productId, $versionId, $context);
+
+                return;
+            }
+
+            $this->warehouseStockRepository->update([[
+                'id' => (string) $row['id'],
+                'minimumQuantity' => $minimumQuantity,
+            ]], $context);
+        });
+    }
+
+    public function assertWarehouseCanBeDeleted(string $warehouseCode, Context $context): void
+    {
+        $warehouse = $this->getWarehouse($warehouseCode, $context);
+        $warehouseId = Uuid::fromHexToBytes($warehouse->getUniqueIdentifier());
+
+        $tables = [
+            'medical_warehouse_stock',
+            'medical_stock_movement',
+            'medical_order_warehouse_allocation',
+            'medical_stock_reservation',
+            'medical_shipment',
+            'medical_stock_alert',
+        ];
+
+        foreach ($tables as $table) {
+            $count = (int) $this->connection->fetchOne(
+                sprintf('SELECT COUNT(*) FROM %s WHERE warehouse_id = :warehouseId', $table),
+                ['warehouseId' => $warehouseId]
+            );
+
+            if ($count > 0) {
+                throw new DomainException(
+                    sprintf(
+                        'Warehouse "%s" has inventory or history and cannot be deleted. Deactivate it instead.',
+                        $warehouseCode
+                    )
+                );
+            }
+        }
+    }
+
+    public function syncProductAvailability(string $productId, Context $context): void
+    {
+        $this->assertProductId($productId);
+        $this->syncAggregateProductStock($productId, $context->getVersionId(), $context);
+    }
+
+    public function syncWarehouseAvailability(string $warehouseCode, Context $context): void
+    {
+        $warehouse = $this->getWarehouse($warehouseCode, $context);
+        $criteria = new Criteria();
+        $criteria->addFilter(new EqualsFilter('warehouseId', $warehouse->getUniqueIdentifier()));
+
+        foreach ($this->warehouseStockRepository->search($criteria, $context)->getEntities() as $stock) {
+            if (!$stock instanceof WarehouseStockEntity) {
+                continue;
+            }
+
+            $this->syncAggregateProductStock(
+                $stock->getProductId(),
+                $stock->getProductVersionId(),
+                $context
+            );
+        }
     }
 
     public function getStock(
@@ -163,10 +307,15 @@ final class WarehouseStockService
         string $productId,
         Context $context,
         callable $change,
+        string $movementType,
+        string $reason,
+        bool $requireActive = true,
+        ?string $referenceType = null,
+        ?string $referenceId = null,
     ): WarehouseStockEntity {
         $warehouse = $this->getWarehouse($warehouseCode, $context);
 
-        if (!$warehouse->isActive()) {
+        if ($requireActive && !$warehouse->isActive()) {
             throw new DomainException(sprintf('Warehouse "%s" is inactive.', $warehouseCode));
         }
 
@@ -180,7 +329,11 @@ final class WarehouseStockService
             $productId,
             $versionId,
             $context,
-            $change
+            $change,
+            $movementType,
+            $reason,
+            $referenceType,
+            $referenceId,
         ): WarehouseStockEntity {
             // Lock the current row before calculating the new values.
             $row = $this->connection->fetchAssociative(
@@ -212,6 +365,7 @@ final class WarehouseStockService
                         'productVersionId' => $versionId,
                         'quantity' => $newState['quantity'],
                         'reservedQuantity' => $newState['reservedQuantity'],
+                        'minimumQuantity' => 0,
                     ],
                 ], $context);
             }
@@ -226,6 +380,20 @@ final class WarehouseStockService
                 ], $context);
             }
 
+            $this->movementRecorder->record(
+                $warehouseId,
+                $productId,
+                $versionId,
+                $movementType,
+                $newState['quantity'] - $currentQuantity,
+                $newState['reservedQuantity'] - $reservedQuantity,
+                $reason,
+                $referenceType,
+                $referenceId
+            );
+
+            $this->syncAggregateProductStock($productId, $versionId, $context);
+
             $stock = $this->findStockByIds($warehouseId, $productId, $versionId, $context);
 
             if (!$stock instanceof WarehouseStockEntity) {
@@ -234,6 +402,36 @@ final class WarehouseStockService
 
             return $stock;
         });
+    }
+
+    private function syncAggregateProductStock(
+        string $productId,
+        string $productVersionId,
+        Context $context,
+    ): void {
+        if ($productVersionId !== $context->getVersionId()) {
+            return;
+        }
+
+        $availableQuantity = min((int) $this->connection->fetchOne(
+            <<<'SQL'
+                SELECT COALESCE(SUM(s.quantity - s.reserved_quantity), 0)
+                FROM medical_warehouse_stock s
+                INNER JOIN medical_warehouse w ON w.id = s.warehouse_id
+                WHERE s.product_id = :productId
+                  AND s.product_version_id = :productVersionId
+                  AND w.is_active = 1
+            SQL,
+            [
+                'productId' => Uuid::fromHexToBytes($productId),
+                'productVersionId' => Uuid::fromHexToBytes($productVersionId),
+            ]
+        ), WarehouseStockCalculator::MAX_QUANTITY);
+
+        $this->productRepository->update([[
+            'id' => $productId,
+            'stock' => $availableQuantity,
+        ]], $context);
     }
 
     private function getWarehouse(string $code, Context $context): WarehouseEntity

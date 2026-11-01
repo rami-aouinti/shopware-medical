@@ -2,19 +2,26 @@
 
 namespace MedicalInventory\Service;
 
-use DomainException;
+use Shopware\Core\Checkout\Cart\CartException;
+use Symfony\Component\HttpFoundation\Response;
 
-final class InsufficientWarehouseStockException extends DomainException
+final class InsufficientWarehouseStockException extends CartException
 {
+    public const ERROR_CODE = 'MEDICAL_INVENTORY__INSUFFICIENT_WAREHOUSE_STOCK';
+
     public function __construct(
         private readonly int $requestedQuantity,
         private readonly int $availableQuantity,
     ) {
-        parent::__construct(sprintf(
-            'Insufficient warehouse stock: requested %d units, only %d units are available.',
-            $requestedQuantity,
-            $availableQuantity
-        ));
+        parent::__construct(
+            Response::HTTP_CONFLICT,
+            self::ERROR_CODE,
+            'Insufficient warehouse stock: requested {{ requestedQuantity }} units, only {{ availableQuantity }} units are available.',
+            [
+                'requestedQuantity' => $requestedQuantity,
+                'availableQuantity' => $availableQuantity,
+            ]
+        );
     }
 
     public function getRequestedQuantity(): int

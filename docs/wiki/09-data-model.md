@@ -55,25 +55,38 @@ Relation : Product N — N Media si plusieurs documents et réutilisation sont r
 
 ## Inventory Management
 
-### Warehouse
-Champs : id, code, name, country_code, priority, active. La priorité est un entier de 0 à 65535 ; une valeur plus petite est prioritaire et la valeur par défaut est 100. La V1 n'utilise pas encore la distance géographique.
-Contraintes : code unique ; un seul entrepôt par défaut si cette règle est retenue.
+### Warehouse — `medical_warehouse`
+Champs : id, code, name, country_code, priority, is_active, created_at, updated_at.
+Contraintes : code unique ; priority entier entre 0 et 65535 (plus petit = priorité supérieure, défaut 100).
+Un entrepôt avec stock, mouvements, allocations, réservations, expéditions ou alertes ne peut pas être supprimé ; il doit être désactivé.
 
-### Inventory
-Champs : id, warehouse_id, product_id, physical_quantity, reserved_quantity, minimum_quantity, version, updated_at.
-Relations : Warehouse 1 — N Inventory ; Product 1 — N Inventory.
-Contrainte : UNIQUE(warehouse_id, product_id).
-La quantité disponible est calculée comme physical_quantity - reserved_quantity, avec prise en compte des éventuels statuts de stock indisponible.
+### WarehouseStock — `medical_warehouse_stock`
+Champs : id, warehouse_id, product_id, product_version_id, quantity, reserved_quantity, minimum_quantity.
+Contrainte : une ligne par entrepôt, produit et version du produit.
+Quantité disponible = quantity - reserved_quantity. Le seuil minimum est configuré par entrepôt et produit ; 0 désactive l'alerte.
+Le stock natif `product.stock` des produits gérés est synchronisé avec la somme des quantités disponibles des entrepôts actifs.
 
-### StockMovement
-Champs : id, inventory_id, movement_type, quantity, reference_type, reference_id, reason, created_by, created_at.
-Types : INBOUND, OUTBOUND, ADJUSTMENT, TRANSFER_IN, TRANSFER_OUT, RETURN.
-Les mouvements validés sont immuables.
+### StockMovement — `medical_stock_movement`
+Champs : id, warehouse_id, product_id, product_version_id, movement_type, quantity_delta, reserved_quantity_delta, reference_type, reference_id, reason, created_at.
+Types utilisés : INBOUND, OUTBOUND, ADJUSTMENT, RESERVATION, RELEASE, SHIPMENT.
+Les deltas sont signés ; chaque mouvement est écrit dans la même transaction que la mutation du stock. Les lignes d'audit sont append-only.
 
-### StockReservation
-Champs : id, inventory_id, order_id, product_id, quantity, status, expires_at, created_at, released_at.
-Statuts : ACTIVE, CONSUMED, RELEASED, EXPIRED.
-Relations vers order et product natifs. Les contraintes d'unicité/idempotence doivent empêcher la réservation répétée du même besoin.
+### OrderWarehouseAllocation — `medical_order_warehouse_allocation`
+Champs : id, order_id, order_version_id, product_id, product_version_id, warehouse_id, quantity, shipped_quantity, status, created_at, updated_at.
+Contrainte d'idempotence : UNIQUE(order_id, order_version_id, product_id, product_version_id, warehouse_id).
+Statuts : RESERVED, PARTIALLY_SHIPPED, SHIPPED, RELEASED, PARTIALLY_CANCELLED.
+Une ligne représente la quantité d'un produit attribuée à un entrepôt pour une commande.
+
+### StockReservation — `medical_stock_reservation`
+Champs : id, allocation_id, order_id, order_version_id, warehouse_id, product_id, product_version_id, quantity, consumed_quantity, status, expires_at, created_at, updated_at, released_at.
+Contrainte : une réservation par allocation.
+Statuts : ACTIVE, CONSUMED, RELEASED.
+La réservation est créée dans la transaction de persistance de la commande. L'expédition consomme la réservation ; l'annulation libère uniquement le reliquat non expédié.
+
+### StockAlert — `medical_stock_alert`
+Champs : id, warehouse_id, product_id, product_version_id, threshold_quantity, available_quantity, status, opened_at, resolved_at.
+Statuts : OPEN, RESOLVED.
+Un scan ouvre ou actualise une alerte lorsque le disponible est inférieur ou égal au seuil, puis la résout lorsque le stock repasse au-dessus.
 
 ## B2B Customer Management
 
@@ -121,21 +134,17 @@ Conserver l'historique des décisions ; ne pas écraser les décisions précéde
 
 ## Delivery Management
 
-### Carrier
-Champs : id, code, name, tracking_url_template, active.
-Contrainte : code unique.
+### Shipment — `medical_shipment`
+Champs : id, order_id, order_version_id, warehouse_id, carrier_code, tracking_number, status, shipped_at, delivered_at, created_at, updated_at.
+Une expédition appartient à un seul entrepôt et à une commande ; une commande peut avoir plusieurs expéditions provenant de plusieurs entrepôts.
 
-### Shipment
-Champs : id, order_id, order_delivery_id, warehouse_id, carrier_id, tracking_number, status, shipped_at, delivered_at.
-Relation : Order 1 — N Shipment ; Warehouse 1 — N Shipment.
+### ShipmentItem — `medical_shipment_item`
+Champs : id, shipment_id, allocation_id, product_id, quantity, created_at.
+Une allocation peut être expédiée en plusieurs fois ; la somme expédiée ne peut pas dépasser la quantité allouée.
 
-### ShipmentItem
-Champs : id, shipment_id, order_line_item_id, quantity.
-Une ligne peut être expédiée en plusieurs shipments ; contrôler le cumul.
-
-### TrackingEvent
-Champs : id, shipment_id, event_code, description, event_date, location nullable.
-Historique append-only.
+### TrackingEvent — `medical_shipment_event`
+Champs : id, shipment_id, event_code, description, location, event_at, created_at.
+Historique append-only des événements SHIPPED et DELIVERED ; les événements peuvent être étendus selon les transporteurs intégrés.
 
 ## External Orders
 

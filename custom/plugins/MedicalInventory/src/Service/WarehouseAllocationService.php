@@ -15,8 +15,8 @@ use Shopware\Core\Framework\Uuid\Uuid;
  * Loads per-warehouse availability from the Shopware DAL and delegates
  * the allocation decision to the pure planner.
  *
- * This service plans allocations only. Order persistence and stock reservation
- * are intentionally handled later by the order/inventory workflow.
+ * The order fulfillment service uses these plans to persist allocations and
+ * reserve stock inside the Shopware order persistence transaction.
  */
 final class WarehouseAllocationService
 {

@@ -18,6 +18,8 @@ class WarehouseStockEntity extends Entity
 
     protected int $reservedQuantity;
 
+    protected int $minimumQuantity = 0;
+
     protected ?WarehouseEntity $warehouse = null;
 
     protected ?ProductEntity $product = null;
@@ -70,6 +72,16 @@ class WarehouseStockEntity extends Entity
     public function setReservedQuantity(int $reservedQuantity): void
     {
         $this->reservedQuantity = $reservedQuantity;
+    }
+
+    public function getMinimumQuantity(): int
+    {
+        return $this->minimumQuantity;
+    }
+
+    public function setMinimumQuantity(int $minimumQuantity): void
+    {
+        $this->minimumQuantity = $minimumQuantity;
     }
 
     public function getAvailableQuantity(): int
