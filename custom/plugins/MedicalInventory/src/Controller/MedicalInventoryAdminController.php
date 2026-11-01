@@ -6,6 +6,8 @@ use Doctrine\DBAL\Connection;
 use InvalidArgumentException;
 use MedicalInventory\Service\LowStockAlertService;
 use MedicalInventory\Service\ShipmentService;
+use MedicalInventory\Service\LowStockAlertService;
+use MedicalInventory\Service\ShipmentService;
 use MedicalInventory\Service\WarehouseService;
 use MedicalInventory\Service\WarehouseStockService;
 use Shopware\Core\Framework\Context;
