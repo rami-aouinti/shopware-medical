@@ -11,6 +11,7 @@ final class WarehouseStockCalculatorTest extends TestCase
 {
     private WarehouseStockCalculator $calculator;
 
+    #[\Override]
     protected function setUp(): void
     {
         $this->calculator = new WarehouseStockCalculator();
