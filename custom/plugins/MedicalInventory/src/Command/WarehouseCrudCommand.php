@@ -197,12 +197,6 @@ class WarehouseCrudCommand extends Command
         $this->stockService->assertWarehouseCanBeDeleted($code, $context);
         $this->warehouseService->deleteByCode($code, $context);
 
-        foreach ($stockRows as $stock) {
-            if ($stock instanceof WarehouseStockEntity) {
-                $this->stockService->syncProductAvailability($stock->getProductId(), $context);
-            }
-        }
-
         $io->success(sprintf('Warehouse "%s" deleted.', $code));
 
         return Command::SUCCESS;
