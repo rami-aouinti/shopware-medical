@@ -19,21 +19,25 @@ class WarehouseDefinition extends EntityDefinition
 {
     public const ENTITY_NAME = 'medical_warehouse';
 
+    #[\Override]
     public function getEntityName(): string
     {
         return self::ENTITY_NAME;
     }
 
+    #[\Override]
     public function getEntityClass(): string
     {
         return WarehouseEntity::class;
     }
 
+    #[\Override]
     public function getCollectionClass(): string
     {
         return WarehouseCollection::class;
     }
 
+    #[\Override]
     protected function defineFields(): FieldCollection
     {
         return new FieldCollection([
