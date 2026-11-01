@@ -332,7 +332,6 @@ final class WarehouseStockService
                 $newState['quantity'] - $currentQuantity,
                 $newState['reservedQuantity'] - $reservedQuantity,
                 $reason,
-                $context,
                 $referenceType,
                 $referenceId
             );
