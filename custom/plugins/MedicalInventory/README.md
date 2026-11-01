@@ -69,3 +69,42 @@ docker compose exec web php --ri xdebug
 Configure the IDE to listen on port 9003, use the host mapping
 /var/www/html to the project root, and start debugging with the
 XDEBUG_TRIGGER environment variable or cookie.
+
+
+## Warehouse priority and allocation planning
+
+Every warehouse has an allocation priority from 0 to 65535. Lower values have
+higher priority; newly created warehouses default to 100. Existing warehouses
+receive priority 100 through an additive migration, without changing their
+stock or other warehouse data.
+
+Set a priority when creating a warehouse:
+
+~~~bash
+docker compose exec web bin/console medical:inventory:warehouse create \
+  --code=DE-KOELN --name="Köln Central Warehouse" --country=DE --priority=10
+~~~
+
+Change an existing priority:
+
+~~~bash
+docker compose exec web bin/console medical:inventory:warehouse set-priority \
+  --code=DE-KOELN --priority=10
+~~~
+
+The allocation planner follows these rules:
+
+1. Ignore inactive warehouses and warehouses with no available stock.
+2. Prefer one warehouse that can fulfil the complete requested quantity.
+3. If several warehouses can fulfil it, choose the lowest priority value.
+4. For equal priorities, choose the warehouse with the greatest available stock.
+5. If no single warehouse can fulfil it, split the quantity in priority order,
+   using available stock descending as the tie-breaker.
+6. Use warehouse code as a deterministic final tie-breaker.
+7. If combined stock is insufficient, return an insufficient-stock exception;
+   no stock is reserved or changed by the planner.
+
+WarehouseAllocationService::planForProduct() loads stock rows through the DAL
+and returns the plan. It is deliberately a planning operation only. Persisting
+allocations against Shopware orders, reserving stock atomically, shipment
+tracking, and release/shipping lifecycle belong to the upcoming order workflow.
