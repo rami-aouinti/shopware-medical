@@ -15,6 +15,7 @@ class WarehouseService
 {
     public function __construct(
         private readonly EntityRepository $warehouseRepository,
+        private readonly WarehouseValidator $warehouseValidator,
     ) {
     }
 
@@ -24,12 +25,18 @@ class WarehouseService
         string $countryCode,
         Context $context,
     ): void {
+        $data = $this->warehouseValidator->validate($code, $name, $countryCode);
+
+        if ($this->findByCode($data['code'], $context) !== null) {
+            throw new RuntimeException(sprintf('A warehouse with code "%s" already exists.', $data['code']));
+        }
+
         $this->warehouseRepository->create([
             [
                 'id' => Uuid::randomHex(),
-                'code' => $code,
-                'name' => $name,
-                'countryCode' => strtoupper($countryCode),
+                'code' => $data['code'],
+                'name' => $data['name'],
+                'countryCode' => $data['countryCode'],
                 'isActive' => true,
             ],
         ], $context);
@@ -38,7 +45,7 @@ class WarehouseService
     public function findByCode(string $code, Context $context): ?WarehouseEntity
     {
         $criteria = new Criteria();
-        $criteria->addFilter(new EqualsFilter('code', $code));
+        $criteria->addFilter(new EqualsFilter('code', strtoupper(trim($code))));
         $criteria->setLimit(1);
 
         $entity = $this->warehouseRepository->search($criteria, $context)->first();
