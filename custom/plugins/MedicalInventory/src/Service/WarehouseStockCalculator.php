@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace MedicalInventory\\Service;
+namespace MedicalInventory\Service;
 
 use DomainException;
 use InvalidArgumentException;
