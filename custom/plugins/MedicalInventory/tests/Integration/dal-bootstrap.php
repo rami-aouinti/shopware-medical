@@ -3,6 +3,7 @@
 use Shopware\Core\TestBootstrapper;
 
 $projectRoot = dirname(__DIR__, 5);
+require_once $projectRoot . '/vendor/autoload.php';
 $databaseUrl = getenv('MEDICAL_INVENTORY_TEST_DATABASE_URL');
 
 if (!is_string($databaseUrl) || $databaseUrl === '') {
