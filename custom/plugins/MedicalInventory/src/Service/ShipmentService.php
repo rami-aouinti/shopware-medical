@@ -73,7 +73,7 @@ final class ShipmentService
         });
     }
 
-    public function markDelivered(string $shipmentId, Context $context, ?string $location = null): void
+    public function markDelivered(string $shipmentId, ?string $location = null): void
     {
         if (!Uuid::isValid($shipmentId)) {
             throw new InvalidArgumentException('Shipment ID must be a valid UUID.');
