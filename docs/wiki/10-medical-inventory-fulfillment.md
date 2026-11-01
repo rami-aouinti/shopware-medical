@@ -11,6 +11,16 @@ back both the order and the inventory changes.
 Products that have no `medical_warehouse_stock` row remain outside this
 plugin's inventory scope and continue to use native Shopware stock.
 
+## Shopware native stock integration
+
+Shopware 6.7's `OrderStockSubscriber` changes native product stock when order
+line items are created, edited, or cancelled. MedicalInventory decorates
+Shopware's `StockStorage` and filters those stock alterations for products
+that have a warehouse-stock row. This prevents the same order from reducing
+both the warehouse availability and the mirrored `product.stock` value twice.
+The native storage still handles products outside MedicalInventory, and its
+availability indexing remains delegated to Shopware.
+
 ## Reservation states
 
 - `ACTIVE`: quantity is reserved and may still be shipped.
