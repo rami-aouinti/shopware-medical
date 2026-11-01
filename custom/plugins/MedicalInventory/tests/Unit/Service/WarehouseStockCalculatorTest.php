@@ -40,6 +40,21 @@ final class WarehouseStockCalculatorTest extends TestCase
         );
     }
 
+    public function testItRejectsStockAdditionThatWouldOverflowTheDatabaseColumn(): void
+    {
+        $this->expectException(DomainException::class);
+
+        $this->calculator->add(WarehouseStockCalculator::MAX_QUANTITY, 0, 1);
+    }
+
+    public function testItRemovesAvailableStock(): void
+    {
+        self::assertSame(
+            ['quantity' => 15, 'reservedQuantity' => 5],
+            $this->calculator->remove(20, 5, 5)
+        );
+    }
+
     public function testItCannotRemoveReservedUnits(): void
     {
         $this->expectException(DomainException::class);
@@ -70,12 +85,26 @@ final class WarehouseStockCalculatorTest extends TestCase
         );
     }
 
+    public function testItCannotReleaseMoreThanReserved(): void
+    {
+        $this->expectException(DomainException::class);
+
+        $this->calculator->release(10, 2, 3);
+    }
+
     public function testShippingDecreasesBothPhysicalAndReservedQuantities(): void
     {
         self::assertSame(
             ['quantity' => 7, 'reservedQuantity' => 2],
             $this->calculator->ship(10, 5, 3)
         );
+    }
+
+    public function testItCannotShipMoreThanReserved(): void
+    {
+        $this->expectException(DomainException::class);
+
+        $this->calculator->ship(10, 2, 3);
     }
 
     public function testItRejectsZeroOrNegativeMovements(): void
@@ -85,10 +114,17 @@ final class WarehouseStockCalculatorTest extends TestCase
         $this->calculator->add(10, 0, 0);
     }
 
-    public function testItRejectsQuantitiesAboveTheDatabaseLimit(): void
+    public function testItRejectsNegativeOrOversizedPhysicalQuantity(): void
     {
         $this->expectException(InvalidArgumentException::class);
 
         $this->calculator->setQuantity(0, 0, WarehouseStockCalculator::MAX_QUANTITY + 1);
+    }
+
+    public function testItRejectsAnExistingInvalidStockState(): void
+    {
+        $this->expectException(DomainException::class);
+
+        $this->calculator->reserve(5, 8, 1);
     }
 }

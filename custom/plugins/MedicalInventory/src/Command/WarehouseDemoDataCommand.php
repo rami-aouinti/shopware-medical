@@ -3,6 +3,7 @@
 namespace MedicalInventory\Command;
 
 use MedicalInventory\Core\Content\Warehouse\WarehouseEntity;
+use MedicalInventory\Core\Content\WarehouseStock\WarehouseStockEntity;
 use MedicalInventory\Service\WarehouseService;
 use MedicalInventory\Service\WarehouseStockService;
 use RuntimeException;
@@ -119,7 +120,7 @@ final class WarehouseDemoDataCommand extends Command
             foreach ($definition['stock'] as $warehouseCode => $quantity) {
                 $existingStock = $this->stockService->getStock($warehouseCode, $product->getId(), $context);
 
-                if ($existingStock !== null) {
+                if ($existingStock instanceof WarehouseStockEntity) {
                     $rows[] = [
                         $definition['productNumber'],
                         $warehouseCode,
@@ -176,7 +177,7 @@ final class WarehouseDemoDataCommand extends Command
     {
         $warehouse = $this->warehouseService->findByCode($definition['code'], $context);
 
-        if ($warehouse !== null) {
+        if ($warehouse instanceof WarehouseEntity) {
             return $warehouse;
         }
 
@@ -189,7 +190,7 @@ final class WarehouseDemoDataCommand extends Command
 
         $warehouse = $this->warehouseService->findByCode($definition['code'], $context);
 
-        if ($warehouse === null) {
+        if (!$warehouse instanceof WarehouseEntity) {
             throw new RuntimeException(sprintf(
                 'Warehouse "%s" could not be created.',
                 $definition['code']

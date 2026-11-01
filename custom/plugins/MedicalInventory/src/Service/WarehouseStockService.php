@@ -7,6 +7,7 @@ use DomainException;
 use InvalidArgumentException;
 use MedicalInventory\Core\Content\Warehouse\WarehouseEntity;
 use MedicalInventory\Core\Content\WarehouseStock\WarehouseStockEntity;
+use RuntimeException;
 use Shopware\Core\Content\Product\ProductEntity;
 use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
@@ -14,7 +15,6 @@ use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\EntitySearchResult;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\EqualsFilter;
 use Shopware\Core\Framework\Uuid\Uuid;
-use RuntimeException;
 
 /**
  * Application service for stock operations.
@@ -214,7 +214,9 @@ final class WarehouseStockService
                         'reservedQuantity' => $newState['reservedQuantity'],
                     ],
                 ], $context);
-            } else {
+            }
+
+            if ($row !== false) {
                 $this->warehouseStockRepository->update([
                     [
                         'id' => (string) $row['id'],
@@ -226,7 +228,7 @@ final class WarehouseStockService
 
             $stock = $this->findStockByIds($warehouseId, $productId, $versionId, $context);
 
-            if ($stock === null) {
+            if (!$stock instanceof WarehouseStockEntity) {
                 throw new RuntimeException('The stock row could not be reloaded after the operation.');
             }
 
