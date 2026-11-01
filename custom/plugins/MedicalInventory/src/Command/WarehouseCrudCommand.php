@@ -1,17 +1,17 @@
 <?php declare(strict_types=1);
 
-namespace MedicalInventory\\Command;
+namespace MedicalInventory\Command;
 
-use MedicalInventory\\Core\\Content\\Warehouse\\WarehouseEntity;
-use MedicalInventory\\Service\\WarehouseService;
-use Shopware\\Core\\Framework\\Context;
-use Symfony\\Component\\Console\\Attribute\\AsCommand;
-use Symfony\\Component\\Console\\Command\\Command;
-use Symfony\\Component\\Console\\Input\\InputArgument;
-use Symfony\\Component\\Console\\Input\\InputInterface;
-use Symfony\\Component\\Console\\Input\\InputOption;
-use Symfony\\Component\\Console\\Output\\OutputInterface;
-use Symfony\\Component\\Console\\Style\\SymfonyStyle;
+use MedicalInventory\Core\Content\Warehouse\WarehouseEntity;
+use MedicalInventory\Service\WarehouseService;
+use Shopware\Core\Framework\Context;
+use Symfony\Component\Console\Attribute\AsCommand;
+use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Style\SymfonyStyle;
 
 #[AsCommand(
     name: 'medical:inventory:warehouse',
@@ -25,7 +25,7 @@ class WarehouseCrudCommand extends Command
         parent::__construct();
     }
 
-    #[\\Override]
+    #[\Override]
     protected function configure(): void
     {
         $this
@@ -39,7 +39,7 @@ class WarehouseCrudCommand extends Command
             ->addOption('country', null, InputOption::VALUE_REQUIRED, 'Two-letter country code');
     }
 
-    #[\\Override]
+    #[\Override]
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
@@ -49,7 +49,7 @@ class WarehouseCrudCommand extends Command
 
         try {
             return $this->dispatch($action, $code, $input, $io, $context);
-        } catch (\\InvalidArgumentException | \\RuntimeException $exception) {
+        } catch (\InvalidArgumentException | \RuntimeException $exception) {
             $io->error($exception->getMessage());
 
             return Command::FAILURE;
@@ -170,7 +170,7 @@ class WarehouseCrudCommand extends Command
     private function requireCode(string $code): void
     {
         if (trim($code) === '') {
-            throw new \\RuntimeException('This action requires the --code option.');
+            throw new \RuntimeException('This action requires the --code option.');
         }
     }
 }
