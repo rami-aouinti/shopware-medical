@@ -68,7 +68,7 @@ final class MedicalInventoryStockStorageDecorator extends AbstractStockStorage
         );
 
         $managedLookup = array_fill_keys(
-            array_map(static fn (string $id): string => strtolower($id), $managedProductIds),
+            array_map(static fn (mixed $id): string => strtolower((string) $id), $managedProductIds),
             true
         );
 
