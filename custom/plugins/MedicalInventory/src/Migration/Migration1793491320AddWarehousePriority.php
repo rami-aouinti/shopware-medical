@@ -7,11 +7,13 @@ use Shopware\Core\Framework\Migration\MigrationStep;
 
 class Migration1793491320AddWarehousePriority extends MigrationStep
 {
+    #[\Override]
     public function getCreationTimestamp(): int
     {
         return 1793491320;
     }
 
+    #[\Override]
     public function update(Connection $connection): void
     {
         $schemaManager = $connection->createSchemaManager();
