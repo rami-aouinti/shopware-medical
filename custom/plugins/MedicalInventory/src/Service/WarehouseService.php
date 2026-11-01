@@ -64,7 +64,7 @@ class WarehouseService
 
         $this->warehouseRepository->update([
             [
-                'id' => $warehouse->getId(),
+                'id' => $warehouse->getUniqueIdentifier(),
                 'isActive' => $active,
             ],
         ], $context);
@@ -79,7 +79,7 @@ class WarehouseService
         }
 
         $this->warehouseRepository->delete([
-            ['id' => $warehouse->getId()],
+            ['id' => $warehouse->getUniqueIdentifier()],
         ], $context);
     }
 }
