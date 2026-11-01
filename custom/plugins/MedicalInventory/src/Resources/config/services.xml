@@ -6,7 +6,7 @@
            https://symfony.com/schema/dic/services/services-1.0.xsd">
 
     <services>
-        <service id="MedicalInventory\\Core\\Content\\Warehouse\\WarehouseDefinition">
+        <service id="MedicalInventory\Core\Content\Warehouse\WarehouseDefinition">
             <tag name="shopware.entity.definition" entity="medical_warehouse"/>
         </service>
     </services>
