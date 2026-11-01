@@ -6,6 +6,7 @@ use MedicalInventory\Core\Content\WarehouseStock\WarehouseStockDefinition;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityDefinition;
 use Shopware\Core\Framework\DataAbstractionLayer\Field\BoolField;
 use Shopware\Core\Framework\DataAbstractionLayer\Field\CreatedAtField;
+use Shopware\Core\Framework\DataAbstractionLayer\Field\Flag\CascadeDelete;
 use Shopware\Core\Framework\DataAbstractionLayer\Field\Flag\PrimaryKey;
 use Shopware\Core\Framework\DataAbstractionLayer\Field\Flag\Required;
 use Shopware\Core\Framework\DataAbstractionLayer\Field\IdField;
@@ -54,11 +55,11 @@ class WarehouseDefinition extends EntityDefinition
             new CreatedAtField(),
             new UpdatedAtField(),
 
-            new OneToManyAssociationField(
+            (new OneToManyAssociationField(
                 'stocks',
                 WarehouseStockDefinition::class,
                 'warehouse_id'
-            ),
+            ))->addFlags(new CascadeDelete()),
         ]);
     }
 }
