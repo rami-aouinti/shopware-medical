@@ -9,6 +9,15 @@
         <service id="MedicalInventory\Core\Content\Warehouse\WarehouseDefinition">
             <tag name="shopware.entity.definition" entity="medical_warehouse"/>
         </service>
+
+        <service id="MedicalInventory\Service\WarehouseService">
+            <argument type="service" id="medical_warehouse.repository"/>
+        </service>
+
+        <service id="MedicalInventory\Command\WarehouseCrudCommand">
+            <argument type="service" id="MedicalInventory\Service\WarehouseService"/>
+            <tag name="console.command"/>
+        </service>
     </services>
 
 </container>
