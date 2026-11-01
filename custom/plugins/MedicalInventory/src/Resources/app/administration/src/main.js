@@ -60,7 +60,7 @@ Component.register('medical-inventory-dashboard', {
                         </sw-card>
 
                         <sw-card title="Add or adjust product stock" style="margin:16px 0">
-                            <sw-text-field v-model:value="productSearch" label="Search product by number or name" @input="searchProducts"/>
+                            <sw-text-field v-model:value="productSearch" label="Search product by number or name" @update:value="searchProducts"/>
                             <div v-if="productResults.length" style="border:1px solid #d1d5db;border-radius:4px;margin-bottom:12px">
                                 <button v-for="product in productResults" :key="product.id" type="button" @click="selectProduct(product)"
                                         style="display:block;width:100%;text-align:left;padding:10px;border:0;border-bottom:1px solid #e5e7eb;background:white;cursor:pointer">
