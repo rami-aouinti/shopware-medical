@@ -206,6 +206,33 @@ final class WarehouseStockService
         });
     }
 
+    public function assertWarehouseCanBeDeleted(string $warehouseCode, Context $context): void
+    {
+        $warehouse = $this->getWarehouse($warehouseCode, $context);
+        $warehouseId = Uuid::fromHexToBytes($warehouse->getUniqueIdentifier());
+
+        $tables = [
+            'medical_warehouse_stock',
+            'medical_stock_movement',
+            'medical_order_warehouse_allocation',
+            'medical_stock_reservation',
+            'medical_shipment',
+        ];
+
+        foreach ($tables as $table) {
+            $count = (int) $this->connection->fetchOne(
+                sprintf('SELECT COUNT(*) FROM %s WHERE warehouse_id = :warehouseId', $table),
+                ['warehouseId' => $warehouseId]
+            );
+
+            if ($count > 0) {
+                throw new DomainException(
+                    sprintf('Warehouse "%s" has inventory or history and cannot be deleted. Deactivate it instead.', $warehouseCode)
+                );
+            }
+        }
+    }
+
     public function syncProductAvailability(string $productId, Context $context): void
     {
         $this->assertProductId($productId);
@@ -381,7 +408,7 @@ final class WarehouseStockService
             return;
         }
 
-        $availableQuantity = (int) $this->connection->fetchOne(
+        $availableQuantity = min((int) $this->connection->fetchOne(
             <<<'SQL'
                 SELECT COALESCE(SUM(s.quantity - s.reserved_quantity), 0)
                 FROM medical_warehouse_stock s
@@ -394,7 +421,7 @@ final class WarehouseStockService
                 'productId' => Uuid::fromHexToBytes($productId),
                 'productVersionId' => Uuid::fromHexToBytes($productVersionId),
             ]
-        );
+        ), WarehouseStockCalculator::MAX_QUANTITY);
 
         $this->productRepository->update([[
             'id' => $productId,
