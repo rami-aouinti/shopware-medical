@@ -57,7 +57,9 @@ final class OrderFulfillmentService
                     $item['warehouseCode'],
                     $productId,
                     $item['quantity'],
-                    $context
+                    $context,
+                    'order',
+                    $orderId
                 );
 
                 $allocationId = Uuid::randomHex();
@@ -120,7 +122,9 @@ final class OrderFulfillmentService
                     $warehouseCode,
                     (string) $reservation['product_id'],
                     $remaining,
-                    $context
+                    $context,
+                    'order',
+                    $orderId
                 );
 
                 // Restore Shopware's aggregate stock after the native order stock updater deducted it.
