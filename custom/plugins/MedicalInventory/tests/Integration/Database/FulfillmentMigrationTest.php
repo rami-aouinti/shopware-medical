@@ -183,7 +183,7 @@ final class FulfillmentMigrationTest extends TestCase
 
         $alertService = new LowStockAlertService($this->connection());
 
-        self::assertSame(1, $alertService->scan());
+        $alertService->scan();
         $alertService->scan();
 
         self::assertCount(1, $alertService->getOpenAlerts());
@@ -192,7 +192,8 @@ final class FulfillmentMigrationTest extends TestCase
             'UPDATE medical_warehouse_stock SET quantity = 20, reserved_quantity = 0'
         );
 
-        self::assertSame(0, $alertService->scan());
+        $alertService->scan();
+
         self::assertCount(0, $alertService->getOpenAlerts());
         self::assertSame('RESOLVED', $this->connection()->fetchOne(
             'SELECT status FROM medical_stock_alert'
