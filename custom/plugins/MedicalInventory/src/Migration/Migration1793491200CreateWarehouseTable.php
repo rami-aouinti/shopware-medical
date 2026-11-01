@@ -7,11 +7,13 @@ use Shopware\Core\Framework\Migration\MigrationStep;
 
 class Migration1793491200CreateWarehouseTable extends MigrationStep
 {
+    #[\Override]
     public function getCreationTimestamp(): int
     {
         return 1793491200;
     }
 
+    #[\Override]
     public function update(Connection $connection): void
     {
         $connection->executeStatement(<<<'SQL'
