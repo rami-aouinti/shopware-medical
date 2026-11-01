@@ -2,7 +2,7 @@ const { Component, Module } = Shopware;
 
 Component.register('medical-inventory-dashboard', {
     inject: ['loginService'],
-    template: \`
+    template: `
         <sw-page class="medical-inventory-dashboard">
             <template #smart-bar-header><h2>Medical Inventory</h2></template>
             <template #content>
@@ -108,7 +108,7 @@ Component.register('medical-inventory-dashboard', {
                 </div>
             </template>
         </sw-page>
-    \`,
+    `,
     data() {
         return {
             isLoading:false,isScanning:false,error:null,success:null,dashboard:null,
