@@ -1,0 +1,22 @@
+{
+  "name": "rami/medical-inventory",
+  "description": "Warehouse and inventory management for MedicalSupply B2B Commerce.",
+  "type": "shopware-platform-plugin",
+  "license": "MIT",
+  "version": "1.0.0",
+  "require": {
+    "shopware/core": ">=6.7.0.0 <6.8.0.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "MedicalInventory\\\\": "src/"
+    }
+  },
+  "extra": {
+    "shopware-plugin-class": "MedicalInventory\\\\MedicalInventory",
+    "label": {
+      "en-GB": "Medical Inventory",
+      "de-DE": "Medical Inventory"
+    }
+  }
+}
