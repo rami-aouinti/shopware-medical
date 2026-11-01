@@ -6,11 +6,19 @@
            https://symfony.com/schema/dic/services/services-1.0.xsd">
 
     <services>
-        <service id="MedicalInventory\Core\Content\Warehouse\WarehouseDefinition">
+        <service
+                id="MedicalInventory\Core\Content\Warehouse\WarehouseDefinition"
+                class="MedicalInventory\Core\Content\Warehouse\WarehouseDefinition"
+                public="true"
+        >
             <tag name="shopware.entity.definition" entity="medical_warehouse"/>
         </service>
 
-        <service id="MedicalInventory\Core\Content\WarehouseStock\WarehouseStockDefinition">
+        <service
+                id="MedicalInventory\Core\Content\WarehouseStock\WarehouseStockDefinition"
+                class="MedicalInventory\Core\Content\WarehouseStock\WarehouseStockDefinition"
+                public="true"
+        >
             <tag name="shopware.entity.definition" entity="medical_warehouse_stock"/>
         </service>
 
