@@ -21,11 +21,13 @@ class WarehouseStockDefinition extends EntityDefinition
     public const ENTITY_NAME = 'medical_warehouse_stock';
 
     #[\Override]
+    #[\Override]
     public function getEntityName(): string
     {
         return self::ENTITY_NAME;
     }
 
+    #[\Override]
     #[\Override]
     public function getEntityClass(): string
     {
@@ -33,11 +35,13 @@ class WarehouseStockDefinition extends EntityDefinition
     }
 
     #[\Override]
+    #[\Override]
     public function getCollectionClass(): string
     {
         return WarehouseStockCollection::class;
     }
 
+    #[\Override]
     #[\Override]
     protected function defineFields(): FieldCollection
     {
