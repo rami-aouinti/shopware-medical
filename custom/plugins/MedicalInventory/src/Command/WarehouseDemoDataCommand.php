@@ -196,7 +196,10 @@ final class WarehouseDemoDataCommand extends Command
         $warehouse = $this->warehouseService->findByCode($definition['code'], $context);
 
         if ($warehouse === null) {
-            throw new RuntimeException(sprintf('Warehouse "%s" could not be created.', $definition['code']));
+            throw new RuntimeException(sprintf(
+                'Warehouse "%s" could not be created.',
+                $definition['code']
+            ));
         }
 
         return $warehouse;
