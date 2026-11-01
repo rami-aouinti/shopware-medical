@@ -117,7 +117,7 @@ class WarehouseCrudCommand extends Command
         $this->requireCode($code);
         $warehouse = $this->warehouseService->findByCode($code, $context);
 
-        if ($warehouse === null) {
+        if (!$warehouse instanceof WarehouseEntity) {
             $io->warning(sprintf('Warehouse "%s" was not found.', $code));
 
             return Command::FAILURE;
