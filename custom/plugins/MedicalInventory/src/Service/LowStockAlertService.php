@@ -35,7 +35,7 @@ final class LowStockAlertService
             );
 
             $openedOrUpdated = 0;
-            $now = (new \\DateTimeImmutable())->format('Y-m-d H:i:s.v');
+            $now = (new \DateTimeImmutable())->format('Y-m-d H:i:s.v');
 
             foreach ($rows as $row) {
                 $criteria = [
