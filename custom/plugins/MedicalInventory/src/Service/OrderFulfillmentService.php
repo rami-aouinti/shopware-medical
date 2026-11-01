@@ -134,6 +134,7 @@ final class OrderFulfillmentService
                         SET stock = stock + :quantity
                         WHERE id = :productId
                           AND version_id = :versionId
+                          AND is_closeout = 1
                     SQL,
                     [
                         'quantity' => $remaining,
@@ -153,10 +154,10 @@ final class OrderFulfillmentService
         $this->connection->executeStatement(
             <<<'SQL'
                 UPDATE medical_order_warehouse_allocation
-                SET status = CASE WHEN shipped_quantity > 0 THEN 'PARTIALLY_SHIPPED' ELSE 'RELEASED' END,
+                SET status = CASE WHEN shipped_quantity > 0 THEN 'PARTIALLY_CANCELLED' ELSE 'RELEASED' END,
                     updated_at = :updatedAt
                 WHERE order_id = :orderId
-                  AND status = 'RESERVED'
+                  AND status IN ('RESERVED', 'PARTIALLY_SHIPPED')
             SQL,
             [
                 'updatedAt' => (new \DateTimeImmutable())->format('Y-m-d H:i:s.v'),
