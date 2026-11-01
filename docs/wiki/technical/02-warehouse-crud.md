@@ -151,3 +151,27 @@ La commande est un outil de démonstration et non une interface destinée aux ut
 ## Étape suivante
 
 Ajouter une validation métier propre au domaine Warehouse, puis exposer la lecture et les opérations autorisées à travers une API adaptée à Shopware. Nous aborderons notamment les contraintes DAL, les associations et les permissions avant d'ouvrir les opérations d'écriture.
+
+
+## Correction — récupérer l'identifiant d'une Entity Shopware
+
+Dans une entité Shopware, l'identifiant technique est exposé par la méthode héritée `getUniqueIdentifier()`. Il ne faut pas supposer que chaque entité DAL possède un getter `getId()`.
+
+Pour notre `WarehouseEntity`, nous utilisons donc :
+
+```php
+$id = $warehouse->getUniqueIdentifier();
+```
+
+Cette valeur est ensuite transmise au repository pour les écritures :
+
+```php
+$this->warehouseRepository->update([
+    [
+        'id' => $warehouse->getUniqueIdentifier(),
+        'isActive' => $active,
+    ],
+], $context);
+```
+
+La même méthode est utilisée pour `delete()` et pour afficher l'ID dans la commande CLI. Cette correction est appliquée dans `WarehouseService.php` et `WarehouseCrudCommand.php`.
