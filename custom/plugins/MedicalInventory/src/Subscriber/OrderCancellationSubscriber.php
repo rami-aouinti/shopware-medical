@@ -8,8 +8,9 @@ use Shopware\Core\Checkout\Order\OrderStates;
 use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\Uuid\Uuid;
 use Shopware\Core\System\StateMachine\Event\StateMachineTransitionEvent;
+use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
-final class OrderCancellationSubscriber
+final class OrderCancellationSubscriber implements EventSubscriberInterface
 {
     public function __construct(
         private readonly Connection $connection,
