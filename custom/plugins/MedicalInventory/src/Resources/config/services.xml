@@ -10,8 +10,11 @@
             <tag name="shopware.entity.definition" entity="medical_warehouse"/>
         </service>
 
+        <service id="MedicalInventory\Service\WarehouseValidator"/>
+
         <service id="MedicalInventory\Service\WarehouseService">
             <argument type="service" id="medical_warehouse.repository"/>
+            <argument type="service" id="MedicalInventory\Service\WarehouseValidator"/>
         </service>
 
         <service id="MedicalInventory\Command\WarehouseCrudCommand">
