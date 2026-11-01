@@ -19,7 +19,7 @@ Les règles ci-dessous constituent la version 1. Elles seront référencées par
 - BR-015 : une réservation ne peut pas rendre le stock disponible négatif ; une annulation libère uniquement la quantité non expédiée.
 - BR-016 : la réservation est atomique, protégée contre les mises à jour concurrentes et incluse dans la transaction de persistance de la commande.
 - BR-017 : l'allocation ignore les entrepôts inactifs ; elle privilégie un entrepôt pouvant satisfaire toute la ligne de commande, choisi par priorité croissante, puis par stock disponible décroissant ; si aucun entrepôt ne suffit seul, la quantité est répartie selon le même ordre ; si le stock cumulé est insuffisant, aucune réservation n'est créée.
-- BR-018 : le stock multi-entrepôts est la source de vérité pour les produits gérés par MedicalInventory ; les produits sans ligne de stock MedicalInventory restent gérés par le stock natif Shopware. Le stock natif agrégé reste cohérent avec les réservations de commande pour les produits en mode closeout.
+- BR-018 : le stock multi-entrepôts est la source de vérité pour les produits gérés par MedicalInventory ; les produits sans ligne de stock MedicalInventory restent gérés par le stock natif Shopware. Le stock natif agrégé reste géré par le mécanisme natif de cycle de vie des commandes Shopware ; MedicalInventory ne modifie que le stock et les réservations par entrepôt.
 
 ## Comptes B2B et accès
 
