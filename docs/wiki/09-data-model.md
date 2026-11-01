@@ -56,7 +56,7 @@ Relation : Product N — N Media si plusieurs documents et réutilisation sont r
 ## Inventory Management
 
 ### Warehouse
-Champs : id, code, name, street, zipcode, city, country_id, active, is_default.
+Champs : id, code, name, country_code, priority, active. La priorité est un entier de 0 à 65535 ; une valeur plus petite est prioritaire et la valeur par défaut est 100. La V1 n'utilise pas encore la distance géographique.
 Contraintes : code unique ; un seul entrepôt par défaut si cette règle est retenue.
 
 ### Inventory
