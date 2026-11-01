@@ -1,6 +1,6 @@
 {
   "main.js": {
-    "file": "assets/swag-extension-store-CRvzeWEr.js",
+    "file": "assets/swag-extension-store-Bjqaqdzm.js",
     "name": "swag-extension-store",
     "src": "main.js",
     "isEntry": true,
@@ -60,7 +60,7 @@
     ]
   },
   "module/sw-extension-store/component/sw-extension-store-purchase-confirmation-checkout/index.ts": {
-    "file": "assets/index-B3piLQFU.js",
+    "file": "assets/index-BXzxn2JF.js",
     "name": "index",
     "src": "module/sw-extension-store/component/sw-extension-store-purchase-confirmation-checkout/index.ts",
     "isDynamicEntry": true,
@@ -72,7 +72,7 @@
     ]
   },
   "module/sw-extension-store/component/sw-extension-store-purchase-confirmation-modal/index.ts": {
-    "file": "assets/index-cj08uMqT.js",
+    "file": "assets/index-DMxHxey6.js",
     "name": "index",
     "src": "module/sw-extension-store/component/sw-extension-store-purchase-confirmation-modal/index.ts",
     "isDynamicEntry": true,
@@ -93,7 +93,7 @@
     ]
   },
   "module/sw-extension-store/page/sw-extension-store-index/index.js": {
-    "file": "assets/index-nEpsAGVw.js",
+    "file": "assets/index-BH2NSdsD.js",
     "name": "index",
     "src": "module/sw-extension-store/page/sw-extension-store-index/index.js",
     "isDynamicEntry": true,
@@ -150,7 +150,7 @@
     ]
   },
   "module/sw-in-app-purchases/component/sw-in-app-purchase-checkout/index.ts": {
-    "file": "assets/index-Bxgnc9aI.js",
+    "file": "assets/index-DhJylTVe.js",
     "name": "index",
     "src": "module/sw-in-app-purchases/component/sw-in-app-purchase-checkout/index.ts",
     "isDynamicEntry": true,
@@ -171,7 +171,7 @@
     ]
   },
   "module/sw-payments/component/sw-payments-dashboard-promotion-card/index.js": {
-    "file": "assets/index-C72rLUAp.js",
+    "file": "assets/index-CLZ9qIuw.js",
     "name": "index",
     "src": "module/sw-payments/component/sw-payments-dashboard-promotion-card/index.js",
     "isDynamicEntry": true,

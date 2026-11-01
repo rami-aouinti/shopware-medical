@@ -1,0 +1,23 @@
+{
+  "base": "/bundles/medicalinventory/administration/",
+  "entryPoints": {
+    "medical-inventory": {
+      "css": [],
+      "dynamic": [],
+      "js": [
+        "/bundles/medicalinventory/administration/assets/medical-inventory-D4Q_QY84.js"
+      ],
+      "legacy": false,
+      "preload": []
+    }
+  },
+  "legacy": false,
+  "metadatas": {},
+  "version": [
+    "7.1.0",
+    7,
+    1,
+    0
+  ],
+  "viteServer": null
+}
