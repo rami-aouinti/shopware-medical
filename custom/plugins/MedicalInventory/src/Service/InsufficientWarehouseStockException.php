@@ -16,7 +16,8 @@ final class InsufficientWarehouseStockException extends CartException
         parent::__construct(
             Response::HTTP_CONFLICT,
             self::ERROR_CODE,
-            'Insufficient warehouse stock: requested {{ requestedQuantity }} units, only {{ availableQuantity }} units are available.',
+            'Insufficient warehouse stock: requested {{ requestedQuantity }} units, '
+            . 'only {{ availableQuantity }} units are available.',
             [
                 'requestedQuantity' => $requestedQuantity,
                 'availableQuantity' => $availableQuantity,
