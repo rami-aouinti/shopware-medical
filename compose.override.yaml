@@ -1,0 +1,6 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.xdebug
+    image: shopware-medical-dev-xdebug:php8.5

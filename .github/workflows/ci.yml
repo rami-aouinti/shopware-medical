@@ -1,17 +1,59 @@
-name: Check
+name: MedicalInventory CI
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - dev
+      - staging
+      - master
   pull_request:
-    branches: [ main ]
+    branches:
+      - dev
+      - staging
+      - master
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: medical-inventory-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  check:
+  quality:
+    name: PHP 8.5 / Shopware 6.7 quality and tests
     runs-on: ubuntu-latest
+    timeout-minutes: 35
 
     steps:
-      - name: Project Validate
-        uses: shopware/github-actions/project-validate@main
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
         with:
-          phpVersion: '8.4'
+          php-version: '8.5'
+          tools: composer:v2
+          extensions: bcmath, ctype, curl, dom, fileinfo, gd, iconv, intl, json, libxml, mbstring, openssl, pdo_mysql, simplexml, sodium, tokenizer, xml, xmlwriter, zip
+          coverage: none
+
+      - name: Validate Composer configuration
+        run: composer validate --no-check-publish --no-check-lock
+
+      - name: Install Shopware CLI
+        uses: shopware/shopware-cli-action@v3
+
+      - name: Validate MedicalInventory extension
+        run: shopware-cli extension validate custom/plugins/MedicalInventory
+
+      # The committed lock file predates the new quality-tool dependencies.
+      # Resolve them in CI; run composer update locally and commit the refreshed lock.
+      - name: Resolve project and quality dependencies
+        run: composer update --no-interaction --prefer-dist --no-progress --no-scripts
+
+      - name: Build optimized autoloader
+        run: composer dump-autoload --optimize --no-interaction
+
+      - name: Run all quality gates and unit tests
+        run: composer quality

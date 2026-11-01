@@ -48,6 +48,15 @@
             <argument type="service" id="MedicalInventory\Service\WarehouseStockService"/>
             <tag name="console.command"/>
         </service>
+
+        <service id="MedicalInventory\Command\WarehouseDemoDataCommand">
+            <argument type="service" id="MedicalInventory\Service\WarehouseService"/>
+            <argument type="service" id="MedicalInventory\Service\WarehouseStockService"/>
+            <argument type="service" id="product.repository"/>
+            <argument type="service" id="tax.repository"/>
+            <argument type="service" id="currency.repository"/>
+            <tag name="console.command"/>
+        </service>
     </services>
 
 </container>

@@ -1,0 +1,10 @@
+parameters:
+    phpVersion: 80500
+    level: 4
+    paths:
+        - custom/plugins/MedicalInventory/src
+        - custom/plugins/MedicalInventory/tests
+    bootstrapFiles:
+        - vendor/autoload.php
+    tmpDir: var/cache/phpstan-medical-inventory
+    treatPhpDocTypesAsCertain: false
