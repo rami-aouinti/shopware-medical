@@ -27,9 +27,10 @@ docker compose exec web bin/console medical:inventory:stock list --warehouse=DE-
 docker compose exec web bin/console medical:inventory:stock list --warehouse=FR-PARIS_01
 ~~~
 
-The plugin stock is tracked per warehouse. Shopware's native product stock is
-initialized to the sum of the demo warehouse quantities only when a demo
-product is first created; existing products are not changed.
+The plugin stock is tracked per warehouse. For managed products, Shopware's
+aggregate product stock is synchronized to the sum of available quantities in
+active warehouses after stock mutations. Products without MedicalInventory
+stock rows remain under native Shopware stock management.
 
 ## Tests and quality tools
 
