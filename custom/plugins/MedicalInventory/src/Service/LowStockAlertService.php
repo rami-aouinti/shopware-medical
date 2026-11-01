@@ -14,6 +14,9 @@ final class LowStockAlertService
     public function scan(): int
     {
         return $this->connection->transactional(function (): int {
+            // Lock the inventory rows in a stable order. Two scheduler workers
+            // must not both observe "no OPEN alert" and insert duplicate alerts
+            // for the same warehouse/product pair.
             $rows = $this->connection->fetchAllAssociative(
                 <<<'SQL'
                     SELECT
@@ -26,11 +29,13 @@ final class LowStockAlertService
                     INNER JOIN medical_warehouse w ON w.id = s.warehouse_id
                     WHERE w.is_active = 1
                       AND s.minimum_quantity > 0
+                    ORDER BY s.warehouse_id, s.product_id, s.product_version_id
+                    FOR UPDATE
                 SQL
             );
 
             $openedOrUpdated = 0;
-            $now = (new \DateTimeImmutable())->format('Y-m-d H:i:s.v');
+            $now = (new \\DateTimeImmutable())->format('Y-m-d H:i:s.v');
 
             foreach ($rows as $row) {
                 $criteria = [
