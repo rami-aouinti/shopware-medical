@@ -65,7 +65,7 @@ final class WarehouseAllocationPlanner
             $candidates[] = $warehouse;
         }
 
-        usort($candidates, self::compareCandidates(...));
+        usort($candidates, $this->compareCandidates(...));
 
         return $candidates;
     }
@@ -195,7 +195,7 @@ final class WarehouseAllocationPlanner
      * @param array{warehouseCode: string, priority: int, availableQuantity: int, active: bool} $left
      * @param array{warehouseCode: string, priority: int, availableQuantity: int, active: bool} $right
      */
-    private static function compareCandidates(array $left, array $right): int
+    private function compareCandidates(array $left, array $right): int
     {
         $priorityComparison = $left['priority'] <=> $right['priority'];
 
