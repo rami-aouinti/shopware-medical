@@ -5,6 +5,7 @@ namespace MedicalInventory\Subscriber;
 use Doctrine\DBAL\Connection;
 use MedicalInventory\Service\OrderFulfillmentService;
 use Shopware\Core\Checkout\Order\OrderStates;
+use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\Uuid\Uuid;
 use Shopware\Core\System\StateMachine\Event\StateMachineTransitionEvent;
 
