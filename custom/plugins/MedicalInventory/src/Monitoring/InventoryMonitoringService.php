@@ -29,7 +29,8 @@ final class InventoryMonitoringService
                     (SELECT COUNT(*) FROM medical_warehouse_stock) AS stock_rows,
                     (SELECT COALESCE(SUM(quantity), 0) FROM medical_warehouse_stock) AS stock_physical,
                     (SELECT COALESCE(SUM(reserved_quantity), 0) FROM medical_warehouse_stock) AS stock_reserved,
-                    (SELECT COALESCE(SUM(quantity - reserved_quantity), 0) FROM medical_warehouse_stock) AS stock_available,
+                    (SELECT COALESCE(SUM(quantity - reserved_quantity), 0)
+                        FROM medical_warehouse_stock) AS stock_available,
                     (SELECT COUNT(*) FROM medical_stock_alert WHERE status = 'OPEN') AS alerts_open,
                     (SELECT COUNT(*) FROM medical_stock_reservation WHERE status = 'ACTIVE') AS reservations_active,
                     (SELECT COUNT(*) FROM medical_shipment WHERE status = 'SHIPPED') AS shipments_open
