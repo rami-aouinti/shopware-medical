@@ -17,7 +17,10 @@ class ProductDocumentDefinitionTest extends TestCase
         self::assertInstanceOf(ProductDocumentDefinition::class, $definition);
         self::assertNotNull(static::getContainer()->get('medical_product_document.repository'));
         self::assertTrue(
-            static::getContainer()->get(Connection::class)->createSchemaManager()->tablesExist(['medical_product_document'])
+            static::getContainer()
+                ->get(Connection::class)
+                ->createSchemaManager()
+                ->tablesExist(['medical_product_document'])
         );
 
         $productDefinition = $registry->getByEntityName(ProductDefinition::ENTITY_NAME);
