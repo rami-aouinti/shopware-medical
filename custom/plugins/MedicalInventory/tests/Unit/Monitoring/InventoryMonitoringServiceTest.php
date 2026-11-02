@@ -35,4 +35,28 @@ final class InventoryMonitoringServiceTest extends TestCase
             'shipments' => ['open' => 1],
         ], $metrics);
     }
+
+    public function testItRendersPrometheusGaugeFormat(): void
+    {
+        $connection = $this->createMock(Connection::class);
+        $connection->expects(self::once())
+            ->method('fetchAssociative')
+            ->willReturn([
+                'warehouses_total' => '4',
+                'warehouses_active' => '3',
+                'stock_rows' => '12',
+                'stock_physical' => '240',
+                'stock_reserved' => '35',
+                'stock_available' => '205',
+                'alerts_open' => '2',
+                'reservations_active' => '5',
+                'shipments_open' => '1',
+            ]);
+
+        $output = (new InventoryMonitoringService($connection))->renderPrometheusMetrics();
+
+        self::assertStringContainsString('# TYPE medical_inventory_stock_available_units gauge', $output);
+        self::assertStringContainsString('medical_inventory_stock_available_units 205', $output);
+        self::assertStringContainsString('medical_inventory_open_alerts 2', $output);
+    }
 }
