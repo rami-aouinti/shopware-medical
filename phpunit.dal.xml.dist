@@ -10,5 +10,11 @@
         <testsuite name="MedicalInventory DAL Integration">
             <directory>custom/plugins/MedicalInventory/tests/Integration/Dal</directory>
         </testsuite>
+        <testsuite name="MedicalProductManagement DAL Integration">
+            <directory>custom/plugins/MedicalProductManagement/tests/Integration/Dal</directory>
+        </testsuite>
+        <testsuite name="MedicalProductManagement API Functional">
+            <directory>custom/plugins/MedicalProductManagement/tests/Integration/Api</directory>
+        </testsuite>
     </testsuites>
 </phpunit>
