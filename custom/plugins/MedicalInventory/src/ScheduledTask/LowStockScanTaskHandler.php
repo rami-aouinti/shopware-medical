@@ -5,7 +5,6 @@ namespace MedicalInventory\ScheduledTask;
 use MedicalInventory\Service\LowStockAlertService;
 use Psr\Log\LoggerInterface;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
-use Shopware\Core\Framework\MessageQueue\ScheduledTask\ScheduledTask;
 use Shopware\Core\Framework\MessageQueue\ScheduledTask\ScheduledTaskHandler;
 
 final class LowStockScanTaskHandler extends ScheduledTaskHandler
