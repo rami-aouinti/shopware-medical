@@ -4,7 +4,6 @@ namespace MedicalInventory\Controller;
 
 use MedicalInventory\Monitoring\InventoryMonitoringService;
 use Psr\Log\LoggerInterface;
-use Shopware\Core\Framework\Context;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Attribute\Route;
 
