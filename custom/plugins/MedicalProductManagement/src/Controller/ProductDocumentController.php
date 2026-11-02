@@ -47,6 +47,7 @@ final class ProductDocumentController
     public function create(string $productId, Request $request, Context $context): JsonResponse
     {
         $this->assertUuid($productId, 'productId');
+        $productId = strtolower($productId);
         $payload = $request->toArray();
         $title = $this->requiredString($payload, 'title', 255);
         $type = $this->requiredString($payload, 'documentType', 100);
@@ -63,6 +64,7 @@ final class ProductDocumentController
     public function update(string $documentId, Request $request, Context $context): JsonResponse
     {
         $this->assertUuid($documentId, 'documentId');
+        $documentId = strtolower($documentId);
         $payload = $request->toArray();
         $doc = $this->documentRepository->search(new Criteria([$documentId]), $context)->first();
         if (!$doc instanceof ProductDocumentEntity) { return new JsonResponse(['errors'=>[['detail'=>'Document not found.']]],404); }
@@ -72,7 +74,7 @@ final class ProductDocumentController
         if (array_key_exists('mediaId',$payload) || array_key_exists('isPrivate',$payload)) {
             $mediaId = $payload['mediaId'] ?? $doc->getMediaId();
             $private = $payload['isPrivate'] ?? $doc->isPrivate();
-            if (!is_string($mediaId) || !is_bool($private)) { throw new InvalidArgumentException('Invalid mediaId or isPrivate.'); }
+            if (!is_string($mediaId) || !is_bool($private)) { throw new BadRequestHttpException('Invalid mediaId or isPrivate.'); }
             $this->assertMediaPrivacy($mediaId,$private,$context);
             $update['mediaId']=$mediaId; $update['isPrivate']=$private;
         }
@@ -82,36 +84,43 @@ final class ProductDocumentController
     #[Route(path:'/api/_action/medical-product-management/documents/{documentId}',name:'api.action.medical_product_document.delete',methods:['DELETE'],defaults:['_acl'=>['product:delete']])]
     public function delete(string $documentId, Context $context): JsonResponse
     {
-        $this->assertUuid($documentId,'documentId');
-        $this->documentRepository->delete([['id'=>$documentId]],$context);
-        return new JsonResponse(['success'=>true]);
+        $this->assertUuid($documentId, 'documentId');
+        $documentId = strtolower($documentId);
+        $document = $this->documentRepository->search(new Criteria([$documentId]), $context)->first();
+        if (!$document instanceof ProductDocumentEntity) {
+            return new JsonResponse(['errors' => [['detail' => 'Document not found.']]], 404);
+        }
+
+        $this->documentRepository->delete([['id' => $documentId]], $context);
+
+        return new JsonResponse(['success' => true]);
     }
     private function assertMediaPrivacy(string $id, bool $private, Context $context): void
     {
         $this->assertUuid($id,'mediaId');
         $media=$this->mediaRepository->search(new Criteria([$id]),$context)->first();
-        if (!$media instanceof MediaEntity) { throw new InvalidArgumentException('The selected media file does not exist.'); }
+        if (!$media instanceof MediaEntity) { throw new BadRequestHttpException('The selected media file does not exist.'); }
         if ($media->isPrivate() !== $private) {
-            throw new InvalidArgumentException($private
+            throw new BadRequestHttpException($private
                 ? 'Private documents must use a Shopware media file marked as private.'
                 : 'A private Shopware media file cannot be published as a public product document.');
         }
     }
     private function assertType(string $type): void
     {
-        if (!in_array($type,self::TYPES,true)) { throw new InvalidArgumentException('Unsupported medical document type.'); }
+        if (!in_array($type,self::TYPES,true)) { throw new BadRequestHttpException('Unsupported medical document type.'); }
     }
     /** @param array<string,mixed> $payload */
     private function requiredString(array $payload,string $key,int $max): string
     {
         $value=$payload[$key]??null;
         if (!is_string($value) || trim($value)==='' || mb_strlen(trim($value))>$max) {
-            throw new InvalidArgumentException(sprintf('%s must contain between 1 and %d characters.',$key,$max));
+            throw new BadRequestHttpException(sprintf('%s must contain between 1 and %d characters.',$key,$max));
         }
         return trim($value);
     }
     private function assertUuid(string $value,string $field): void
     {
-        if (!Uuid::isValid($value)) { throw new InvalidArgumentException(sprintf('%s must be a valid UUID.',$field)); }
+        if (!Uuid::isValid($value)) { throw new BadRequestHttpException(sprintf('%s must be a valid UUID.',$field)); }
     }
 }
