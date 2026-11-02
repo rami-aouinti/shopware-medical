@@ -45,7 +45,7 @@ Sign in at http://localhost:3000 with the credentials from `.env.monitoring`. Pr
 
 ## Logs
 
-Alloy discovers Docker containers and forwards stdout/stderr to Loki. Symfony logs are written as JSON to stdout by the root Monolog handler.
+Alloy discovers Docker containers and forwards stdout/stderr to Loki. Symfony logs are written as JSON to stdout by the root Monolog handler. MedicalInventory API requests also receive or generate an `X-Correlation-ID`; the ID is returned in the response header and included in request, response and exception log context.
 
 LogQL examples:
 
