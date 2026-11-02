@@ -1,0 +1,18 @@
+<?xml version="1.0" ?>
+
+<container xmlns="http://symfony.com/schema/dic/services"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services
+           https://symfony.com/schema/dic/services/services-1.0.xsd">
+
+    <services>
+        <service id="MedicalProductManagement\\Service\\ProductCustomFieldInstaller">
+            <argument type="service" id="custom_field_set.repository"/>
+        </service>
+
+        <service id="MedicalProductManagement\\Command\\InstallProductCustomFieldsCommand">
+            <argument type="service" id="MedicalProductManagement\\Service\\ProductCustomFieldInstaller"/>
+            <tag name="console.command"/>
+        </service>
+    </services>
+</container>
