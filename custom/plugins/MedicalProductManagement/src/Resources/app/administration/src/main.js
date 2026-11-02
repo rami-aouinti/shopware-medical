@@ -95,7 +95,7 @@ Component.register('medical-product-documents', {
                 document.body.appendChild(link);
                 link.click();
                 link.remove();
-                window.URL.revokeObjectURL(objectUrl);
+                window.setTimeout(() => window.URL.revokeObjectURL(objectUrl),1000);
             } catch(e) { this.showError(e,'Unable to download private document.'); }
             finally { this.downloadingId=null; }
         },
