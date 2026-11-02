@@ -3,9 +3,23 @@ namespace MedicalProductManagement\Tests\Integration\Api;
 use PHPUnit\Framework\TestCase;
 use Shopware\Core\Framework\Test\TestCaseBase\KernelTestBehaviour;
 use Symfony\Component\Routing\RouterInterface;
+use Symfony\Bundle\FrameworkBundle\KernelBrowser;
+use Shopware\Core\Framework\Uuid\Uuid;
 class ProductDocumentRouteTest extends TestCase
 {
     use KernelTestBehaviour;
+
+    public function testActionEndpointRejectsUnauthenticatedRequests(): void
+    {
+        $browser = new KernelBrowser(static::getKernel());
+        $browser->request(
+            'GET',
+            '/api/_action/medical-product-management/products/' . Uuid::randomHex() . '/documents'
+        );
+
+        self::assertContains($browser->getResponse()->getStatusCode(), [401, 403]);
+    }
+
     public function testRoutesHaveExpectedAcl(): void
     {
         $routes=static::getContainer()->get(RouterInterface::class)->getRouteCollection();
