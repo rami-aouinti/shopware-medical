@@ -15,7 +15,8 @@ $bootstrapper
     ->setProjectDir($projectRoot)
     ->setDatabaseUrl($databaseUrl)
     ->setForceInstall(true)
-    ->addCallingPlugin($projectRoot . '/custom/plugins/MedicalInventory/composer.json');
+    ->addCallingPlugin($projectRoot . '/custom/plugins/MedicalInventory/composer.json')
+    ->addCallingPlugin($projectRoot . '/custom/plugins/MedicalProductManagement/composer.json');
 
 $bootstrapper->setClassLoader($bootstrapper->getClassLoader());
 $bootstrapper->bootstrap();
