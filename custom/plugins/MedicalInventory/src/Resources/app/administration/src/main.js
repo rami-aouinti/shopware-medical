@@ -210,7 +210,7 @@ Module.register('medical-inventory',{
     routes:{index:{component:'medical-inventory-dashboard',path:'index'}},
     navigation: [{
         id: 'medical-inventory-overview',
-        label: 'Overview',
+        label: 'Medical Overview',
         color: '#3b82f6',
         path: 'medical.inventory.index',
         icon: 'regular-chart-bar',
