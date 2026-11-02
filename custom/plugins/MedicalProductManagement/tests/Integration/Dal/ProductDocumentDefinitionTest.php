@@ -2,6 +2,12 @@
 namespace MedicalProductManagement\Tests\Integration\Dal;
 use MedicalProductManagement\Core\Content\ProductDocument\ProductDocumentDefinition;
 use Shopware\Core\Content\Product\ProductDefinition;
+use Shopware\Core\Defaults;
+use Shopware\Core\Framework\Context;
+use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
+use Shopware\Core\Framework\Uuid\Uuid;
+use Shopware\Core\System\Tax\TaxEntity;
+use Shopware\Core\Framework\Validation\WriteConstraintViolationException;
 use Shopware\Core\Framework\DataAbstractionLayer\Field\OneToManyAssociationField;
 use PHPUnit\Framework\TestCase;
 use Shopware\Core\Framework\Test\TestCaseBase\KernelTestBehaviour;
@@ -10,6 +16,41 @@ use Doctrine\DBAL\Connection;
 class ProductDocumentDefinitionTest extends TestCase
 {
     use KernelTestBehaviour;
+
+    public function testInvalidMedicalCustomFieldsAreRejectedDuringDalWrite(): void
+    {
+        $context = Context::createDefaultContext();
+        $tax = static::getContainer()
+            ->get('tax.repository')
+            ->search(new Criteria(), $context)
+            ->first();
+
+        self::assertInstanceOf(TaxEntity::class, $tax);
+
+        $this->expectException(WriteConstraintViolationException::class);
+
+        static::getContainer()->get('product.repository')->create([
+            [
+                'id' => Uuid::randomHex(),
+                'productNumber' => Uuid::randomHex(),
+                'name' => 'Invalid medical product',
+                'stock' => 10,
+                'active' => false,
+                'tax' => ['id' => $tax->getId()],
+                'price' => [[
+                    'currencyId' => Defaults::CURRENCY,
+                    'gross' => 12.0,
+                    'net' => 10.0,
+                    'linked' => false,
+                ]],
+                'customFields' => [
+                    'package_quantity' => 0,
+                    'minimum_order_quantity' => -1,
+                ],
+            ],
+        ], $context);
+    }
+
     public function testDefinitionIsRegisteredWithPrivacyAndAssociations(): void
     {
         $registry=static::getContainer()->get(DefinitionInstanceRegistry::class);
