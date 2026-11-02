@@ -10,7 +10,7 @@ Component.register('medical-product-documents', {
                     <sw-alert v-if="error" variant="error" appearance="default" :show-icon="true">{{ error }}</sw-alert>
                     <sw-alert v-if="success" variant="success" appearance="default" :show-icon="true">{{ success }}</sw-alert>
                     <sw-card title="Select product" style="margin:16px 0">
-                        <sw-text-field v-model:value="productId" label="Product UUID" placeholder="Paste Shopware product UUID"/>
+                        <sw-entity-single-select entity="product" v-model:value="productId" label="Product" placeholder="Select a product"/>
                         <sw-button variant="primary" :disabled="!isValidProductId" :is-loading="loading" @click="loadDocuments">Load documents</sw-button>
                     </sw-card>
                     <sw-card v-if="isValidProductId && acl.can('product:update')" title="Add a document" style="margin:16px 0">
@@ -42,7 +42,7 @@ Component.register('medical-product-documents', {
     data() { return { productId:'', documents:[], loading:false, saving:false, error:null, success:null,
         form:{title:'',documentType:'TECHNICAL_DATASHEET',mediaId:null,isPrivate:false}, editingId:null }; },
     computed: {
-        isValidProductId() { return /^[0-9a-f]{32}$/i.test(this.productId.trim()); },
+        isValidProductId() { return typeof this.productId === 'string' && /^[0-9a-f]{32}$/i.test(this.productId); },
         canCreate() { return this.isValidProductId && this.form.title.trim()!=='' && !!this.form.mediaId && !!this.form.documentType; },
     },
     methods: {
@@ -51,7 +51,7 @@ Component.register('medical-product-documents', {
         showError(error,fallback) { this.error=error?.response?.data?.errors?.[0]?.detail || error.message || fallback; this.success=null; },
         async loadDocuments() {
             if (!this.isValidProductId) return; this.loading=true; this.error=null;
-            try { const r=await this.http().get(`_action/medical-product-management/products/${this.productId.trim()}/documents`,this.config()); this.documents=r.data.data||[]; }
+            try { const r=await this.http().get(`_action/medical-product-management/products/${this.productId}/documents`,this.config()); this.documents=r.data.data||[]; }
             catch(e) { this.showError(e,'Unable to load product documents.'); } finally { this.loading=false; }
         },
         async saveDocument() {
