@@ -1,12 +1,12 @@
 <?php declare(strict_types=1);
 
-namespace MedicalInventory\\ScheduledTask;
+namespace MedicalInventory\ScheduledTask;
 
-use MedicalInventory\\Service\\LowStockAlertService;
-use Psr\\Log\\LoggerInterface;
-use Shopware\\Core\\Framework\\DataAbstractionLayer\\EntityRepository;
-use Shopware\\Core\\Framework\\MessageQueue\\ScheduledTask\\ScheduledTask;
-use Shopware\\Core\\Framework\\MessageQueue\\ScheduledTask\\ScheduledTaskHandler;
+use MedicalInventory\Service\LowStockAlertService;
+use Psr\Log\LoggerInterface;
+use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
+use Shopware\Core\Framework\MessageQueue\ScheduledTask\ScheduledTask;
+use Shopware\Core\Framework\MessageQueue\ScheduledTask\ScheduledTaskHandler;
 
 final class LowStockScanTaskHandler extends ScheduledTaskHandler
 {
@@ -24,7 +24,7 @@ final class LowStockScanTaskHandler extends ScheduledTaskHandler
         return [LowStockScanTask::class];
     }
 
-    #[\\Override]
+    #[\Override]
     public function run(): void
     {
         $startedAt = microtime(true);
@@ -39,7 +39,7 @@ final class LowStockScanTaskHandler extends ScheduledTaskHandler
                 'alerts_opened_or_updated' => $count,
                 'duration_ms' => round((microtime(true) - $startedAt) * 1000, 2),
             ]);
-        } catch (\\Throwable $exception) {
+        } catch (\Throwable $exception) {
             $this->logger->error('Medical inventory low-stock scan failed.', [
                 'event' => 'medical_inventory.alert_scan.failed',
                 'exception' => $exception::class,
