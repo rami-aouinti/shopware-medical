@@ -88,7 +88,7 @@ class ProductDocumentRouteTest extends TestCase
 
     public function testCreateEndpointPassesAclAndRejectsMissingMedia(): void
     {
-        $browser = $this->createClient(permissions: ['product:update']);
+        $browser = $this->createClient(permissions: ['product:read', 'product:update']);
         $browser->jsonRequest(
             'POST',
             '/api/_action/medical-product-management/products/' . Uuid::randomHex() . '/documents',
@@ -117,7 +117,7 @@ class ProductDocumentRouteTest extends TestCase
 
     public function testDeleteEndpointPassesAclAndReturnsNotFoundForMissingDocument(): void
     {
-        $browser = $this->createClient(permissions: ['product:delete']);
+        $browser = $this->createClient(permissions: ['product:read', 'product:delete']);
         $browser->request(
             'DELETE',
             '/api/_action/medical-product-management/documents/' . Uuid::randomHex()
