@@ -89,3 +89,7 @@ Les versions exactes et les services Docker sont documentés à partir de l'audi
 ## Statut
 
 Phase de spécifications V1 documentée. Les documents décrivent les décisions et la cible de conception ; les plugins métier seront implémentés progressivement et validés par des tests.
+
+## Observability
+
+The independent Docker observability stack (Grafana, Prometheus, Loki, Grafana Alloy, OpenTelemetry Collector, Tempo, cAdvisor and Node Exporter) is documented in [monitoring/README.md](monitoring/README.md). It uses [compose.monitoring.yaml](compose.monitoring.yaml) as an overlay and leaves the Shopware CLI-managed [compose.yaml](compose.yaml) untouched. Create the local `.env.monitoring` file before starting the stack.
