@@ -147,7 +147,7 @@ Component.register('medical-inventory-dashboard', {
     watch:{warehouseSearch(){this.warehousePage=1;},stockSearch(){this.stockPage=1;}},
     methods:{
         getHttpClient(){return Shopware.Application.getContainer('init').httpClient;},
-        getRequestConfig(){return {headers:this.loginService.getBearerAuthentication()};},
+        getRequestConfig(){return {headers:{Authorization:`Bearer ${this.loginService.getToken()}`}};},
         setError(error,fallback){this.error=error?.response?.data?.errors?.[0]?.detail||error.message||fallback;this.success=null;},
         notifySuccess(message){this.success=message;this.error=null;},
         async createWarehouse(){
