@@ -50,7 +50,8 @@ services:
     command: ["--path.rootfs=/host","--path.procfs=/host/proc","--path.sysfs=/host/sys","--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)"]
     pid: host
     ports: ["127.0.0.1:9100:9100"]
-    volumes: ["/:/host:ro,rslave"]
+    volumes:
+      - "/:/host:ro"
     restart: unless-stopped
   grafana:
     image: grafana/grafana:12.1.1
