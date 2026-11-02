@@ -1,0 +1,33 @@
+groups:
+  - name: medical-inventory
+    rules:
+      - alert: MedicalInventoryMetricsTargetDown
+        expr: up{job="shopware-medical-inventory"} == 0
+        for: 2m
+        labels: {severity: critical, service: medical-inventory}
+        annotations:
+          summary: MedicalInventory metrics endpoint is unavailable
+          description: Prometheus cannot scrape the authenticated Shopware metrics endpoint.
+      - alert: MedicalInventoryNegativeAvailableStock
+        expr: medical_inventory_stock_available_units < 0
+        for: 1m
+        labels: {severity: critical, service: medical-inventory}
+        annotations:
+          summary: Negative available inventory detected
+          description: Available stock across warehouses is below zero.
+      - alert: MedicalInventoryOpenAlertsHigh
+        expr: medical_inventory_open_alerts > 5
+        for: 5m
+        labels: {severity: warning, service: medical-inventory}
+        annotations:
+          summary: Many open low-stock alerts
+          description: More than five low-stock alerts have remained open for five minutes.
+  - name: docker-host
+    rules:
+      - alert: CadvisorTargetDown
+        expr: up{job="cadvisor"} == 0
+        for: 5m
+        labels: {severity: warning}
+        annotations:
+          summary: cAdvisor is not reporting container metrics
+          description: Check the cAdvisor container and Docker socket.
