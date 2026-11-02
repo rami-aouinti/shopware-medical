@@ -1,12 +1,12 @@
 <?php declare(strict_types=1);
 
-namespace MedicalProductManagement\\Tests\\Integration\\Api;
+namespace MedicalProductManagement\Tests\Integration\Api;
 
-use PHPUnit\\Framework\\TestCase;
-use Shopware\\Core\\Framework\\Test\\TestCaseBase\\AdminApiTestBehaviour;
-use Shopware\\Core\\Framework\\Test\\TestCaseBase\\KernelTestBehaviour;
-use Shopware\\Core\\Framework\\Uuid\\Uuid;
-use Symfony\\Component\\Routing\\RouterInterface;
+use PHPUnit\Framework\TestCase;
+use Shopware\Core\Framework\Test\TestCaseBase\AdminApiTestBehaviour;
+use Shopware\Core\Framework\Test\TestCaseBase\KernelTestBehaviour;
+use Shopware\Core\Framework\Uuid\Uuid;
+use Symfony\Component\Routing\RouterInterface;
 
 class ProductDocumentRouteTest extends TestCase
 {
