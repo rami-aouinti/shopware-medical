@@ -1,6 +1,7 @@
+import './acl';
 const { Component, Module } = Shopware;
 Component.register('medical-product-documents', {
-    inject: ['loginService'],
+    inject: ['loginService', 'acl'],
     template: `
         <sw-page class="medical-product-documents">
             <template #smart-bar-header><h2>Medical product documents</h2></template>
@@ -12,7 +13,7 @@ Component.register('medical-product-documents', {
                         <sw-text-field v-model:value="productId" label="Product UUID" placeholder="Paste Shopware product UUID"/>
                         <sw-button variant="primary" :disabled="!isValidProductId" :is-loading="loading" @click="loadDocuments">Load documents</sw-button>
                     </sw-card>
-                    <sw-card v-if="isValidProductId" title="Add a document" style="margin:16px 0">
+                    <sw-card v-if="isValidProductId && acl.can('product:update')" title="Add a document" style="margin:16px 0">
                         <sw-text-field v-model:value="form.title" label="Document title"/>
                         <sw-select-field v-model:value="form.documentType" label="Document type">
                             <option value="CE_CERTIFICATE">CE certificate</option><option value="DECLARATION_OF_CONFORMITY">Declaration of conformity</option>
@@ -30,7 +31,7 @@ Component.register('medical-product-documents', {
                                 <sw-badge v-if="doc.isPrivate" variant="warning">Private</sw-badge><sw-badge v-else variant="success">Public</sw-badge>
                             </div>
                             <sw-button v-if="doc.url && !doc.isPrivate" size="small" @click="openDocument(doc.url)">Open file</sw-button>
-                            <sw-button size="small" variant="danger" @click="deleteDocument(doc)">Delete</sw-button>
+                            <sw-button v-if="acl.can('product:delete')" size="small" variant="danger" @click="deleteDocument(doc)">Delete</sw-button>
                         </div>
                     </sw-card>
                 </div>
@@ -52,12 +53,13 @@ Component.register('medical-product-documents', {
             catch(e) { this.showError(e,'Unable to load product documents.'); } finally { this.loading=false; }
         },
         async createDocument() {
-            if (!this.canCreate) return; this.saving=true; this.error=null;
+            if (!this.canCreate || !this.acl.can('product:update')) return; this.saving=true; this.error=null;
             try { await this.http().post(`_action/medical-product-management/products/${this.productId.trim()}/documents`,this.form,this.config());
                 this.form={title:'',documentType:'TECHNICAL_DATASHEET',mediaId:null,isPrivate:false}; await this.loadDocuments(); this.success='Document added successfully.';
             } catch(e) { this.showError(e,'Unable to add document.'); } finally { this.saving=false; }
         },
         async deleteDocument(doc) {
+            if (!this.acl.can('product:delete')) return;
             try { await this.http().delete(`_action/medical-product-management/documents/${doc.id}`,this.config()); await this.loadDocuments(); this.success='Document deleted successfully.'; }
             catch(e) { this.showError(e,'Unable to delete document.'); }
         },
@@ -68,7 +70,7 @@ Module.register('medical-product-management', {
     type:'plugin',name:'MedicalProductManagement',title:'Medical Product Management',
     description:'Medical product attributes and technical documents',routePrefix:'medical.product.management',
     color:'#0f766e',icon:'regular-file-text',
-    routes:{index:{component:'medical-product-documents',path:'index'}},
+    routes:{index:{component:'medical-product-documents',path:'index',meta:{privilege:'medical_product_management.viewer'}}},
     navigation:[{id:'medical-product-management-documents',label:'Product documents',color:'#0f766e',
-        path:'medical.product.management.index',icon:'regular-file-text',parent:'sw-catalogue',position:110,privilege:'product:read'}],
+        path:'medical.product.management.index',icon:'regular-file-text',parent:'sw-catalogue',position:110,privilege:'medical_product_management.viewer'}],
 });
