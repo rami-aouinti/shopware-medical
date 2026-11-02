@@ -6,6 +6,7 @@ use MedicalProductManagement\Core\Content\ProductDocument\ProductDocumentEntity;
 use MedicalProductManagement\Service\ProductDocumentPrivacyPolicy;
 use Shopware\Core\Content\Media\File\DownloadResponseGenerator;
 use Shopware\Core\Content\Media\MediaEntity;
+use Shopware\Core\Content\Media\MediaException;
 use Shopware\Core\Defaults;
 use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
@@ -112,7 +113,12 @@ final class ProductDocumentController
             return new JsonResponse(['errors' => [['detail' => 'Private document file not found.']]], 404);
         }
 
-        $response = $this->downloadResponseGenerator->getResponseByContext($media, $context);
+        try {
+            $response = $this->downloadResponseGenerator->getResponseByContext($media, $context);
+        } catch (MediaException) {
+            return new JsonResponse(['errors' => [['detail' => 'Document file not found.']]], 404);
+        }
+
         $response->headers->set('Cache-Control', 'private, no-store, no-cache, must-revalidate');
         $response->headers->set('Pragma', 'no-cache');
         $response->headers->set('X-Content-Type-Options', 'nosniff');
