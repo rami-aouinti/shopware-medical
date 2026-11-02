@@ -1,10 +1,14 @@
 <?php declare(strict_types=1);
-namespace MedicalProductManagement\Core\Content\ProductDocument;
-use Shopware\Core\Content\Media\MediaEntity;
-use Shopware\Core\Content\Product\ProductEntity;
-use Shopware\Core\Framework\DataAbstractionLayer\Entity;
+
+namespace MedicalProductManagement\\Core\\Content\\ProductDocument;
+
+use Shopware\\Core\\Content\\Media\\MediaEntity;
+use Shopware\\Core\\Content\\Product\\ProductEntity;
+use Shopware\\Core\\Framework\\DataAbstractionLayer\\Entity;
+
 class ProductDocumentEntity extends Entity
 {
+    protected string $id;
     protected string $productId;
     protected string $productVersionId;
     protected string $mediaId;
@@ -13,6 +17,10 @@ class ProductDocumentEntity extends Entity
     protected bool $isPrivate = false;
     protected ?ProductEntity $product = null;
     protected ?MediaEntity $media = null;
+
+    public function getId(): string { return $this->id; }
+    public function setId(string $value): void { $this->id = $value; }
+
     public function getProductId(): string { return $this->productId; }
     public function setProductId(string $value): void { $this->productId = $value; }
     public function getProductVersionId(): string { return $this->productVersionId; }
