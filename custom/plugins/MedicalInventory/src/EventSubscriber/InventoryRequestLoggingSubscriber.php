@@ -40,10 +40,17 @@ final class InventoryRequestLoggingSubscriber implements EventSubscriberInterfac
             return;
         }
 
+        $incomingId = (string) $request->headers->get('X-Correlation-ID', '');
+        $correlationId = preg_match('/^[A-Za-z0-9._-]{1,64}$/', $incomingId) === 1
+            ? $incomingId
+            : bin2hex(random_bytes(16));
+
         $request->attributes->set('_medical_inventory_started_at', microtime(true));
+        $request->attributes->set('_medical_inventory_correlation_id', $correlationId);
 
         $this->logger->info('Medical inventory API request started.', [
             'event' => 'medical_inventory.api.request',
+            'correlation_id' => $correlationId,
             'route' => $route,
             'method' => $request->getMethod(),
         ]);
@@ -62,11 +69,18 @@ final class InventoryRequestLoggingSubscriber implements EventSubscriberInterfac
             return;
         }
 
+        $correlationId = $request->attributes->get('_medical_inventory_correlation_id');
         $startedAt = $request->attributes->get('_medical_inventory_started_at');
         $durationMs = is_float($startedAt) ? round((microtime(true) - $startedAt) * 1000, 2) : null;
         $statusCode = $event->getResponse()->getStatusCode();
+
+        if (is_string($correlationId)) {
+            $event->getResponse()->headers->set('X-Correlation-ID', $correlationId);
+        }
+
         $context = [
             'event' => 'medical_inventory.api.response',
+            'correlation_id' => $correlationId,
             'route' => $route,
             'method' => $request->getMethod(),
             'status_code' => $statusCode,
@@ -98,6 +112,7 @@ final class InventoryRequestLoggingSubscriber implements EventSubscriberInterfac
         $exception = $event->getThrowable();
         $this->logger->error('Medical inventory API request raised an exception.', [
             'event' => 'medical_inventory.api.exception',
+            'correlation_id' => $request->attributes->get('_medical_inventory_correlation_id'),
             'route' => $route,
             'method' => $request->getMethod(),
             'exception' => $exception::class,

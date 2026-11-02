@@ -1,0 +1,9 @@
+monolog:
+  handlers:
+    medical_stdout:
+      type: stream
+      path: "php://stdout"
+      level: info
+      formatter: monolog.formatter.json
+      channels: ["!event"]
+      bubble: true

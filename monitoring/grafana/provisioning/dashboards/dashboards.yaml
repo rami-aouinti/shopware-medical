@@ -1,0 +1,10 @@
+apiVersion: 1
+providers:
+  - name: Bro Medical
+    orgId: 1
+    folder: Bro Medical
+    type: file
+    disableDeletion: false
+    editable: true
+    options:
+      path: /var/lib/grafana/dashboards

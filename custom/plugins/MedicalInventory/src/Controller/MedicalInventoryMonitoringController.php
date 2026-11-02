@@ -5,6 +5,7 @@ namespace MedicalInventory\Controller;
 use MedicalInventory\Monitoring\InventoryMonitoringService;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
 #[Route(defaults: ['_routeScope' => ['api']])]
@@ -46,5 +47,24 @@ final class MedicalInventoryMonitoringController
 
             throw $exception;
         }
+    }
+
+    #[Route(
+        path: '/api/_action/medical-inventory/metrics',
+        name: 'api.action.medical_inventory.prometheus_metrics',
+        methods: ['GET'],
+        defaults: ['_acl' => ['product:read']]
+    )]
+    public function prometheusMetrics(): Response
+    {
+        $this->logger->debug('Medical inventory Prometheus scrape requested.', [
+            'event' => 'medical_inventory.metrics.scrape',
+        ]);
+
+        return new Response(
+            $this->monitoringService->renderPrometheusMetrics(),
+            Response::HTTP_OK,
+            ['Content-Type' => 'text/plain; version=0.0.4; charset=utf-8']
+        );
     }
 }
