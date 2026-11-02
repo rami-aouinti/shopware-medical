@@ -4,6 +4,7 @@ namespace MedicalProductManagement\Controller;
 
 use MedicalProductManagement\Core\Content\ProductDocument\ProductDocumentEntity;
 use MedicalProductManagement\Service\ProductDocumentPrivacyPolicy;
+use League\Flysystem\UnableToReadFile;
 use Shopware\Core\Content\Media\File\DownloadResponseGenerator;
 use Shopware\Core\Content\Media\MediaEntity;
 use Shopware\Core\Content\Media\MediaException;
