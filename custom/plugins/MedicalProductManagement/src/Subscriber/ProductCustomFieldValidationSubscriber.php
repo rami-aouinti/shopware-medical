@@ -1,15 +1,15 @@
 <?php declare(strict_types=1);
 
-namespace MedicalProductManagement\\Subscriber;
+namespace MedicalProductManagement\Subscriber;
 
-use MedicalProductManagement\\Service\\ProductCustomFieldValidator;
-use Shopware\\Core\\Content\\Product\\Aggregate\\ProductTranslation\\ProductTranslationDefinition;
-use Shopware\\Core\\Content\\Product\\ProductDefinition;
-use Shopware\\Core\\Framework\\DataAbstractionLayer\\Write\\Validation\\PreWriteValidationEvent;
-use Shopware\\Core\\Framework\\Validation\\WriteConstraintViolationException;
-use Symfony\\Component\\EventDispatcher\\EventSubscriberInterface;
-use Symfony\\Component\\Validator\\ConstraintViolation;
-use Symfony\\Component\\Validator\\ConstraintViolationList;
+use MedicalProductManagement\Service\ProductCustomFieldValidator;
+use Shopware\Core\Content\Product\Aggregate\ProductTranslation\ProductTranslationDefinition;
+use Shopware\Core\Content\Product\ProductDefinition;
+use Shopware\Core\Framework\DataAbstractionLayer\Write\Validation\PreWriteValidationEvent;
+use Shopware\Core\Framework\Validation\WriteConstraintViolationException;
+use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Component\Validator\ConstraintViolation;
+use Symfony\Component\Validator\ConstraintViolationList;
 
 final class ProductCustomFieldValidationSubscriber implements EventSubscriberInterface
 {
