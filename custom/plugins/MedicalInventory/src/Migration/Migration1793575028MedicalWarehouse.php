@@ -9,14 +9,16 @@ use Shopware\Core\Framework\Migration\MigrationStep;
 /**
  * @internal
  */
-#[Package('core')]
+#[Package('inventory')]
 class Migration1793575028MedicalWarehouse extends MigrationStep
 {
+    #[\Override]
     public function getCreationTimestamp(): int
     {
         return 1793575028;
     }
 
+    #[\Override]
     public function update(Connection $connection): void
     {
         $schemaManager = $connection->createSchemaManager();
@@ -47,6 +49,7 @@ class Migration1793575028MedicalWarehouse extends MigrationStep
         );
     }
 
+    #[\Override]
     public function updateDestructive(Connection $connection): void
     {
         // Add destructive update if necessary
