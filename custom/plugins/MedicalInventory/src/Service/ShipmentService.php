@@ -55,7 +55,7 @@ final class ShipmentService
             $normalizedItems[] = ['productId' => $productId, 'quantity' => $quantity];
         }
 
-        return $this->connection->transactional(function () use (
+        $shipmentId = $this->connection->transactional(function () use (
             $orderId,
             $warehouseCode,
             $normalizedItems,
