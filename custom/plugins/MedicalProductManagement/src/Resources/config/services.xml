@@ -2,30 +2,30 @@
 <container xmlns="http://symfony.com/schema/dic/services" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
            xsi:schemaLocation="http://symfony.com/schema/dic/services https://symfony.com/schema/dic/services/services-1.0.xsd">
     <services>
-        <service id="MedicalProductManagement\\Core\\Content\\ProductDocument\\ProductDocumentDefinition" class="MedicalProductManagement\\Core\\Content\\ProductDocument\\ProductDocumentDefinition" public="true">
+        <service id="MedicalProductManagement\Core\Content\ProductDocument\ProductDocumentDefinition" class="MedicalProductManagement\Core\Content\ProductDocument\ProductDocumentDefinition" public="true">
             <tag name="shopware.entity.definition" entity="medical_product_document"/>
         </service>
-        <service id="MedicalProductManagement\\Extension\\ProductDefinitionExtension" class="MedicalProductManagement\\Extension\\ProductDefinitionExtension">
+        <service id="MedicalProductManagement\Extension\ProductDefinitionExtension" class="MedicalProductManagement\Extension\ProductDefinitionExtension">
             <tag name="shopware.entity.extension"/>
         </service>
-        <service id="MedicalProductManagement\\Service\\ProductCustomFieldInstaller">
+        <service id="MedicalProductManagement\Service\ProductCustomFieldInstaller">
             <argument type="service" id="custom_field_set.repository"/>
         </service>
-        <service id="MedicalProductManagement\\Service\\ProductCustomFieldValidator"/>
-        <service id="MedicalProductManagement\\Service\\ProductDocumentPrivacyPolicy"/>
-        <service id="MedicalProductManagement\\Subscriber\\ProductCustomFieldValidationSubscriber">
-            <argument type="service" id="MedicalProductManagement\\Service\\ProductCustomFieldValidator"/>
+        <service id="MedicalProductManagement\Service\ProductCustomFieldValidator"/>
+        <service id="MedicalProductManagement\Service\ProductDocumentPrivacyPolicy"/>
+        <service id="MedicalProductManagement\Subscriber\ProductCustomFieldValidationSubscriber">
+            <argument type="service" id="MedicalProductManagement\Service\ProductCustomFieldValidator"/>
             <tag name="kernel.event_subscriber"/>
         </service>
-        <service id="MedicalProductManagement\\Command\\InstallProductCustomFieldsCommand">
-            <argument type="service" id="MedicalProductManagement\\Service\\ProductCustomFieldInstaller"/>
+        <service id="MedicalProductManagement\Command\InstallProductCustomFieldsCommand">
+            <argument type="service" id="MedicalProductManagement\Service\ProductCustomFieldInstaller"/>
             <tag name="console.command"/>
         </service>
-        <service id="MedicalProductManagement\\Controller\\ProductDocumentController">
+        <service id="MedicalProductManagement\Controller\ProductDocumentController">
             <argument type="service" id="medical_product_document.repository"/>
             <argument type="service" id="media.repository"/>
-            <argument type="service" id="MedicalProductManagement\\Service\\ProductDocumentPrivacyPolicy"/>
-            <argument type="service" id="Shopware\\Core\\Content\\Media\\File\\DownloadResponseGenerator"/>
+            <argument type="service" id="MedicalProductManagement\Service\ProductDocumentPrivacyPolicy"/>
+            <argument type="service" id="Shopware\Core\Content\Media\File\DownloadResponseGenerator"/>
             <tag name="controller.service_arguments"/>
         </service>
     </services>
