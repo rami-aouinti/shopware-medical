@@ -1,0 +1,40 @@
+services:
+  san6-api:
+    build:
+      context: ./apps/mock-san6
+      dockerfile: Dockerfile
+    container_name: shopware-medical-san6-api
+    ports:
+      - "127.0.0.1:8081:8081"
+    environment:
+      APP_ENV: dev
+      APP_DEBUG: "1"
+      APP_SECRET: "mock-san6-local-secret-change-me"
+      DATABASE_URL: "mysql://san6:san6_password@san6-database:3306/san6?serverVersion=mariadb-11.8.0&charset=utf8mb4"
+    command: php -S 0.0.0.0:8081 -t public
+    depends_on:
+      san6-database:
+        condition: service_healthy
+    restart: unless-stopped
+
+  san6-database:
+    image: mariadb:11.8
+    container_name: shopware-medical-san6-database
+    environment:
+      MARIADB_DATABASE: san6
+      MARIADB_USER: san6
+      MARIADB_PASSWORD: san6_password
+      MARIADB_ROOT_PASSWORD: san6_root_password
+    ports:
+      - "127.0.0.1:3307:3306"
+    volumes:
+      - san6-db-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+
+volumes:
+  san6-db-data:
