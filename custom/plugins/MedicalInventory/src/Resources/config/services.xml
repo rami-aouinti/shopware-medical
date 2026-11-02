@@ -21,6 +21,7 @@
         <service id="MedicalInventory\Service\WarehouseStockCalculator"/>
         <service id="MedicalInventory\Service\StockMovementRecorder">
             <argument type="service" id="Doctrine\DBAL\Connection"/>
+            <argument type="service" id="logger"/>
         </service>
         <service id="MedicalInventory\Service\WarehouseAllocationPlanner"/>
         <service id="MedicalInventory\Service\WarehouseAllocationService">
@@ -49,6 +50,7 @@
         <service id="MedicalInventory\Service\ShipmentService">
             <argument type="service" id="Doctrine\DBAL\Connection"/>
             <argument type="service" id="MedicalInventory\Service\WarehouseStockService"/>
+            <argument type="service" id="logger"/>
         </service>
         <service id="MedicalInventory\Service\LowStockAlertService">
             <argument type="service" id="Doctrine\DBAL\Connection"/>
