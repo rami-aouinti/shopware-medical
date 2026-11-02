@@ -1,9 +1,9 @@
 <?php declare(strict_types=1);
 
-namespace MedicalProductManagement\Controller;
+namespace MedicalProductManagement\Transport\Http\Controller;
 
-use MedicalProductManagement\Core\Content\ProductDocument\ProductDocumentEntity;
-use MedicalProductManagement\Service\ProductDocumentPrivacyPolicy;
+use MedicalProductManagement\Infrastructure\Persistence\Shopware\ProductDocument\ProductDocumentEntity;
+use MedicalProductManagement\Domain\ProductDocuments\Policy\ProductDocumentPrivacyPolicy;
 use League\Flysystem\UnableToReadFile;
 use Shopware\Core\Content\Media\File\DownloadResponseGenerator;
 use Shopware\Core\Content\Media\MediaEntity;

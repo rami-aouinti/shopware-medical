@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace MedicalProductManagement\Service;
+namespace MedicalProductManagement\Domain\ProductDocuments\Policy;
 
 final class ProductDocumentPrivacyPolicy
 {
