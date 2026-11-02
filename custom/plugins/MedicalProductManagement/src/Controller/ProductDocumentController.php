@@ -115,7 +115,7 @@ final class ProductDocumentController
 
         try {
             $response = $this->downloadResponseGenerator->getResponseByContext($media, $context);
-        } catch (MediaException) {
+        } catch (MediaException|UnableToReadFile) {
             return new JsonResponse(['errors' => [['detail' => 'Document file not found.']]], 404);
         }
 
