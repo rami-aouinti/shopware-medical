@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 namespace MedicalProductManagement\Controller;
-use InvalidArgumentException;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use MedicalProductManagement\Core\Content\ProductDocument\ProductDocumentEntity;
 use Shopware\Core\Content\Media\MediaEntity;
 use Shopware\Core\Defaults;
@@ -22,8 +22,10 @@ final class ProductDocumentController
     public function list(string $productId, Context $context): JsonResponse
     {
         $this->assertUuid($productId, 'productId');
+        $productId = strtolower($productId);
         $criteria = new Criteria();
-        $criteria->addFilter(new EqualsFilter('productId', $productId));
+        $criteria->addFilter(new EqualsFilter('productId', strtolower($productId)));
+        $criteria->addFilter(new EqualsFilter('productVersionId', Defaults::LIVE_VERSION));
         $criteria->addAssociation('media');
         $criteria->addSorting(new FieldSorting('createdAt'));
         $items = [];
@@ -50,7 +52,7 @@ final class ProductDocumentController
         $type = $this->requiredString($payload, 'documentType', 100);
         $mediaId = $this->requiredString($payload, 'mediaId', 32);
         $private = $payload['isPrivate'] ?? false;
-        if (!is_bool($private)) { throw new InvalidArgumentException('isPrivate must be a boolean.'); }
+        if (!is_bool($private)) { throw new BadRequestHttpException('isPrivate must be a boolean.'); }
         $this->assertType($type);
         $this->assertMediaPrivacy($mediaId, $private, $context);
         $id = Uuid::randomHex();
