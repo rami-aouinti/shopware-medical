@@ -7,7 +7,7 @@ use Shopware\Core\Content\Product\ProductDefinition;
 use Shopware\Core\Framework\DataAbstractionLayer\Field\Flag\CascadeDelete;
 use Shopware\Core\Framework\DataAbstractionLayer\Field\OneToManyAssociationField;
 use Shopware\Core\Framework\DataAbstractionLayer\FieldCollection;
-use Shopware\Core\Framework\DataAbstractionLayer\Extension\EntityExtension;
+use Shopware\Core\Framework\DataAbstractionLayer\EntityExtension;
 
 class ProductDefinitionExtension extends EntityExtension
 {
