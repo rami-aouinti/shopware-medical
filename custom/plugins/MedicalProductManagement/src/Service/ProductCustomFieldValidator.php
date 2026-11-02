@@ -26,10 +26,6 @@ final class ProductCustomFieldValidator
                 $errors[] = ['field'=>'minimum_order_quantity','message'=>'Minimum order quantity must be a finite number greater than zero.','code'=>'MEDICAL_MINIMUM_ORDER_QUANTITY_INVALID'];
             }
         }
-        if (isset($customFields['package_quantity']) && is_int($customFields['package_quantity']) && $customFields['package_quantity'] > 0
-            && (!isset($customFields['package_unit']) || !is_string($customFields['package_unit']) || trim($customFields['package_unit']) === '')) {
-            $errors[] = ['field'=>'package_unit','message'=>'A package unit is required when units per package are configured.','code'=>'MEDICAL_PACKAGE_UNIT_REQUIRED'];
-        }
         return $errors;
     }
 }
