@@ -5,6 +5,7 @@ namespace MedicalInventory\Service;
 use Doctrine\DBAL\Connection;
 use DomainException;
 use InvalidArgumentException;
+use Psr\Log\LoggerInterface;
 use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\Uuid\Uuid;
 
@@ -13,6 +14,7 @@ final class ShipmentService
     public function __construct(
         private readonly Connection $connection,
         private readonly WarehouseStockService $stockService,
+        private readonly LoggerInterface $logger,
     ) {
     }
 
@@ -93,6 +95,17 @@ final class ShipmentService
 
             return $shipmentId;
         });
+
+        $this->logger->info('Medical inventory shipment created.', [
+            'event' => 'medical_inventory.shipment.created',
+            'shipment_id' => $shipmentId,
+            'order_id' => $orderId,
+            'warehouse_code' => $warehouseCode,
+            'item_count' => count($normalizedItems),
+            'quantity_total' => array_sum(array_column($normalizedItems, 'quantity')),
+        ]);
+
+        return $shipmentId;
     }
 
     public function markDelivered(string $shipmentId, ?string $location = null): void
@@ -118,6 +131,11 @@ final class ShipmentService
 
             $this->recordEvent($shipmentId, 'DELIVERED', 'Shipment delivered', $location, $now);
         });
+
+        $this->logger->info('Medical inventory shipment marked as delivered.', [
+            'event' => 'medical_inventory.shipment.delivered',
+            'shipment_id' => $shipmentId,
+        ]);
     }
 
     /**
