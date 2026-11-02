@@ -3,12 +3,15 @@
 namespace MedicalInventory\Service;
 
 use Doctrine\DBAL\Connection;
+use Psr\Log\LoggerInterface;
 use Shopware\Core\Framework\Uuid\Uuid;
 
 final class StockMovementRecorder
 {
-    public function __construct(private readonly Connection $connection)
-    {
+    public function __construct(
+        private readonly Connection $connection,
+        private readonly LoggerInterface $logger,
+    ) {
     }
 
     public function record(
@@ -38,6 +41,16 @@ final class StockMovementRecorder
             'reference_id' => $referenceId,
             'reason' => mb_substr($reason, 0, 255),
             'created_at' => (new \DateTimeImmutable())->format('Y-m-d H:i:s.v'),
+        ]);
+
+        $this->logger->info('Medical inventory stock movement recorded.', [
+            'event' => 'medical_inventory.stock.movement',
+            'warehouse_id' => $warehouseId,
+            'product_id' => $productId,
+            'movement_type' => $type,
+            'quantity_delta' => $quantityDelta,
+            'reserved_quantity_delta' => $reservedQuantityDelta,
+            'reference_type' => $referenceType,
         ]);
     }
 }

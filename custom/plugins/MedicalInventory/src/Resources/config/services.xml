@@ -21,6 +21,7 @@
         <service id="MedicalInventory\Service\WarehouseStockCalculator"/>
         <service id="MedicalInventory\Service\StockMovementRecorder">
             <argument type="service" id="Doctrine\DBAL\Connection"/>
+            <argument type="service" id="logger"/>
         </service>
         <service id="MedicalInventory\Service\WarehouseAllocationPlanner"/>
         <service id="MedicalInventory\Service\WarehouseAllocationService">
@@ -49,6 +50,7 @@
         <service id="MedicalInventory\Service\ShipmentService">
             <argument type="service" id="Doctrine\DBAL\Connection"/>
             <argument type="service" id="MedicalInventory\Service\WarehouseStockService"/>
+            <argument type="service" id="logger"/>
         </service>
         <service id="MedicalInventory\Service\LowStockAlertService">
             <argument type="service" id="Doctrine\DBAL\Connection"/>
@@ -60,6 +62,7 @@
             <argument type="service" id="scheduled_task.repository"/>
             <argument type="service" id="logger"/>
             <argument type="service" id="MedicalInventory\Service\LowStockAlertService"/>
+            <argument type="service" id="logger"/>
             <tag name="messenger.message_handler"/>
         </service>
         <service id="MedicalInventory\Command\ShipmentManagementCommand">
@@ -107,6 +110,19 @@
             <argument type="service" id="tax.repository"/>
             <argument type="service" id="currency.repository"/>
             <tag name="console.command"/>
+        </service>
+
+        <service id="MedicalInventory\Monitoring\InventoryMonitoringService">
+            <argument type="service" id="Doctrine\DBAL\Connection"/>
+        </service>
+        <service id="MedicalInventory\Controller\MedicalInventoryMonitoringController">
+            <argument type="service" id="MedicalInventory\Monitoring\InventoryMonitoringService"/>
+            <argument type="service" id="logger"/>
+            <tag name="controller.service_arguments"/>
+        </service>
+        <service id="MedicalInventory\EventSubscriber\InventoryRequestLoggingSubscriber">
+            <argument type="service" id="logger"/>
+            <tag name="kernel.event_subscriber"/>
         </service>
     </services>
 </container>
