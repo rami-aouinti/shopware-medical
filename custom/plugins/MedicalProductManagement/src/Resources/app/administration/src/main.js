@@ -22,7 +22,8 @@ Component.register('medical-product-documents', {
                         </sw-select-field>
                         <sw-entity-single-select entity="media" v-model:value="form.mediaId" label="Media file"/>
                         <sw-switch-field v-model:value="form.isPrivate" label="Private (media must already be private)"/>
-                        <sw-button variant="primary" :disabled="!canCreate" :is-loading="saving" @click="createDocument">Add document</sw-button>
+                        <sw-button variant="primary" :disabled="!canCreate" :is-loading="saving" @click="saveDocument">{{ editingId ? 'Save changes' : 'Add document' }}</sw-button>
+                        <sw-button v-if="editingId" @click="cancelEdit">Cancel</sw-button>
                     </sw-card>
                     <sw-card v-if="isValidProductId" title="Existing documents" style="margin:16px 0">
                         <div v-if="documents.length===0 && !loading" style="padding:24px;text-align:center">No documents registered for this product.</div>
@@ -31,6 +32,7 @@ Component.register('medical-product-documents', {
                                 <sw-badge v-if="doc.isPrivate" variant="warning">Private</sw-badge><sw-badge v-else variant="success">Public</sw-badge>
                             </div>
                             <sw-button v-if="doc.url && !doc.isPrivate" size="small" @click="openDocument(doc.url)">Open file</sw-button>
+                            <sw-button v-if="acl.can('product:update')" size="small" @click="startEdit(doc)">Edit</sw-button>
                             <sw-button v-if="acl.can('product:delete')" size="small" variant="danger" @click="deleteDocument(doc)">Delete</sw-button>
                         </div>
                     </sw-card>
@@ -38,7 +40,7 @@ Component.register('medical-product-documents', {
             </template>
         </sw-page>`,
     data() { return { productId:'', documents:[], loading:false, saving:false, error:null, success:null,
-        form:{title:'',documentType:'TECHNICAL_DATASHEET',mediaId:null,isPrivate:false} }; },
+        form:{title:'',documentType:'TECHNICAL_DATASHEET',mediaId:null,isPrivate:false}, editingId:null }; },
     computed: {
         isValidProductId() { return /^[0-9a-f]{32}$/i.test(this.productId.trim()); },
         canCreate() { return this.isValidProductId && this.form.title.trim()!=='' && !!this.form.mediaId && !!this.form.documentType; },
@@ -52,11 +54,24 @@ Component.register('medical-product-documents', {
             try { const r=await this.http().get(`_action/medical-product-management/products/${this.productId.trim()}/documents`,this.config()); this.documents=r.data.data||[]; }
             catch(e) { this.showError(e,'Unable to load product documents.'); } finally { this.loading=false; }
         },
-        async createDocument() {
+        async saveDocument() {
             if (!this.canCreate || !this.acl.can('product:update')) return; this.saving=true; this.error=null;
-            try { await this.http().post(`_action/medical-product-management/products/${this.productId.trim()}/documents`,this.form,this.config());
-                this.form={title:'',documentType:'TECHNICAL_DATASHEET',mediaId:null,isPrivate:false}; await this.loadDocuments(); this.success='Document added successfully.';
-            } catch(e) { this.showError(e,'Unable to add document.'); } finally { this.saving=false; }
+            try {
+                if (this.editingId) {
+                    await this.http().patch(`_action/medical-product-management/documents/${this.editingId}`,this.form,this.config());
+                } else {
+                    await this.http().post(`_action/medical-product-management/products/${this.productId.trim()}/documents`,this.form,this.config());
+                }
+                this.cancelEdit(); await this.loadDocuments(); this.success='Document saved successfully.';
+            } catch(e) { this.showError(e,'Unable to save document.'); } finally { this.saving=false; }
+        },
+        startEdit(doc) {
+            this.editingId=doc.id;
+            this.form={title:doc.title,documentType:doc.documentType,mediaId:doc.mediaId,isPrivate:doc.isPrivate};
+        },
+        cancelEdit() {
+            this.editingId=null;
+            this.form={title:'',documentType:'TECHNICAL_DATASHEET',mediaId:null,isPrivate:false};
         },
         async deleteDocument(doc) {
             if (!this.acl.can('product:delete')) return;
