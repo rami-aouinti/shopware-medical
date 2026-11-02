@@ -50,4 +50,29 @@ final class InventoryMonitoringService
             'shipments' => ['open' => (int) $row['shipments_open']],
         ];
     }
+
+    public function renderPrometheusMetrics(): string
+    {
+        $metrics = $this->collectMetrics();
+        $gauges = [
+            'medical_inventory_warehouses_total' => ['Total number of medical warehouses', $metrics['warehouses']['total']],
+            'medical_inventory_warehouses_active' => ['Number of active medical warehouses', $metrics['warehouses']['active']],
+            'medical_inventory_stock_rows' => ['Number of product warehouse stock rows', $metrics['stock']['rows']],
+            'medical_inventory_stock_physical_units' => ['Physical stock units across all warehouses', $metrics['stock']['physical']],
+            'medical_inventory_stock_reserved_units' => ['Reserved stock units across all warehouses', $metrics['stock']['reserved']],
+            'medical_inventory_stock_available_units' => ['Available stock units across all warehouses', $metrics['stock']['available']],
+            'medical_inventory_open_alerts' => ['Number of open low stock alerts', $metrics['alerts']['open']],
+            'medical_inventory_active_reservations' => ['Number of active stock reservations', $metrics['reservations']['active']],
+            'medical_inventory_shipments_shipped' => ['Number of shipments currently in SHIPPED state', $metrics['shipments']['open']],
+        ];
+
+        $lines = [];
+        foreach ($gauges as $name => [$help, $value]) {
+            $lines[] = sprintf('# HELP %s %s', $name, $help);
+            $lines[] = sprintf('# TYPE %s gauge', $name);
+            $lines[] = sprintf('%s %d', $name, $value);
+        }
+
+        return implode("\n", $lines) . "\n";
+    }
 }
