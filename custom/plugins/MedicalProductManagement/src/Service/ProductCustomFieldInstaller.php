@@ -3,7 +3,6 @@
 namespace MedicalProductManagement\Service;
 
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
-use Shopware\Core\Framework\Uuid\Uuid;
 use Shopware\Core\Framework\Context;
 
 class ProductCustomFieldInstaller
@@ -56,7 +55,7 @@ class ProductCustomFieldInstaller
         string $frenchLabel
     ): array {
         return [
-            'id' => Uuid::fromString(sprintf('7f3b0a7d-2e8c-4f4e-9a1b-%012d', $position)),
+            'id' => sprintf('7f3b0a7d2e8c4f4e9a1b%012d', $position),
             'name' => $name,
             'type' => $type,
             'config' => [
