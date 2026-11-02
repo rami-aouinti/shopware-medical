@@ -6,107 +6,120 @@
            https://symfony.com/schema/dic/services/services-1.0.xsd">
 
     <services>
-        <service id="MedicalInventory\Core\Content\Warehouse\WarehouseDefinition" class="MedicalInventory\Core\Content\Warehouse\WarehouseDefinition" public="true">
+        <service id="MedicalInventory\\Core\\Content\\Warehouse\\WarehouseDefinition" class="MedicalInventory\\Core\\Content\\Warehouse\\WarehouseDefinition" public="true">
             <tag name="shopware.entity.definition" entity="medical_warehouse"/>
         </service>
-        <service id="MedicalInventory\Core\Content\WarehouseStock\WarehouseStockDefinition" class="MedicalInventory\Core\Content\WarehouseStock\WarehouseStockDefinition" public="true">
+        <service id="MedicalInventory\\Core\\Content\\WarehouseStock\\WarehouseStockDefinition" class="MedicalInventory\\Core\\Content\\WarehouseStock\\WarehouseStockDefinition" public="true">
             <tag name="shopware.entity.definition" entity="medical_warehouse_stock"/>
         </service>
 
-        <service id="MedicalInventory\Service\WarehouseValidator"/>
-        <service id="MedicalInventory\Service\WarehouseService">
+        <service id="MedicalInventory\\Service\\WarehouseValidator"/>
+        <service id="MedicalInventory\\Service\\WarehouseService">
             <argument type="service" id="medical_warehouse.repository"/>
-            <argument type="service" id="MedicalInventory\Service\WarehouseValidator"/>
+            <argument type="service" id="MedicalInventory\\Service\\WarehouseValidator"/>
         </service>
-        <service id="MedicalInventory\Service\WarehouseStockCalculator"/>
-        <service id="MedicalInventory\Service\StockMovementRecorder">
-            <argument type="service" id="Doctrine\DBAL\Connection"/>
+        <service id="MedicalInventory\\Service\\WarehouseStockCalculator"/>
+        <service id="MedicalInventory\\Service\\StockMovementRecorder">
+            <argument type="service" id="Doctrine\\DBAL\\Connection"/>
         </service>
-        <service id="MedicalInventory\Service\WarehouseAllocationPlanner"/>
-        <service id="MedicalInventory\Service\WarehouseAllocationService">
+        <service id="MedicalInventory\\Service\\WarehouseAllocationPlanner"/>
+        <service id="MedicalInventory\\Service\\WarehouseAllocationService">
             <argument type="service" id="medical_warehouse_stock.repository"/>
-            <argument type="service" id="MedicalInventory\Service\WarehouseAllocationPlanner"/>
+            <argument type="service" id="MedicalInventory\\Service\\WarehouseAllocationPlanner"/>
         </service>
-        <service id="MedicalInventory\Decorator\MedicalInventoryStockStorageDecorator" decorates="Shopware\Core\Content\Product\Stock\StockStorage">
-            <argument type="service" id="MedicalInventory\Decorator\MedicalInventoryStockStorageDecorator.inner"/>
-            <argument type="service" id="Doctrine\DBAL\Connection"/>
+        <service id="MedicalInventory\\Decorator\\MedicalInventoryStockStorageDecorator" decorates="Shopware\\Core\\Content\\Product\\Stock\\StockStorage">
+            <argument type="service" id="MedicalInventory\\Decorator\\MedicalInventoryStockStorageDecorator.inner"/>
+            <argument type="service" id="Doctrine\\DBAL\\Connection"/>
         </service>
-        <service id="MedicalInventory\Service\OrderFulfillmentService">
-            <argument type="service" id="Doctrine\DBAL\Connection"/>
-            <argument type="service" id="MedicalInventory\Service\WarehouseAllocationService"/>
-            <argument type="service" id="MedicalInventory\Service\WarehouseStockService"/>
+        <service id="MedicalInventory\\Service\\OrderFulfillmentService">
+            <argument type="service" id="Doctrine\\DBAL\\Connection"/>
+            <argument type="service" id="MedicalInventory\\Service\\WarehouseAllocationService"/>
+            <argument type="service" id="MedicalInventory\\Service\\WarehouseStockService"/>
         </service>
-        <service id="MedicalInventory\Decorator\MedicalInventoryOrderPersister" decorates="Shopware\Core\Checkout\Cart\Order\OrderPersister">
-            <argument type="service" id="MedicalInventory\Decorator\MedicalInventoryOrderPersister.inner"/>
-            <argument type="service" id="Doctrine\DBAL\Connection"/>
-            <argument type="service" id="MedicalInventory\Service\OrderFulfillmentService"/>
+        <service id="MedicalInventory\\Decorator\\MedicalInventoryOrderPersister" decorates="Shopware\\Core\\Checkout\\Cart\\Order\\OrderPersister">
+            <argument type="service" id="MedicalInventory\\Decorator\\MedicalInventoryOrderPersister.inner"/>
+            <argument type="service" id="Doctrine\\DBAL\\Connection"/>
+            <argument type="service" id="MedicalInventory\\Service\\OrderFulfillmentService"/>
         </service>
-        <service id="MedicalInventory\Subscriber\OrderCancellationSubscriber">
-            <argument type="service" id="Doctrine\DBAL\Connection"/>
-            <argument type="service" id="MedicalInventory\Service\OrderFulfillmentService"/>
+        <service id="MedicalInventory\\Subscriber\\OrderCancellationSubscriber">
+            <argument type="service" id="Doctrine\\DBAL\\Connection"/>
+            <argument type="service" id="MedicalInventory\\Service\\OrderFulfillmentService"/>
             <tag name="kernel.event_subscriber"/>
         </service>
-        <service id="MedicalInventory\Service\ShipmentService">
-            <argument type="service" id="Doctrine\DBAL\Connection"/>
-            <argument type="service" id="MedicalInventory\Service\WarehouseStockService"/>
+        <service id="MedicalInventory\\Service\\ShipmentService">
+            <argument type="service" id="Doctrine\\DBAL\\Connection"/>
+            <argument type="service" id="MedicalInventory\\Service\\WarehouseStockService"/>
         </service>
-        <service id="MedicalInventory\Service\LowStockAlertService">
-            <argument type="service" id="Doctrine\DBAL\Connection"/>
+        <service id="MedicalInventory\\Service\\LowStockAlertService">
+            <argument type="service" id="Doctrine\\DBAL\\Connection"/>
         </service>
-        <service id="MedicalInventory\ScheduledTask\LowStockScanTask">
+        <service id="MedicalInventory\\ScheduledTask\\LowStockScanTask">
             <tag name="shopware.scheduled.task"/>
         </service>
-        <service id="MedicalInventory\ScheduledTask\LowStockScanTaskHandler">
+        <service id="MedicalInventory\\ScheduledTask\\LowStockScanTaskHandler">
             <argument type="service" id="scheduled_task.repository"/>
             <argument type="service" id="logger"/>
-            <argument type="service" id="MedicalInventory\Service\LowStockAlertService"/>
+            <argument type="service" id="MedicalInventory\\Service\\LowStockAlertService"/>
             <tag name="messenger.message_handler"/>
         </service>
-        <service id="MedicalInventory\Command\ShipmentManagementCommand">
-            <argument type="service" id="MedicalInventory\Service\ShipmentService"/>
+        <service id="MedicalInventory\\Command\\ShipmentManagementCommand">
+            <argument type="service" id="MedicalInventory\\Service\\ShipmentService"/>
             <tag name="console.command"/>
         </service>
-        <service id="MedicalInventory\Command\LowStockAlertScanCommand">
-            <argument type="service" id="MedicalInventory\Service\LowStockAlertService"/>
+        <service id="MedicalInventory\\Command\\LowStockAlertScanCommand">
+            <argument type="service" id="MedicalInventory\\Service\\LowStockAlertService"/>
             <tag name="console.command"/>
         </service>
-        <service id="MedicalInventory\Controller\MedicalInventoryAdminController">
-            <argument type="service" id="Doctrine\DBAL\Connection"/>
-            <argument type="service" id="MedicalInventory\Service\WarehouseStockService"/>
-            <argument type="service" id="MedicalInventory\Service\WarehouseService"/>
-            <argument type="service" id="MedicalInventory\Service\ShipmentService"/>
-            <argument type="service" id="MedicalInventory\Service\LowStockAlertService"/>
+        <service id="MedicalInventory\\Controller\\MedicalInventoryAdminController">
+            <argument type="service" id="Doctrine\\DBAL\\Connection"/>
+            <argument type="service" id="MedicalInventory\\Service\\WarehouseStockService"/>
+            <argument type="service" id="MedicalInventory\\Service\\WarehouseService"/>
+            <argument type="service" id="MedicalInventory\\Service\\ShipmentService"/>
+            <argument type="service" id="MedicalInventory\\Service\\LowStockAlertService"/>
             <tag name="controller.service_arguments"/>
         </service>
-        <service id="MedicalInventory\Controller\MedicalInventoryAdminStockController">
+        <service id="MedicalInventory\\Controller\\MedicalInventoryAdminStockController">
             <argument type="service" id="product.repository"/>
-            <argument type="service" id="MedicalInventory\Service\WarehouseStockService"/>
+            <argument type="service" id="MedicalInventory\\Service\\WarehouseStockService"/>
             <tag name="controller.service_arguments"/>
         </service>
-        <service id="MedicalInventory\Service\WarehouseStockService">
+        <service id="MedicalInventory\\Service\\WarehouseStockService">
             <argument type="service" id="medical_warehouse.repository"/>
             <argument type="service" id="medical_warehouse_stock.repository"/>
             <argument type="service" id="product.repository"/>
-            <argument type="service" id="Doctrine\DBAL\Connection"/>
-            <argument type="service" id="MedicalInventory\Service\WarehouseStockCalculator"/>
-            <argument type="service" id="MedicalInventory\Service\StockMovementRecorder"/>
+            <argument type="service" id="Doctrine\\DBAL\\Connection"/>
+            <argument type="service" id="MedicalInventory\\Service\\WarehouseStockCalculator"/>
+            <argument type="service" id="MedicalInventory\\Service\\StockMovementRecorder"/>
         </service>
-        <service id="MedicalInventory\Command\WarehouseCrudCommand">
-            <argument type="service" id="MedicalInventory\Service\WarehouseService"/>
-            <argument type="service" id="MedicalInventory\Service\WarehouseStockService"/>
+        <service id="MedicalInventory\\Command\\WarehouseCrudCommand">
+            <argument type="service" id="MedicalInventory\\Service\\WarehouseService"/>
+            <argument type="service" id="MedicalInventory\\Service\\WarehouseStockService"/>
             <tag name="console.command"/>
         </service>
-        <service id="MedicalInventory\Command\WarehouseStockCommand">
-            <argument type="service" id="MedicalInventory\Service\WarehouseStockService"/>
+        <service id="MedicalInventory\\Command\\WarehouseStockCommand">
+            <argument type="service" id="MedicalInventory\\Service\\WarehouseStockService"/>
             <tag name="console.command"/>
         </service>
-        <service id="MedicalInventory\Command\WarehouseDemoDataCommand">
-            <argument type="service" id="MedicalInventory\Service\WarehouseService"/>
-            <argument type="service" id="MedicalInventory\Service\WarehouseStockService"/>
+        <service id="MedicalInventory\\Command\\WarehouseDemoDataCommand">
+            <argument type="service" id="MedicalInventory\\Service\\WarehouseService"/>
+            <argument type="service" id="MedicalInventory\\Service\\WarehouseStockService"/>
             <argument type="service" id="product.repository"/>
             <argument type="service" id="tax.repository"/>
             <argument type="service" id="currency.repository"/>
             <tag name="console.command"/>
+        </service>
+
+        <service id="MedicalInventory\\Monitoring\\InventoryMonitoringService">
+            <argument type="service" id="Doctrine\\DBAL\\Connection"/>
+        </service>
+        <service id="MedicalInventory\\Controller\\MedicalInventoryMonitoringController">
+            <argument type="service" id="MedicalInventory\\Monitoring\\InventoryMonitoringService"/>
+            <argument type="service" id="logger"/>
+            <tag name="controller.service_arguments"/>
+        </service>
+        <service id="MedicalInventory\\EventSubscriber\\InventoryRequestLoggingSubscriber">
+            <argument type="service" id="logger"/>
+            <tag name="kernel.event_subscriber"/>
         </service>
     </services>
 </container>
