@@ -12,6 +12,7 @@
             <argument type="service" id="custom_field_set.repository"/>
         </service>
         <service id="MedicalProductManagement\Service\ProductCustomFieldValidator"/>
+        <service id="MedicalProductManagement\Service\ProductDocumentPrivacyPolicy"/>
         <service id="MedicalProductManagement\Subscriber\ProductCustomFieldValidationSubscriber">
             <argument type="service" id="MedicalProductManagement\Service\ProductCustomFieldValidator"/>
             <tag name="kernel.event_subscriber"/>
