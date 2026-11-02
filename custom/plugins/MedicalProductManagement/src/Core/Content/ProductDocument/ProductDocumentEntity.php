@@ -1,10 +1,10 @@
 <?php declare(strict_types=1);
 
-namespace MedicalProductManagement\\Core\\Content\\ProductDocument;
+namespace MedicalProductManagement\Core\Content\ProductDocument;
 
-use Shopware\\Core\\Content\\Media\\MediaEntity;
-use Shopware\\Core\\Content\\Product\\ProductEntity;
-use Shopware\\Core\\Framework\\DataAbstractionLayer\\Entity;
+use Shopware\Core\Content\Media\MediaEntity;
+use Shopware\Core\Content\Product\ProductEntity;
+use Shopware\Core\Framework\DataAbstractionLayer\Entity;
 
 class ProductDocumentEntity extends Entity
 {
