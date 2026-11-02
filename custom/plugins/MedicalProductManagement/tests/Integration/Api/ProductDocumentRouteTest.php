@@ -1,7 +1,7 @@
 <?php declare(strict_types=1);
 namespace MedicalProductManagement\Tests\Integration\Api;
 use PHPUnit\Framework\TestCase;
-use Shopware\Core\Framework\Test\KernelTestBehaviour;
+use Shopware\Core\Framework\Test\TestCaseBase\KernelTestBehaviour;
 use Symfony\Component\Routing\RouterInterface;
 class ProductDocumentRouteTest extends TestCase
 {
