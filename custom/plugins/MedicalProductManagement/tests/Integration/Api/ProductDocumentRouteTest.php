@@ -52,6 +52,18 @@ class ProductDocumentRouteTest extends TestCase
         self::assertSame(403, $browser->getResponse()->getStatusCode());
     }
 
+    public function testUpdateEndpointRequiresProductUpdatePrivilege(): void
+    {
+        $browser = $this->createClient(permissions: ['product:read']);
+        $browser->jsonRequest(
+            'PATCH',
+            '/api/_action/medical-product-management/documents/' . Uuid::randomHex(),
+            ['title' => 'Updated title']
+        );
+
+        self::assertSame(403, $browser->getResponse()->getStatusCode());
+    }
+
     public function testDeleteEndpointRequiresProductDeletePrivilege(): void
     {
         $browser = $this->createClient(permissions: ['product:read']);
