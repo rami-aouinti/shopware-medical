@@ -13,7 +13,7 @@ Shopware 6.7 medical product catalogue extensions and technical document managem
 
 ## Business rules
 - package_quantity is optional, but when supplied it must be a positive integer.
-- package_unit must contain 1–32 non-whitespace characters and is required when package_quantity is configured.
+- package_unit is optional; when supplied it must contain 1–32 non-whitespace characters.
 - minimum_order_quantity is optional, but when supplied it must be a finite number greater than zero.
 
 ## Document privacy
