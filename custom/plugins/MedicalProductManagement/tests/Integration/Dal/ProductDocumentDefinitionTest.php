@@ -73,4 +73,34 @@ class ProductDocumentDefinitionTest extends TestCase
             self::assertNotNull($definition->getFields()->get($field),sprintf('Missing DAL field %s',$field));
         }
     }
+
+    public function testSchemaAllowsMultipleDocumentsPerProductAndRestrictsMediaDeletion(): void
+    {
+        $schemaManager = static::getContainer()
+            ->get(Connection::class)
+            ->createSchemaManager();
+
+        $indexes = $schemaManager->listTableIndexes('medical_product_document');
+        $uniqueNonPrimaryIndexes = array_filter(
+            $indexes,
+            static fn ($index): bool => $index->isUnique() && strtolower($index->getName()) !== 'primary'
+        );
+
+        self::assertCount(
+            0,
+            $uniqueNonPrimaryIndexes,
+            'A product must be able to reference multiple medical documents.'
+        );
+
+        $mediaForeignKey = null;
+        foreach ($schemaManager->listTableForeignKeys('medical_product_document') as $foreignKey) {
+            if ($foreignKey->getForeignTableName() === 'media') {
+                $mediaForeignKey = $foreignKey;
+                break;
+            }
+        }
+
+        self::assertNotNull($mediaForeignKey, 'The document must reference an existing Shopware media row.');
+        self::assertSame('RESTRICT', strtoupper((string) $mediaForeignKey->onDelete()));
+    }
 }
