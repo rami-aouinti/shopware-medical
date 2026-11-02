@@ -11,7 +11,7 @@ services:
       APP_DEBUG: "1"
       APP_SECRET: "mock-san6-local-secret-change-me"
       DATABASE_URL: "mysql://san6:san6_password@san6-database:3306/san6?serverVersion=mariadb-11.8.0&charset=utf8mb4"
-    command: php -S 0.0.0.0:8081 -t public
+    command: php -S 0.0.0.0:8081 -t public public/index.php
     depends_on:
       san6-database:
         condition: service_healthy
