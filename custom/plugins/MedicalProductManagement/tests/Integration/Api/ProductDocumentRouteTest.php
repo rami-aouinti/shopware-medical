@@ -1,12 +1,12 @@
 <?php declare(strict_types=1);
 
-namespace MedicalProductManagement\Tests\Integration\Api;
+namespace MedicalProductManagement\\Tests\\Integration\\Api;
 
-use PHPUnit\Framework\TestCase;
-use Shopware\Core\Framework\Test\TestCaseBase\AdminApiTestBehaviour;
-use Shopware\Core\Framework\Test\TestCaseBase\KernelTestBehaviour;
-use Shopware\Core\Framework\Uuid\Uuid;
-use Symfony\Component\Routing\RouterInterface;
+use PHPUnit\\Framework\\TestCase;
+use Shopware\\Core\\Framework\\Test\\TestCaseBase\\AdminApiTestBehaviour;
+use Shopware\\Core\\Framework\\Test\\TestCaseBase\\KernelTestBehaviour;
+use Shopware\\Core\\Framework\\Uuid\\Uuid;
+use Symfony\\Component\\Routing\\RouterInterface;
 
 class ProductDocumentRouteTest extends TestCase
 {
@@ -63,6 +63,17 @@ class ProductDocumentRouteTest extends TestCase
         self::assertSame(403, $browser->getResponse()->getStatusCode());
     }
 
+    public function testPrivateDownloadRequiresProductAndMediaReadPrivileges(): void
+    {
+        $browser = $this->createClient(permissions: ['product:read']);
+        $browser->request(
+            'GET',
+            '/api/_action/medical-product-management/documents/' . Uuid::randomHex() . '/download'
+        );
+
+        self::assertSame(403, $browser->getResponse()->getStatusCode());
+    }
+
     public function testRoutesHaveExpectedAcl(): void
     {
         $routes = static::getContainer()->get(RouterInterface::class)->getRouteCollection();
@@ -71,6 +82,7 @@ class ProductDocumentRouteTest extends TestCase
             'api.action.medical_product_document.create' => ['POST', ['product:update']],
             'api.action.medical_product_document.update' => ['PATCH', ['product:update']],
             'api.action.medical_product_document.delete' => ['DELETE', ['product:delete']],
+            'api.action.medical_product_document.download_private' => ['GET', ['product:read', 'media:read']],
         ];
 
         foreach ($expected as $name => [$method, $acl]) {
