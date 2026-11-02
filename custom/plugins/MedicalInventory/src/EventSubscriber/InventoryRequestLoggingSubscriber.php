@@ -4,9 +4,9 @@ namespace MedicalInventory\EventSubscriber;
 
 use Psr\Log\LoggerInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
-use Symfony\Component\HttpKernel\EventExceptionEvent;
-use Symfony\Component\HttpKernel\EventRequestEvent;
-use Symfony\Component\HttpKernel\EventResponseEvent;
+use Symfony\Component\HttpKernel\Event\ExceptionEvent;
+use Symfony\Component\HttpKernel\Event\RequestEvent;
+use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 
 final class InventoryRequestLoggingSubscriber implements EventSubscriberInterface
@@ -20,7 +20,7 @@ final class InventoryRequestLoggingSubscriber implements EventSubscriberInterfac
     public static function getSubscribedEvents(): array
     {
         return [
-            KernelEvents::REQUEST => ['onRequest', 100],
+            KernelEvents::REQUEST => ['onRequest', -10],
             KernelEvents::RESPONSE => ['onResponse', -100],
             KernelEvents::EXCEPTION => ['onException', 100],
         ];
