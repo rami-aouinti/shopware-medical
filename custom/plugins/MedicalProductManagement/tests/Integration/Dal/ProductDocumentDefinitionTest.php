@@ -6,6 +6,7 @@ use Shopware\Core\Framework\DataAbstractionLayer\Field\OneToManyAssociationField
 use PHPUnit\Framework\TestCase;
 use Shopware\Core\Framework\Test\TestCaseBase\KernelTestBehaviour;
 use Shopware\Core\Framework\DataAbstractionLayer\DefinitionInstanceRegistry;
+use Doctrine\DBAL\Connection;
 class ProductDocumentDefinitionTest extends TestCase
 {
     use KernelTestBehaviour;
@@ -15,6 +16,9 @@ class ProductDocumentDefinitionTest extends TestCase
         $definition=$registry->getByEntityName(ProductDocumentDefinition::ENTITY_NAME);
         self::assertInstanceOf(ProductDocumentDefinition::class, $definition);
         self::assertNotNull(static::getContainer()->get('medical_product_document.repository'));
+        self::assertTrue(
+            static::getContainer()->get(Connection::class)->createSchemaManager()->tablesExist(['medical_product_document'])
+        );
 
         $productDefinition = $registry->getByEntityName(ProductDefinition::ENTITY_NAME);
         self::assertInstanceOf(
