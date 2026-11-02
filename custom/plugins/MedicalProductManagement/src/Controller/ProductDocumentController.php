@@ -1,24 +1,23 @@
 <?php declare(strict_types=1);
 
-namespace MedicalProductManagement\\Controller;
+namespace MedicalProductManagement\Controller;
 
-use MedicalProductManagement\\Core\\Content\\ProductDocument\\ProductDocumentEntity;
-use MedicalProductManagement\\Service\\ProductDocumentPrivacyPolicy;
-use Shopware\\Core\\Content\\Media\\Api\\MediaDownloadController;
-use Shopware\\Core\\Content\\Media\\File\\DownloadResponseGenerator;
-use Shopware\\Core\\Content\\Media\\MediaEntity;
-use Shopware\\Core\\Defaults;
-use Shopware\\Core\\Framework\\Context;
-use Shopware\\Core\\Framework\\DataAbstractionLayer\\EntityRepository;
-use Shopware\\Core\\Framework\\DataAbstractionLayer\\Search\\Criteria;
-use Shopware\\Core\\Framework\\DataAbstractionLayer\\Search\\Filter\\EqualsFilter;
-use Shopware\\Core\\Framework\\DataAbstractionLayer\\Search\\Sorting\\FieldSorting;
-use Shopware\\Core\\Framework\\Uuid\\Uuid;
-use Symfony\\Component\\HttpFoundation\\JsonResponse;
-use Symfony\\Component\\HttpFoundation\\Request;
-use Symfony\\Component\\HttpFoundation\\Response;
-use Symfony\\Component\\HttpKernel\\Exception\\BadRequestHttpException;
-use Symfony\\Component\\Routing\\Attribute\\Route;
+use MedicalProductManagement\Core\Content\ProductDocument\ProductDocumentEntity;
+use MedicalProductManagement\Service\ProductDocumentPrivacyPolicy;
+use Shopware\Core\Content\Media\File\DownloadResponseGenerator;
+use Shopware\Core\Content\Media\MediaEntity;
+use Shopware\Core\Defaults;
+use Shopware\Core\Framework\Context;
+use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
+use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
+use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\EqualsFilter;
+use Shopware\Core\Framework\DataAbstractionLayer\Search\Sorting\FieldSorting;
+use Shopware\Core\Framework\Uuid\Uuid;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\Routing\Attribute\Route;
 
 #[Route(defaults: ['_routeScope' => ['api']])]
 final class ProductDocumentController
