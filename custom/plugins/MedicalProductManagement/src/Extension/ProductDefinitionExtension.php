@@ -11,9 +11,9 @@ use Shopware\Core\Framework\DataAbstractionLayer\EntityExtension;
 
 class ProductDefinitionExtension extends EntityExtension
 {
-    public function getDefinitionClass(): string
+    public function getEntityName(): string
     {
-        return ProductDefinition::class;
+        return ProductDefinition::ENTITY_NAME;
     }
 
     public function extendFields(FieldCollection $collection): void
