@@ -11,7 +11,13 @@ final class InventoryMonitoringService
     }
 
     /**
-     * @return array{warehouses: array{total: int, active: int}, stock: array{rows: int, physical: int, reserved: int, available: int}, alerts: array{open: int}, reservations: array{active: int}, shipments: array{open: int}}
+     * @return array{
+     *     warehouses: array{total: int, active: int},
+     *     stock: array{rows: int, physical: int, reserved: int, available: int},
+     *     alerts: array{open: int},
+     *     reservations: array{active: int},
+     *     shipments: array{open: int}
+     * }
      */
     public function collectMetrics(): array
     {
@@ -45,7 +51,9 @@ final class InventoryMonitoringService
                 'reserved' => (int) $row['stock_reserved'],
                 'available' => (int) $row['stock_available'],
             ],
-            'alerts' => ['open' => (int) $row['alerts_open']],
+            'alerts' => [
+                'open' => (int) $row['alerts_open'],
+            ],
             'reservations' => ['active' => (int) $row['reservations_active']],
             'shipments' => ['open' => (int) $row['shipments_open']],
         ];
