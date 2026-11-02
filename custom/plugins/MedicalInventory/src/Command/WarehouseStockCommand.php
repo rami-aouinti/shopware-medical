@@ -92,7 +92,9 @@ final class WarehouseStockCommand extends Command
     {
         $rows = [];
 
-        foreach ($this->stockService->listByWarehouse($warehouseCode, Context::createDefaultContext())->getEntities() as $stock) {
+        $stocks = $this->stockService->listByWarehouse($warehouseCode, Context::createDefaultContext())->getEntities();
+
+        foreach ($stocks as $stock) {
             if (!$stock instanceof WarehouseStockEntity) {
                 continue;
             }
