@@ -52,6 +52,18 @@ class ProductDocumentRouteTest extends TestCase
         self::assertSame(403, $browser->getResponse()->getStatusCode());
     }
 
+    public function testUpdateEndpointRequiresProductUpdatePrivilege(): void
+    {
+        $browser = $this->createClient(permissions: ['product:read']);
+        $browser->jsonRequest(
+            'PATCH',
+            '/api/_action/medical-product-management/documents/' . Uuid::randomHex(),
+            ['title' => 'Updated title']
+        );
+
+        self::assertSame(403, $browser->getResponse()->getStatusCode());
+    }
+
     public function testDeleteEndpointRequiresProductDeletePrivilege(): void
     {
         $browser = $this->createClient(permissions: ['product:read']);
@@ -63,6 +75,68 @@ class ProductDocumentRouteTest extends TestCase
         self::assertSame(403, $browser->getResponse()->getStatusCode());
     }
 
+    public function testPrivateDownloadRequiresProductAndMediaReadPrivileges(): void
+    {
+        $browser = $this->createClient(permissions: ['product:read']);
+        $browser->request(
+            'GET',
+            '/api/_action/medical-product-management/documents/' . Uuid::randomHex() . '/download'
+        );
+
+        self::assertSame(403, $browser->getResponse()->getStatusCode());
+    }
+
+    public function testCreateEndpointPassesAclAndRejectsMissingMedia(): void
+    {
+        $browser = $this->createClient(permissions: ['product:read', 'product:update']);
+        $browser->jsonRequest(
+            'POST',
+            '/api/_action/medical-product-management/products/' . Uuid::randomHex() . '/documents',
+            [
+                'title' => 'Technical datasheet',
+                'documentType' => 'TECHNICAL_DATASHEET',
+                'mediaId' => Uuid::randomHex(),
+                'isPrivate' => false,
+            ]
+        );
+
+        self::assertSame(400, $browser->getResponse()->getStatusCode());
+    }
+
+    public function testUpdateEndpointPassesAclAndReturnsNotFoundForMissingDocument(): void
+    {
+        $browser = $this->createClient(permissions: ['product:update']);
+        $browser->jsonRequest(
+            'PATCH',
+            '/api/_action/medical-product-management/documents/' . Uuid::randomHex(),
+            ['title' => 'Updated title']
+        );
+
+        self::assertSame(404, $browser->getResponse()->getStatusCode());
+    }
+
+    public function testDeleteEndpointPassesAclAndReturnsNotFoundForMissingDocument(): void
+    {
+        $browser = $this->createClient(permissions: ['product:read', 'product:delete']);
+        $browser->request(
+            'DELETE',
+            '/api/_action/medical-product-management/documents/' . Uuid::randomHex()
+        );
+
+        self::assertSame(404, $browser->getResponse()->getStatusCode());
+    }
+
+    public function testPrivateDownloadPassesAclAndReturnsNotFoundForMissingDocument(): void
+    {
+        $browser = $this->createClient(permissions: ['product:read', 'media:read']);
+        $browser->request(
+            'GET',
+            '/api/_action/medical-product-management/documents/' . Uuid::randomHex() . '/download'
+        );
+
+        self::assertSame(404, $browser->getResponse()->getStatusCode());
+    }
+
     public function testRoutesHaveExpectedAcl(): void
     {
         $routes = static::getContainer()->get(RouterInterface::class)->getRouteCollection();
@@ -71,6 +145,7 @@ class ProductDocumentRouteTest extends TestCase
             'api.action.medical_product_document.create' => ['POST', ['product:update']],
             'api.action.medical_product_document.update' => ['PATCH', ['product:update']],
             'api.action.medical_product_document.delete' => ['DELETE', ['product:delete']],
+            'api.action.medical_product_document.download_private' => ['GET', ['product:read', 'media:read']],
         ];
 
         foreach ($expected as $name => [$method, $acl]) {

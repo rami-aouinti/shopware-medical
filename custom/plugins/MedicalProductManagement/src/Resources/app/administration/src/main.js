@@ -32,6 +32,7 @@ Component.register('medical-product-documents', {
                                 <span v-if="doc.isPrivate">Private document</span><span v-else>Public document</span>
                             </div>
                             <sw-button v-if="doc.url && !doc.isPrivate" size="small" @click="openDocument(doc.url)">Open file</sw-button>
+                            <sw-button v-if="doc.isPrivate && acl.can('product:read') && acl.can('media:read')" size="small" :is-loading="downloadingId===doc.id" @click="downloadPrivateDocument(doc)">Download private file</sw-button>
                             <sw-button v-if="acl.can('product:update')" size="small" @click="startEdit(doc)">Edit</sw-button>
                             <sw-button v-if="acl.can('product:delete')" size="small" variant="danger" @click="deleteDocument(doc)">Delete</sw-button>
                         </div>
@@ -39,7 +40,7 @@ Component.register('medical-product-documents', {
                 </div>
             </template>
         </sw-page>`,
-    data() { return { productId:'', documents:[], loading:false, saving:false, error:null, success:null,
+    data() { return { productId:'', documents:[], loading:false, saving:false, downloadingId:null, error:null, success:null,
         form:{title:'',documentType:'TECHNICAL_DATASHEET',mediaId:null,isPrivate:false}, editingId:null }; },
     computed: {
         isValidProductId() { return typeof this.productId === 'string' && /^[0-9a-f]{32}$/i.test(this.productId); },
@@ -77,6 +78,26 @@ Component.register('medical-product-documents', {
             if (!this.acl.can('product:delete')) return;
             try { await this.http().delete(`_action/medical-product-management/documents/${doc.id}`,this.config()); await this.loadDocuments(); this.success='Document deleted successfully.'; }
             catch(e) { this.showError(e,'Unable to delete document.'); }
+        },
+        async downloadPrivateDocument(doc) {
+            if (!doc?.isPrivate || !this.acl.can('product:read') || !this.acl.can('media:read')) return;
+            this.downloadingId=doc.id; this.error=null;
+            try {
+                const response=await this.http().get(
+                    `_action/medical-product-management/documents/${doc.id}/download`,
+                    {...this.config(),responseType:'blob'}
+                );
+                const blob=new Blob([response.data],{type:response.headers['content-type']||'application/octet-stream'});
+                const objectUrl=window.URL.createObjectURL(blob);
+                const link=document.createElement('a');
+                link.href=objectUrl;
+                link.download=doc.fileName||'medical-document';
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+                window.setTimeout(() => window.URL.revokeObjectURL(objectUrl),1000);
+            } catch(e) { this.showError(e,'Unable to download private document.'); }
+            finally { this.downloadingId=null; }
         },
         openDocument(url) { if (typeof url==='string' && url.startsWith('http')) window.open(url,'_blank','noopener'); },
     },

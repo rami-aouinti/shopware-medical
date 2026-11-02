@@ -4,7 +4,10 @@ namespace MedicalProductManagement\Controller;
 
 use MedicalProductManagement\Core\Content\ProductDocument\ProductDocumentEntity;
 use MedicalProductManagement\Service\ProductDocumentPrivacyPolicy;
+use League\Flysystem\UnableToReadFile;
+use Shopware\Core\Content\Media\File\DownloadResponseGenerator;
 use Shopware\Core\Content\Media\MediaEntity;
+use Shopware\Core\Content\Media\MediaException;
 use Shopware\Core\Defaults;
 use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
@@ -14,6 +17,7 @@ use Shopware\Core\Framework\DataAbstractionLayer\Search\Sorting\FieldSorting;
 use Shopware\Core\Framework\Uuid\Uuid;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Routing\Attribute\Route;
 
@@ -32,7 +36,8 @@ final class ProductDocumentController
     public function __construct(
         private readonly EntityRepository $documentRepository,
         private readonly EntityRepository $mediaRepository,
-        private readonly ProductDocumentPrivacyPolicy $privacyPolicy
+        private readonly ProductDocumentPrivacyPolicy $privacyPolicy,
+        private readonly DownloadResponseGenerator $downloadResponseGenerator
     ) {
     }
 
@@ -78,6 +83,48 @@ final class ProductDocumentController
         }
 
         return new JsonResponse(['data' => $items]);
+    }
+
+    /**
+     * Streams a private Shopware media file only after both the product-document
+     * and media ACL checks have passed. The core generator selects the private
+     * filesystem and handles the configured download strategy.
+     */
+    #[Route(
+        path: '/api/_action/medical-product-management/documents/{documentId}/download',
+        name: 'api.action.medical_product_document.download_private',
+        methods: ['GET'],
+        defaults: ['_acl' => ['product:read', 'media:read']]
+    )]
+    public function downloadPrivate(string $documentId, Context $context): Response
+    {
+        $this->assertUuid($documentId, 'documentId');
+        $documentId = strtolower($documentId);
+
+        $criteria = new Criteria([$documentId]);
+        $criteria->addAssociation('media');
+        $document = $this->documentRepository->search($criteria, $context)->first();
+
+        if (!$document instanceof ProductDocumentEntity || !$document->isPrivate()) {
+            return new JsonResponse(['errors' => [['detail' => 'Document not found.']]], 404);
+        }
+
+        $media = $document->getMedia();
+        if (!$media instanceof MediaEntity || !$media->isPrivate()) {
+            return new JsonResponse(['errors' => [['detail' => 'Private document file not found.']]], 404);
+        }
+
+        try {
+            $response = $this->downloadResponseGenerator->getResponseByContext($media, $context);
+        } catch (MediaException|UnableToReadFile) {
+            return new JsonResponse(['errors' => [['detail' => 'Document file not found.']]], 404);
+        }
+
+        $response->headers->set('Cache-Control', 'private, no-store, no-cache, must-revalidate');
+        $response->headers->set('Pragma', 'no-cache');
+        $response->headers->set('X-Content-Type-Options', 'nosniff');
+
+        return $response;
     }
 
     #[Route(
@@ -159,7 +206,7 @@ final class ProductDocumentController
             }
 
             $this->assertMediaPrivacy($mediaId, $isPrivate, $context);
-            $update['mediaId'] = $mediaId;
+            $update['mediaId'] = strtolower($mediaId);
             $update['isPrivate'] = $isPrivate;
         }
 
@@ -192,7 +239,7 @@ final class ProductDocumentController
     private function assertMediaPrivacy(string $mediaId, bool $documentIsPrivate, Context $context): void
     {
         $this->assertUuid($mediaId, 'mediaId');
-        $media = $this->mediaRepository->search(new Criteria([$mediaId]), $context)->first();
+        $media = $this->mediaRepository->search(new Criteria([strtolower($mediaId)]), $context)->first();
 
         if (!$media instanceof MediaEntity) {
             throw new BadRequestHttpException('The selected media file does not exist.');

@@ -24,6 +24,8 @@
         <service id="MedicalProductManagement\Controller\ProductDocumentController">
             <argument type="service" id="medical_product_document.repository"/>
             <argument type="service" id="media.repository"/>
+            <argument type="service" id="MedicalProductManagement\Service\ProductDocumentPrivacyPolicy"/>
+            <argument type="service" id="Shopware\Core\Content\Media\File\DownloadResponseGenerator"/>
             <tag name="controller.service_arguments"/>
         </service>
     </services>

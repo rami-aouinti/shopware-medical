@@ -76,7 +76,29 @@ final class MedicalInventoryAdminStockController
         Request $request,
         Context $context,
     ): JsonResponse {
-        $payload = $request->toArray();
+        [$productId, $operation, $quantity] = $this->parseAdjustmentPayload($request->toArray());
+
+        $context->scope(
+            Context::SYSTEM_SCOPE,
+            function (Context $systemContext) use ($warehouseCode, $productId, $operation, $quantity): void {
+                match ($operation) {
+                    'set' => $this->stockService->setStock($warehouseCode, $productId, $quantity, $systemContext),
+                    'add' => $this->stockService->addStock($warehouseCode, $productId, $quantity, $systemContext),
+                    'remove' => $this->stockService->removeStock($warehouseCode, $productId, $quantity, $systemContext),
+                };
+            }
+        );
+
+        return new JsonResponse(['success' => true]);
+    }
+
+    /**
+     * @param array<string, mixed> $payload
+     *
+     * @return array{string, 'set'|'add'|'remove', int}
+     */
+    private function parseAdjustmentPayload(array $payload): array
+    {
         $productId = $payload['productId'] ?? null;
         $operation = $payload['operation'] ?? null;
         $quantity = $payload['quantity'] ?? null;
@@ -97,17 +119,6 @@ final class MedicalInventoryAdminStockController
             throw new InvalidArgumentException('add and remove operations require a positive quantity.');
         }
 
-        $context->scope(
-            Context::SYSTEM_SCOPE,
-            function (Context $systemContext) use ($warehouseCode, $productId, $operation, $quantity): void {
-                match ($operation) {
-                    'set' => $this->stockService->setStock($warehouseCode, $productId, $quantity, $systemContext),
-                    'add' => $this->stockService->addStock($warehouseCode, $productId, $quantity, $systemContext),
-                    'remove' => $this->stockService->removeStock($warehouseCode, $productId, $quantity, $systemContext),
-                };
-            }
-        );
-
-        return new JsonResponse(['success' => true]);
+        return [strtolower($productId), $operation, $quantity];
     }
 }
