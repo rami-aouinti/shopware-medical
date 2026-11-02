@@ -208,5 +208,13 @@ Module.register('medical-inventory',{
     description:'Multi-warehouse stock, reservations and shipments',
     routePrefix:'medical.inventory',color:'#3b82f6',icon:'regular-box',
     routes:{index:{component:'medical-inventory-dashboard',path:'index'}},
-    navigation:[{id:'medical-inventory-overview',label:'Overview',color:'#3b82f6',path:'medical.inventory.index',icon:'regular-chart-bar',position:100}],
+    navigation: [{
+        id: 'medical-inventory-overview',
+        label: 'Overview',
+        color: '#3b82f6',
+        path: 'medical.inventory.index',
+        icon: 'regular-chart-bar',
+        parent: 'sw-catalogue',
+        position: 100
+    }],
 });
