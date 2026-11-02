@@ -1,6 +1,7 @@
 <?php declare(strict_types=1);
 namespace MedicalProductManagement\Controller;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use MedicalProductManagement\Service\ProductDocumentPrivacyPolicy;
 use MedicalProductManagement\Core\Content\ProductDocument\ProductDocumentEntity;
 use Shopware\Core\Content\Media\MediaEntity;
 use Shopware\Core\Defaults;
@@ -17,7 +18,7 @@ use Symfony\Component\Routing\Attribute\Route;
 final class ProductDocumentController
 {
     private const TYPES = ['CE_CERTIFICATE','DECLARATION_OF_CONFORMITY','TECHNICAL_DATASHEET','USER_MANUAL','SAFETY_DATA_SHEET','OTHER'];
-    public function __construct(private readonly EntityRepository $documentRepository, private readonly EntityRepository $mediaRepository) {}
+    public function __construct(private readonly EntityRepository $documentRepository, private readonly EntityRepository $mediaRepository, private readonly ProductDocumentPrivacyPolicy $privacyPolicy) {}
     #[Route(path:'/api/_action/medical-product-management/products/{productId}/documents',name:'api.action.medical_product_document.list',methods:['GET'],defaults:['_acl'=>['product:read']])]
     public function list(string $productId, Context $context): JsonResponse
     {
@@ -37,7 +38,7 @@ final class ProductDocumentController
                 'id'=>$doc->getId(), 'productId'=>$doc->getProductId(), 'mediaId'=>$doc->getMediaId(),
                 'title'=>$doc->getTitle(), 'documentType'=>$doc->getDocumentType(), 'isPrivate'=>$private,
                 'fileName'=>$media?->getFileNameIncludingExtension(),
-                'url'=>(!$private && $media instanceof MediaEntity && !$media->isPrivate()) ? $media->getUrl() : null,
+                'url'=>$media instanceof MediaEntity ? $this->privacyPolicy->resolvePublicUrl($private, $media->isPrivate(), $media->getUrl()) : null,
                 'createdAt'=>$doc->getCreatedAt()?->format(DATE_ATOM),
             ];
         }
