@@ -1,0 +1,23 @@
+{
+  "base": "/bundles/medicalproductmanagement/administration/",
+  "entryPoints": {
+    "medical-product-management": {
+      "css": [],
+      "dynamic": [],
+      "js": [
+        "/bundles/medicalproductmanagement/administration/assets/medical-product-management-xZQQxW3t.js"
+      ],
+      "legacy": false,
+      "preload": []
+    }
+  },
+  "legacy": false,
+  "metadatas": {},
+  "version": [
+    "7.1.0",
+    7,
+    1,
+    0
+  ],
+  "viteServer": null
+}

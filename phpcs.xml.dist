@@ -1,20 +1,21 @@
-<?xml version="1.0"?>
-<ruleset name="MedicalInventory">
-    <description>Code style rules for the MedicalInventory Shopware plugin.</description>
+<?xml version="1.0" encoding="UTF-8"?>
 
-    <file>custom/plugins/MedicalInventory/src</file>
-    <file>custom/plugins/MedicalInventory/tests</file>
-
-    <exclude-pattern>*/vendor/*</exclude-pattern>
-    <exclude-pattern>*/Resources/*</exclude-pattern>
+<ruleset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="vendor/squizlabs/php_codesniffer/phpcs.xsd">
 
     <arg name="basepath" value="."/>
+    <arg name="cache" value=".phpcs-cache"/>
     <arg name="colors"/>
-    <arg value="sp"/>
+    <arg name="extensions" value="php"/>
 
-    <!-- Shopware's standard file header is "<?php declare(strict_types=1);". -->
-    <rule ref="PSR12">
-        <exclude name="PSR12.Files.OpenTag.NotAlone"/>
-        <exclude name="PSR12.Files.FileHeader.SpacingAfterBlock"/>
-    </rule>
+    <rule ref="PSR12"/>
+
+    <file>bin/</file>
+    <file>config/</file>
+    <file>public/</file>
+    <file>src/</file>
+    <file>tests/</file>
+
+    <exclude-pattern>config/reference\.php$</exclude-pattern>
+
 </ruleset>

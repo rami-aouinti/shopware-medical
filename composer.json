@@ -5,66 +5,148 @@
     "require": {
         "composer-runtime-api": "^2.0",
         "php": ">=8.3",
-        "shopware/administration": "*",
-        "shopware/core": "6.7.15.1",
+        "shopware/administration": "6.7.16.0",
+        "shopware/core": "6.7.16.0",
         "shopware/deployment-helper": "*",
-        "shopware/elasticsearch": "*",
-        "shopware/storefront": "*",
+        "shopware/elasticsearch": "6.7.16.0",
+        "shopware/storefront": "6.7.16.0",
         "swag/paypal": "10.8.5",
         "symfony/amqp-messenger": "*",
         "symfony/flex": "~2",
-        "symfony/runtime": "*"
+        "symfony/runtime": ">=5"
     },
     "repositories": [
-        {"type":"path","url":"custom/plugins/*","options":{"symlink":true}},
-        {"type":"path","url":"custom/plugins/*/packages/*","options":{"symlink":true}},
-        {"type":"path","url":"custom/static-plugins/*","options":{"symlink":true}},
-        {"type":"composer","url":"https://shopware.github.io/conflicts/"}
+        {
+            "type": "path",
+            "url": "custom/plugins/*",
+            "options": {
+                "symlink": true
+            }
+        },
+        {
+            "type": "path",
+            "url": "custom/plugins/*/packages/*",
+            "options": {
+                "symlink": true
+            }
+        },
+        {
+            "type": "path",
+            "url": "custom/static-plugins/*",
+            "options": {
+                "symlink": true
+            }
+        },
+        {
+            "type": "composer",
+            "url": "https://shopware.github.io/conflicts/"
+        }
     ],
-    "autoload": {"psr-4":{"App\\":"src/"}},
-    "autoload-dev": {"psr-4":{
-        "MedicalInventory\\":"custom/plugins/MedicalInventory/src/",
-        "MedicalInventory\\Tests\\":"custom/plugins/MedicalInventory/tests/",
-        "MedicalProductManagement\\":"custom/plugins/MedicalProductManagement/src/",
-        "MedicalProductManagement\\Tests\\":"custom/plugins/MedicalProductManagement/tests/"
-    }},
-    "prefer-stable": true,
-    "config": {"allow-plugins":{
-        "php-http/discovery":true,
-        "symfony/flex":true,
-        "symfony/runtime":true,
-        "dealerdirect/phpcodesniffer-composer-installer":true
-    },"optimize-autoloader":true,"sort-packages":true},
-    "scripts": {
-        "auto-scripts":{"assets:install":"symfony-cmd"},
-        "post-install-cmd":["@auto-scripts"],
-        "post-update-cmd":["@auto-scripts"],
-        "cs:cbf":"phpcbf --standard=phpcs.xml.dist",
-        "cs:check":"phpcs --standard=phpcs.xml.dist",
-        "cs:fix":"php-cs-fixer fix --config=.php-cs-fixer.dist.php",
-        "cs:fix:check":"php-cs-fixer fix --config=.php-cs-fixer.dist.php --dry-run --diff",
-        "stan":"phpstan analyse --configuration=phpstan.neon.dist --no-progress",
-        "psalm":"psalm --config=psalm.xml",
-        "mess-detector":"phpmd custom/plugins/MedicalInventory/src text phpmd.xml",
-        "insights":"phpinsights analyse custom/plugins/MedicalInventory/src --no-interaction",
-        "rector:check":"rector process custom/plugins/MedicalInventory/src --dry-run",
-        "rector:fix":"rector process custom/plugins/MedicalInventory/src",
-        "test:plugin":"phpunit --configuration=phpunit.dist.xml --testsuite='MedicalInventory Unit' && phpunit --configuration=phpunit.dist.xml --testsuite='MedicalProductManagement Unit'",
-        "quality":["@cs:check","@cs:fix:check","@stan","@psalm","@mess-detector","@insights","@rector:check","@test:plugin","@test:integration"],
-        "test:integration":"phpunit --configuration=phpunit.dist.xml --testsuite='MedicalInventory Database Integration' && phpunit --configuration=phpunit.dal.xml.dist"
+    "autoload": {
+        "psr-4": {
+            "App\\": "src/"
+        }
     },
-    "extra":{"symfony":{"allow-contrib":true,"docker":false,"endpoint":[
-        "https://raw.githubusercontent.com/shopware/recipes/flex/main/index.json","flex://defaults"
-    ]}},
-    "require-dev":{
-        "friendsofphp/php-cs-fixer":"^3.80",
-        "nunomaduro/phpinsights":"^2.13",
-        "phpmd/phpmd":"^2.15",
-        "phpstan/phpstan":"^2.1",
-        "phpstan/phpstan-phpunit":"^2.0",
-        "phpunit/phpunit":"^11.5",
-        "rector/rector":"^2.0",
-        "squizlabs/php_codesniffer":"^3.13",
-        "vimeo/psalm":"^6.0"
+    "autoload-dev": {
+        "psr-4": {
+            "MedicalInventory\\": "custom/plugins/MedicalInventory/src/",
+            "MedicalInventory\\Tests\\": "custom/plugins/MedicalInventory/tests/",
+            "MedicalProductManagement\\": "custom/plugins/MedicalProductManagement/src/",
+            "MedicalProductManagement\\Tests\\": "custom/plugins/MedicalProductManagement/tests/"
+        }
+    },
+    "prefer-stable": true,
+    "config": {
+        "allow-plugins": {
+            "php-http/discovery": true,
+            "symfony/flex": true,
+            "symfony/runtime": true,
+            "dealerdirect/phpcodesniffer-composer-installer": true
+        },
+        "optimize-autoloader": true,
+        "sort-packages": true,
+        "audit": {
+            "ignore": {
+                "CVE-2026-59943": {
+                    "apply": "block",
+                    "reason": "Shopware is not affected because only authenticated administration users can manipulate input rendered by dompdf. See https://github.com/advisories/GHSA-j8qw-6jw8-r297"
+                },
+                "CVE-2026-59942": {
+                    "apply": "block",
+                    "reason": "Shopware is not affected because only authenticated administration users can manipulate input rendered by dompdf. See https://github.com/advisories/GHSA-f5gf-2cj8-52g2"
+                },
+                "CVE-2026-59941": {
+                    "apply": "block",
+                    "reason": "Shopware is not affected because only authenticated administration users can manipulate input rendered by dompdf. See https://github.com/advisories/GHSA-8hg6-c449-896m"
+                },
+                "CVE-2026-56722": {
+                    "apply": "block",
+                    "reason": "Shopware is not affected because only authenticated administration users can manipulate input rendered by dompdf. See https://github.com/advisories/GHSA-cx96-42px-69fm"
+                },
+                "CVE-2026-55555": {
+                    "apply": "block",
+                    "reason": "Shopware is not affected because only authenticated administration users can manipulate input rendered by dompdf. See https://github.com/advisories/GHSA-7x2p-4jvh-6384"
+                },
+                "CVE-2026-55554": {
+                    "apply": "block",
+                    "reason": "Shopware is not affected because only authenticated administration users can manipulate input rendered by dompdf. See https://github.com/advisories/GHSA-wvh6-f5jh-8gw4"
+                }
+            }
+        }
+    },
+    "scripts": {
+        "auto-scripts": {
+            "assets:install": "symfony-cmd"
+        },
+        "post-install-cmd": [
+            "@auto-scripts"
+        ],
+        "post-update-cmd": [
+            "@auto-scripts"
+        ],
+        "cs:cbf": "phpcbf --standard=phpcs.xml.dist",
+        "cs:check": "phpcs --standard=phpcs.xml.dist",
+        "cs:fix": "php-cs-fixer fix --config=.php-cs-fixer.dist.php",
+        "cs:fix:check": "php-cs-fixer fix --config=.php-cs-fixer.dist.php --dry-run --diff",
+        "stan": "phpstan analyse --configuration=phpstan.neon.dist --no-progress",
+        "psalm": "psalm --config=psalm.xml",
+        "mess-detector": "phpmd custom/plugins/MedicalInventory/src text phpmd.xml",
+        "insights": "phpinsights analyse custom/plugins/MedicalInventory/src --no-interaction",
+        "rector:check": "rector process custom/plugins/MedicalInventory/src --dry-run",
+        "rector:fix": "rector process custom/plugins/MedicalInventory/src",
+        "test:plugin": "phpunit --configuration=phpunit.dist.xml --testsuite='MedicalInventory Unit' && phpunit --configuration=phpunit.dist.xml --testsuite='MedicalProductManagement Unit'",
+        "quality": [
+            "@cs:check",
+            "@cs:fix:check",
+            "@stan",
+            "@psalm",
+            "@mess-detector",
+            "@insights",
+            "@rector:check",
+            "@test:plugin",
+            "@test:integration"
+        ],
+        "test:integration": "phpunit --configuration=phpunit.dist.xml --testsuite='MedicalInventory Database Integration' && phpunit --configuration=phpunit.dal.xml.dist"
+    },
+    "extra": {
+        "symfony": {
+            "allow-contrib": true,
+            "docker": false,
+            "endpoint": [
+                "https://raw.githubusercontent.com/shopware/recipes/flex/main/index.json",
+                "flex://defaults"
+            ]
+        }
+    },
+    "require-dev": {
+        "friendsofphp/php-cs-fixer": "^3.80",
+        "nunomaduro/phpinsights": "^2.13",
+        "phpmd/phpmd": "^2.15",
+        "phpstan/phpstan": "^2.1",
+        "phpstan/phpstan-phpunit": "^2.0",
+        "phpunit/phpunit": "^11.5",
+        "rector/rector": "^2.0",
+        "squizlabs/php_codesniffer": "^3.13",
+        "vimeo/psalm": "^6.0"
     }
 }

@@ -218,7 +218,7 @@
         }
     },
     "symfony/mcp-bundle": {
-        "version": "0.13",
+        "version": "0.14",
         "recipe": {
             "repo": "github.com/symfony/recipes",
             "branch": "main",

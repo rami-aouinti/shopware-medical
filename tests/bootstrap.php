@@ -1,12 +1,13 @@
-<?php declare(strict_types=1);
+<?php
 
-$autoload = dirname(__DIR__) . '/vendor/autoload.php';
+use Symfony\Component\Dotenv\Dotenv;
 
-if (!is_file($autoload)) {
-    throw new RuntimeException(sprintf(
-        'Composer autoloader not found at "%s". Run composer install/update first.',
-        $autoload
-    ));
+require dirname(__DIR__).'/vendor/autoload.php';
+
+if (method_exists(Dotenv::class, 'bootEnv')) {
+    (new Dotenv())->bootEnv(dirname(__DIR__).'/.env');
 }
 
-require_once $autoload;
+if ($_SERVER['APP_DEBUG']) {
+    umask(0000);
+}
