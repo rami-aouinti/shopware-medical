@@ -50,7 +50,9 @@
     "autoload-dev": {
         "psr-4": {
             "MedicalInventory\\": "custom/plugins/MedicalInventory/src/",
-            "MedicalInventory\\Tests\\": "custom/plugins/MedicalInventory/tests/"
+            "MedicalInventory\\Tests\\": "custom/plugins/MedicalInventory/tests/",
+            "MedicalProductManagement\\": "custom/plugins/MedicalProductManagement/src/",
+            "MedicalProductManagement\\Tests\\": "custom/plugins/MedicalProductManagement/tests/"
         }
     },
     "prefer-stable": true,
