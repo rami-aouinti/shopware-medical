@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace MedicalProductManagement\Core\Content\ProductDocument;
+namespace MedicalProductManagement\Infrastructure\Persistence\Shopware\ProductDocument;
 
 use Shopware\Core\Content\Media\MediaEntity;
 use Shopware\Core\Content\Product\ProductEntity;

@@ -1,5 +1,5 @@
 <?php declare(strict_types=1);
-namespace MedicalProductManagement\Core\Content\ProductDocument;
+namespace MedicalProductManagement\Infrastructure\Persistence\Shopware\ProductDocument;
 use Shopware\Core\Content\Media\MediaDefinition;
 use Shopware\Core\Content\Product\ProductDefinition;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityDefinition;

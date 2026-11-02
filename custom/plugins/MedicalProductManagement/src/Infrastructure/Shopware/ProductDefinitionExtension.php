@@ -1,8 +1,8 @@
 <?php declare(strict_types=1);
 
-namespace MedicalProductManagement\Extension;
+namespace MedicalProductManagement\Infrastructure\Shopware;
 
-use MedicalProductManagement\Core\Content\ProductDocument\ProductDocumentDefinition;
+use MedicalProductManagement\Infrastructure\Persistence\Shopware\ProductDocument\ProductDocumentDefinition;
 use Shopware\Core\Content\Product\ProductDefinition;
 use Shopware\Core\Framework\DataAbstractionLayer\Field\Flag\CascadeDelete;
 use Shopware\Core\Framework\DataAbstractionLayer\Field\Flag\Extension;

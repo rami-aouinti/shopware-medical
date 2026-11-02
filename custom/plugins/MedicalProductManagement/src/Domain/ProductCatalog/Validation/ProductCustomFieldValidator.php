@@ -1,5 +1,5 @@
 <?php declare(strict_types=1);
-namespace MedicalProductManagement\Service;
+namespace MedicalProductManagement\Domain\ProductCatalog\Validation;
 final class ProductCustomFieldValidator
 {
     /** @param array<string, mixed> $customFields

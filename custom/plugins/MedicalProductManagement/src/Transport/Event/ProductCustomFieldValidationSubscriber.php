@@ -1,8 +1,8 @@
 <?php declare(strict_types=1);
 
-namespace MedicalProductManagement\Subscriber;
+namespace MedicalProductManagement\Transport\Event;
 
-use MedicalProductManagement\Service\ProductCustomFieldValidator;
+use MedicalProductManagement\Domain\ProductCatalog\Validation\ProductCustomFieldValidator;
 use Shopware\Core\Content\Product\Aggregate\ProductTranslation\ProductTranslationDefinition;
 use Shopware\Core\Content\Product\ProductDefinition;
 use Shopware\Core\Framework\DataAbstractionLayer\Write\Validation\PreWriteValidationEvent;

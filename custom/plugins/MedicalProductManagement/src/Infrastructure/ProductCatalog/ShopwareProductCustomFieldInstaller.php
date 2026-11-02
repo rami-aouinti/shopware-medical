@@ -1,11 +1,11 @@
 <?php declare(strict_types=1);
 
-namespace MedicalProductManagement\Service;
+namespace MedicalProductManagement\Infrastructure\ProductCatalog;
 
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\Context;
 
-class ProductCustomFieldInstaller
+final class ShopwareProductCustomFieldInstaller implements \MedicalProductManagement\Domain\ProductCatalog\Port\ProductCustomFieldInstallerInterface
 {
     private const FIELD_SET_ID = '7f3b0a7d2e8c4f4e9a1b6c5d8e0f1234';
 
@@ -14,8 +14,9 @@ class ProductCustomFieldInstaller
     ) {
     }
 
-    public function install(Context $context): void
+    public function install(): void
     {
+        $context = Context::createDefaultContext();
         $this->customFieldSetRepository->upsert([
             [
                 'id' => self::FIELD_SET_ID,

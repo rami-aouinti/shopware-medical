@@ -31,7 +31,7 @@ From the Shopware project root:
 - bin/console database:migrate --all
 - bin/console medical:product:install-fields
 - bin/console cache:clear
-- bin/console administration:build
+- bash bin/build-administration.sh
 
 ## Tests
 - Unit tests: `vendor/bin/phpunit --configuration=phpunit.dist.xml --testsuite="MedicalProductManagement Unit"`
@@ -39,3 +39,27 @@ From the Shopware project root:
 - Complete integration suite: `composer test:integration`
 
 Never point the integration test database at your local development or production Shopware database. The DAL bootstrapper force-installs Shopware in the configured test database. Validate the Administration build and the complete plugin in the target Docker environment before production use.
+
+
+## Architecture and dependency direction
+
+This plugin adopts a pragmatic combination of Domain-Driven Design, Clean Architecture
+boundaries and Ports & Adapters while remaining one Shopware plugin (a modular monolith).
+
+- `Domain/`: framework-independent business rules and output ports.
+- `Application/`: use-case orchestration; depends on Domain abstractions.
+- `Infrastructure/`: Shopware DAL definitions/entities, persistence and framework adapters.
+- `Transport/`: inbound HTTP, Console and Shopware Event adapters.
+- `Migration/` and `Resources/` stay in Shopware's conventional plugin locations so
+  Shopware can discover migrations and resources without custom bootstrapping.
+
+Dependency rule: Domain does not import Shopware, Symfony or Infrastructure.
+Application depends on Domain ports. Infrastructure implements Domain ports.
+Transport invokes Application use cases and adapts framework requests/events.
+
+The existing product-document HTTP adapter still uses Shopware DAL repositories directly
+for its CRUD and private-download endpoints. This behavior-preserving refactoring step
+moves it to the Transport boundary and keeps the existing ACL and download contracts.
+Extracting the document CRUD/download operations into Application use cases and
+repository ports is a separate follow-up, where the security and API contracts can
+be preserved and tested independently.
