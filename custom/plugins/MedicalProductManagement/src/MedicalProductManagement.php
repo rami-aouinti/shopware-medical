@@ -2,7 +2,7 @@
 
 namespace MedicalProductManagement;
 
-use ShopwareCoreFrameworkPlugin;
+use Shopware\Core\Framework\Plugin;
 
 class MedicalProductManagement extends Plugin
 {
