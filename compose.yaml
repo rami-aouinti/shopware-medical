@@ -16,6 +16,8 @@ services:
         env_file:
             - .env.local
         environment:
+            APP_ENV: xxxxxxx
+            APP_DEBUG: "1"
             HOST: 0.0.0.0
             DATABASE_URL: mysql://root:root@database/shopware
             MAILER_DSN: smtp://mailer:1025
