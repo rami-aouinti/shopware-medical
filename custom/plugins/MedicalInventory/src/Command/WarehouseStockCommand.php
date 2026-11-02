@@ -166,6 +166,7 @@ final class WarehouseStockCommand extends Command
             'reserve' => $this->stockService->reserveStock($warehouseCode, $productId, $quantity, $context),
             'release' => $this->stockService->releaseReservation($warehouseCode, $productId, $quantity, $context),
             'ship' => $this->stockService->shipReservedStock($warehouseCode, $productId, $quantity, $context),
+            default => throw new InvalidArgumentException(sprintf('Unsupported stock action "%s".', $action)),
         };
 
         $io->success(sprintf('Stock operation "%s" completed.', $action));
