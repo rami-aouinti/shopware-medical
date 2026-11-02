@@ -8,8 +8,10 @@ use Shopware\Core\Framework\Uuid\Uuid;
 
 final class StockMovementRecorder
 {
-    public function __construct(\n        private readonly Connection $connection,\n        private readonly LoggerInterface $logger,\n    )
-    {
+    public function __construct(
+        private readonly Connection $connection,
+        private readonly LoggerInterface $logger,
+    ) {
     }
 
     public function record(
@@ -39,4 +41,16 @@ final class StockMovementRecorder
             'reference_id' => $referenceId,
             'reason' => mb_substr($reason, 0, 255),
             'created_at' => (new \DateTimeImmutable())->format('Y-m-d H:i:s.v'),
-        ]);\n\n        $this->logger->info('Medical inventory stock movement recorded.', [\n            'event' => 'medical_inventory.stock.movement',\n            'warehouse_id' => $warehouseId,\n            'product_id' => $productId,\n            'movement_type' => $type,\n            'quantity_delta' => $quantityDelta,\n            'reserved_quantity_delta' => $reservedQuantityDelta,\n            'reference_type' => $referenceType,\n        ]);\n    }\n}
+        ]);
+
+        $this->logger->info('Medical inventory stock movement recorded.', [
+            'event' => 'medical_inventory.stock.movement',
+            'warehouse_id' => $warehouseId,
+            'product_id' => $productId,
+            'movement_type' => $type,
+            'quantity_delta' => $quantityDelta,
+            'reserved_quantity_delta' => $reservedQuantityDelta,
+            'reference_type' => $referenceType,
+        ]);
+    }
+}
