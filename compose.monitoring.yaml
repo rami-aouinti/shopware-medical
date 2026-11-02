@@ -1,0 +1,72 @@
+# Independent observability overlay; keep compose.yaml managed by shopware-cli untouched.
+services:
+  web:
+    environment:
+      OTEL_SERVICE_NAME: medical-shopware
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318
+      OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
+  prometheus:
+    image: prom/prometheus:v3.5.0
+    command: ["--config.file=/etc/prometheus/prometheus.yml","--config.expand-env","--storage.tsdb.path=/prometheus","--storage.tsdb.retention.time=15d","--web.enable-lifecycle"]
+    env_file: [.env.monitoring]
+    ports: ["127.0.0.1:9090:9090"]
+    volumes: ["./monitoring/prometheus:/etc/prometheus:ro","prometheus-data:/prometheus"]
+    depends_on: [web,cadvisor,node-exporter,otel-collector]
+    restart: unless-stopped
+  loki:
+    image: grafana/loki:3.5.5
+    command: ["-config.file=/etc/loki/config.yml"]
+    ports: ["127.0.0.1:3100:3100"]
+    volumes: ["./monitoring/loki/config.yml:/etc/loki/config.yml:ro","loki-data:/loki"]
+    restart: unless-stopped
+  alloy:
+    image: grafana/alloy:v1.11.0
+    command: ["run","--server.http.listen-addr=0.0.0.0:12345","--storage.path=/var/lib/alloy/data","/etc/alloy/config.alloy"]
+    ports: ["127.0.0.1:12345:12345"]
+    volumes: ["./monitoring/alloy/config.alloy:/etc/alloy/config.alloy:ro","/var/run/docker.sock:/var/run/docker.sock:ro","alloy-data:/var/lib/alloy/data"]
+    depends_on: [loki]
+    restart: unless-stopped
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.136.0
+    command: ["--config=/etc/otelcol-contrib/config.yaml"]
+    ports: ["127.0.0.1:4317:4317","127.0.0.1:4318:4318","127.0.0.1:8889:8889"]
+    volumes: ["./monitoring/otel-collector/config.yaml:/etc/otelcol-contrib/config.yaml:ro"]
+    depends_on: [tempo]
+    restart: unless-stopped
+  tempo:
+    image: grafana/tempo:2.8.2
+    command: ["-config.file=/etc/tempo/config.yaml"]
+    ports: ["127.0.0.1:3200:3200"]
+    volumes: ["./monitoring/tempo/config.yaml:/etc/tempo/config.yaml:ro","tempo-data:/var/tempo"]
+    restart: unless-stopped
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:v0.52.1
+    privileged: true
+    devices: ["/dev/kmsg"]
+    ports: ["127.0.0.1:8081:8080"]
+    volumes: ["/:/rootfs:ro","/var/run:/var/run:ro","/sys:/sys:ro","/var/lib/docker:/var/lib/docker:ro","/dev/disk:/dev/disk:ro"]
+    restart: unless-stopped
+  node-exporter:
+    image: prom/node-exporter:v1.9.1
+    command: ["--path.rootfs=/host","--path.procfs=/host/proc","--path.sysfs=/host/sys","--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)"]
+    pid: host
+    ports: ["127.0.0.1:9100:9100"]
+    volumes: ["/:/host:ro,rslave"]
+    restart: unless-stopped
+  grafana:
+    image: grafana/grafana:12.1.1
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:?Set GRAFANA_ADMIN_PASSWORD in .env.monitoring}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_SERVER_ROOT_URL: http://localhost:3000
+    ports: ["127.0.0.1:3000:3000"]
+    volumes: ["grafana-data:/var/lib/grafana","./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro","./monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro"]
+    depends_on: [prometheus,loki,tempo]
+    restart: unless-stopped
+volumes:
+  prometheus-data:
+  loki-data:
+  alloy-data:
+  tempo-data:
+  grafana-data:
