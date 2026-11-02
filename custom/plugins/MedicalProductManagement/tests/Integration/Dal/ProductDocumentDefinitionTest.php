@@ -2,7 +2,7 @@
 namespace MedicalProductManagement\Tests\Integration\Dal;
 use MedicalProductManagement\Core\Content\ProductDocument\ProductDocumentDefinition;
 use PHPUnit\Framework\TestCase;
-use Shopware\Core\Framework\Test\KernelTestBehaviour;
+use Shopware\Core\Framework\Test\TestCaseBase\KernelTestBehaviour;
 use Shopware\Core\Framework\DataAbstractionLayer\DefinitionInstanceRegistry;
 class ProductDocumentDefinitionTest extends TestCase
 {
