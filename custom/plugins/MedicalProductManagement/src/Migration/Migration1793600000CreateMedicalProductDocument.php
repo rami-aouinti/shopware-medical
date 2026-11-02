@@ -6,14 +6,16 @@ use Doctrine\DBAL\Connection;
 use Shopware\Core\Framework\Log\Package;
 use Shopware\Core\Framework\Migration\MigrationStep;
 
-#[Package('core')]
+#[Package('inventory')]
 class Migration1793600000CreateMedicalProductDocument extends MigrationStep
 {
+    #[\Override]
     public function getCreationTimestamp(): int
     {
         return 1793600000;
     }
 
+    #[\Override]
     public function update(Connection $connection): void
     {
         $connection->executeStatement(<<<'SQL'
@@ -41,6 +43,7 @@ class Migration1793600000CreateMedicalProductDocument extends MigrationStep
         );
     }
 
+    #[\Override]
     public function updateDestructive(Connection $connection): void
     {
     }

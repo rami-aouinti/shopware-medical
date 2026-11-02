@@ -3,13 +3,16 @@ namespace MedicalProductManagement\Migration;
 use Doctrine\DBAL\Connection;
 use Shopware\Core\Framework\Log\Package;
 use Shopware\Core\Framework\Migration\MigrationStep;
-#[Package('core')]
+#[Package('inventory')]
 class Migration1793600100AddPrivateFlagToMedicalProductDocument extends MigrationStep
 {
+    #[\Override]
     public function getCreationTimestamp(): int { return 1793600100; }
+    #[\Override]
     public function update(Connection $connection): void
     {
         $connection->executeStatement('ALTER TABLE medical_product_document ADD COLUMN is_private TINYINT(1) NOT NULL DEFAULT 0');
     }
+    #[\Override]
     public function updateDestructive(Connection $connection): void {}
 }
