@@ -32,7 +32,8 @@ From the Shopware project root:
 
 ## Tests
 - vendor/bin/phpunit --configuration=phpunit.dist.xml --testsuite="MedicalProductManagement Unit"
-- vendor/bin/phpunit --configuration=phpunit.dist.xml --testsuite="MedicalProductManagement DAL Integration"
-- vendor/bin/phpunit --configuration=phpunit.dist.xml --testsuite="MedicalProductManagement API Functional"
+- Unit tests: `vendor/bin/phpunit --configuration=phpunit.dist.xml --testsuite="MedicalProductManagement Unit"`
+- DAL and API integration tests: configure a dedicated disposable database in `MEDICAL_INVENTORY_TEST_DATABASE_URL`, then run `vendor/bin/phpunit --configuration=phpunit.dal.xml.dist --testsuite="MedicalProductManagement DAL Integration"` and `vendor/bin/phpunit --configuration=phpunit.dal.xml.dist --testsuite="MedicalProductManagement API Functional"`
+- Complete integration suite: `composer test:integration`
 
-Run integration suites only after the Shopware test database is configured. Validate the complete plugin in the target Docker environment before production use.
+Never point the integration test database at your local development or production Shopware database. The DAL bootstrapper force-installs Shopware in the configured test database. The API functional suite checks that the action API rejects unauthenticated requests and that all routes carry their expected ACL privileges. Validate the Administration build and the complete plugin in the target Docker environment before production use.
