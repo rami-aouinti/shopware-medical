@@ -29,7 +29,7 @@ Component.register('medical-product-documents', {
                         <div v-if="documents.length===0 && !loading" style="padding:24px;text-align:center">No documents registered for this product.</div>
                         <div v-for="doc in documents" :key="doc.id" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:12px 0;border-bottom:1px solid #ddd">
                             <div style="flex:1;min-width:220px"><strong>{{ doc.title }}</strong><div><small>{{ doc.documentType }} · {{ doc.fileName || doc.mediaId }}</small></div>
-                                <sw-badge v-if="doc.isPrivate" variant="warning">Private</sw-badge><sw-badge v-else variant="success">Public</sw-badge>
+                                <span v-if="doc.isPrivate">Private document</span><span v-else>Public document</span>
                             </div>
                             <sw-button v-if="doc.url && !doc.isPrivate" size="small" @click="openDocument(doc.url)">Open file</sw-button>
                             <sw-button v-if="acl.can('product:update')" size="small" @click="startEdit(doc)">Edit</sw-button>
