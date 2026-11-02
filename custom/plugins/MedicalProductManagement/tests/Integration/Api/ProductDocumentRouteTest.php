@@ -86,6 +86,57 @@ class ProductDocumentRouteTest extends TestCase
         self::assertSame(403, $browser->getResponse()->getStatusCode());
     }
 
+    public function testCreateEndpointPassesAclAndRejectsMissingMedia(): void
+    {
+        $browser = $this->createClient(permissions: ['product:update']);
+        $browser->jsonRequest(
+            'POST',
+            '/api/_action/medical-product-management/products/' . Uuid::randomHex() . '/documents',
+            [
+                'title' => 'Technical datasheet',
+                'documentType' => 'TECHNICAL_DATASHEET',
+                'mediaId' => Uuid::randomHex(),
+                'isPrivate' => false,
+            ]
+        );
+
+        self::assertSame(400, $browser->getResponse()->getStatusCode());
+    }
+
+    public function testUpdateEndpointPassesAclAndReturnsNotFoundForMissingDocument(): void
+    {
+        $browser = $this->createClient(permissions: ['product:update']);
+        $browser->jsonRequest(
+            'PATCH',
+            '/api/_action/medical-product-management/documents/' . Uuid::randomHex(),
+            ['title' => 'Updated title']
+        );
+
+        self::assertSame(404, $browser->getResponse()->getStatusCode());
+    }
+
+    public function testDeleteEndpointPassesAclAndReturnsNotFoundForMissingDocument(): void
+    {
+        $browser = $this->createClient(permissions: ['product:delete']);
+        $browser->request(
+            'DELETE',
+            '/api/_action/medical-product-management/documents/' . Uuid::randomHex()
+        );
+
+        self::assertSame(404, $browser->getResponse()->getStatusCode());
+    }
+
+    public function testPrivateDownloadPassesAclAndReturnsNotFoundForMissingDocument(): void
+    {
+        $browser = $this->createClient(permissions: ['product:read', 'media:read']);
+        $browser->request(
+            'GET',
+            '/api/_action/medical-product-management/documents/' . Uuid::randomHex() . '/download'
+        );
+
+        self::assertSame(404, $browser->getResponse()->getStatusCode());
+    }
+
     public function testRoutesHaveExpectedAcl(): void
     {
         $routes = static::getContainer()->get(RouterInterface::class)->getRouteCollection();
